@@ -5,21 +5,31 @@ from pathlib import Path
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from app.config import get_settings
+from app.logging_config import setup_logging
 from app.rag.chunker import load_all_knowledge
 from app.rag.embeddings import EmbeddingService
 from app.rag.retriever import Retriever
 from app.rag.store import ChromaStore
-from app.routers import chat, health
+from app.routers import chat, health, knowledge
 from app.routers.chat import init_chat_dependencies
 from app.services.llm import LLMService
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
-    logger = structlog.get_logger()
     settings = get_settings()
+    setup_logging(settings.log_level)
+    logger = structlog.get_logger()
 
     await logger.ainfo("Starting AI Professional Twin backend")
 
@@ -81,7 +91,18 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
+
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+        return JSONResponse(
+            status_code=429,
+            content={"detail": "Rate limit exceeded. Try again later."},
+        )
+
     app.include_router(health.router)
     app.include_router(chat.router)
+    app.include_router(knowledge.router)
 
     return app
