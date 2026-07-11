@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         if docs:
             texts = [d.text for d in docs]
             embeddings = await embedding_service.embed_texts(texts)
-            for doc, emb in zip(docs, embeddings):
+            for doc, emb in zip(docs, embeddings, strict=True):
                 doc.embedding = emb
             store.add_documents(docs)
             await logger.ainfo("Ingested documents", count=len(docs))

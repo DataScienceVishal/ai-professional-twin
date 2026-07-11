@@ -66,7 +66,9 @@ def format_context(results: list[SearchResult]) -> tuple[str, list[SourceInfo]]:
 
 
 class Retriever:
-    def __init__(self, store: ChromaStore, embedding_service: EmbeddingService, top_k: int = 5) -> None:
+    def __init__(
+        self, store: ChromaStore, embedding_service: EmbeddingService, top_k: int = 5,
+    ) -> None:
         self.store = store
         self.embedding_service = embedding_service
         self.classifier = QueryClassifier()
@@ -76,7 +78,9 @@ class Retriever:
         intent = self.classifier.classify(query)
         query_embedding = await self.embedding_service.embed_query(query)
         metadata_filter = INTENT_FILTER_MAP.get(intent)
-        results = self.store.query(query_embedding=query_embedding, n_results=self.top_k, where=metadata_filter)
+        results = self.store.query(
+            query_embedding=query_embedding, n_results=self.top_k, where=metadata_filter,
+        )
         if not results and metadata_filter:
             results = self.store.query(query_embedding=query_embedding, n_results=self.top_k)
         return format_context(results)

@@ -7,7 +7,7 @@ from sse_starlette.sse import EventSourceResponse
 
 from app.models.chat import ChatRequest
 from app.prompts.system import build_system_prompt
-from app.rag.retriever import Retriever, SourceInfo
+from app.rag.retriever import Retriever
 from app.services.llm import LLMService
 
 router = APIRouter()
