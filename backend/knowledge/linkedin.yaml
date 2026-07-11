@@ -1,0 +1,54 @@
+headline: Data Engineer | Machine Learning & Deep Learning | M.Sc. AI and Computer Science candidate
+url: https://www.linkedin.com/in/vishal-khan-a53aboraaa
+location: London, United Kingdom
+current_role: Data Engineer at Teleperformance Global Business Pvt. Ltd.
+education:
+  - institution: Northeastern University London
+    degree: MSc AI and Computer Science
+    dates: Jan 2026 - Jan 2027
+  - institution: Liverpool John Moores University, UK
+    degree: MSc Data Science
+    dates: Mar 2023 - Mar 2024
+  - institution: IIIT Bangalore, India
+    degree: Executive PG Program in Data Science
+    dates: Jan 2022 - Jan 2023
+  - institution: University of Delhi
+    degree: Bachelor of Commerce
+    dates: Nov 2018 - Nov 2021
+experience:
+  - company: Teleperformance Global Business Pvt. Ltd.
+    role: Data Engineer
+    dates: Jun 2024 - Jan 2026
+    description: >
+      Developed and maintained SSMS/Databricks data pipelines for telecom
+      data, ensuring seamless data flow and processing. Migrated on-prem
+      database schemas to Databricks, increasing efficiency by 50% and
+      lowering costs by 20% by reducing on-prem infrastructure dependency.
+  - company: Avant Garde Clean Room & Engg. Solutions Pvt. Ltd.
+    role: Commercial Executive
+    dates: Aug 2021 - Dec 2023
+    description: >
+      Boosted Excel proficiency, cutting reporting time by 50% and enhancing
+      accuracy in revenue and collection data analysis using advanced Excel.
+      Cleaned, validated, and preprocessed data using Python and SQL to
+      ensure accuracy and consistency. Built ML sales forecasting models
+      with 80-90% accuracy.
+  - company: Aryan Care Pvt. Ltd.
+    role: E-commerce & Finance Executive
+    dates: Jan 2021 - Aug 2021
+    description: >
+      Achieved a 15% increase in sales through branding strategies. Managed
+      GST, ITR filings, and audits.
+  - company: Other Firms/Companies
+    role: Finance/Accounts/Taxation
+    dates: Jul 2018 - Sep 2020
+    description: >
+      Two years of finance and taxation operations experience.
+summary: >
+  Industrious Data Engineer with 4+ years of experience skilled in data
+  cleaning, transformation, visualization, and analysis, with hands-on
+  experience in machine learning and deep learning. Holds an M.Sc. in Data
+  Science from Liverpool John Moores University, England, and authored an
+  IEEE-published research paper in deep learning/reinforcement learning.
+  Currently pursuing an M.Sc. in AI and Computer Science at Northeastern
+  University London.

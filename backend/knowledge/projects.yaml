@@ -1,0 +1,72 @@
+# Projects extracted from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
+
+- name: AI Professional Twin
+  slug: ai-professional-twin
+  description: >
+    A RAG-powered AI assistant that serves as a digital professional identity for
+    Vishal. Ingests his resume, skills, projects, and career Q&A into a vector
+    store and answers recruiter/interviewer questions through a streaming chat
+    interface. Built as a full-stack project with a FastAPI backend, ChromaDB
+    for retrieval, and a React frontend.
+  tech_stack: [Python, FastAPI, ChromaDB, React, TypeScript, Docker, uv]
+  github_url: https://github.com/DataScienceVishal/my-ai-resume
+  category: AI/LLM
+  highlights:
+    - Retrieval-augmented generation pipeline over structured career knowledge
+    - FastAPI backend with health checks and streaming chat endpoints
+    - Dockerized, reproducible build using uv for dependency management
+    - Designed to answer recruiter-style questions with grounded, factual answers
+
+- name: Image Classification with CNN (CIFAR-10)
+  slug: image-classification-cnn-cifar10
+  description: >
+    Built a Convolutional Neural Network to classify images from the CIFAR-10
+    dataset, focused on improving generalization through regularization
+    techniques.
+  tech_stack: [Python, TensorFlow, Keras]
+  github_url: https://github.com/DataScienceVishal
+  category: Deep Learning
+  highlights:
+    - Designed a CNN architecture in TensorFlow/Keras
+    - Applied normalization, dropout, and L2 regularization to reduce overfitting
+    - Achieved 72.12% training accuracy and 74.06% validation accuracy after 5 epochs
+
+- name: Telecom Churn Prediction
+  slug: telecom-churn-prediction
+  description: >
+    A machine learning project to predict customer churn for a telecom
+    provider using 21 predictor variables, with a full exploratory data
+    analysis and preprocessing pipeline.
+  tech_stack: [Python, Pandas, Scikit-learn]
+  github_url: https://github.com/DataScienceVishal
+  category: Machine Learning
+  highlights:
+    - Conducted thorough EDA and feature preprocessing for modeling
+    - Achieved 80% accuracy using Logistic Regression
+    - Identified customer tenure as the most significant churn predictor
+
+- name: Bank Loan Dashboard
+  slug: bank-loan-dashboard
+  description: >
+    A Power BI dashboard built for executives to monitor and analyze home
+    loan performance, recovery rates, and product mix.
+  tech_stack: [Power BI, DAX]
+  github_url: https://github.com/DataScienceVishal
+  category: Data Visualization
+  highlights:
+    - Designed an executive-facing Home Loan Dashboard in Microsoft Power BI
+    - Identified July 2019 as the peak month for loan disbursement
+    - Found group-insurance loans to be the top product with a 53% recovery rate
+
+- name: Reinforcement Learning for Real-Time Pricing Optimization in E-Commerce
+  slug: rl-real-time-pricing-optimization
+  description: >
+    Research publication exploring reinforcement learning techniques for
+    dynamic, real-time pricing optimization in e-commerce settings, published
+    in an IEEE Journal in 2024.
+  tech_stack: [Python, Reinforcement Learning]
+  github_url: ""
+  category: Research
+  highlights:
+    - Published in an IEEE Journal (2024)
+    - Applied reinforcement learning to real-time e-commerce pricing decisions

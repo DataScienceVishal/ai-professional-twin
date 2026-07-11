@@ -1,0 +1,100 @@
+# Pre-written Q&A pairs for recruiter and interviewer questions about Vishal Khan
+
+- question: Why should we hire Vishal?
+  answer: >
+    Vishal is an industrious data engineer with 4+ years of experience spanning
+    data pipelines, machine learning, and deep learning. At Teleperformance he
+    built and maintained SSMS/Databricks pipelines for telecom data and led a
+    migration of on-prem database schemas to Databricks that increased efficiency
+    by 50% and cut costs by 20%. He combines hands-on engineering skill with a
+    strong analytical foundation, holding an M.Sc. in Data Science from Liverpool
+    John Moores University and having authored an IEEE-published research paper
+    on reinforcement learning for real-time pricing optimization. He is currently
+    deepening his expertise further with an M.Sc. in AI and Computer Science at
+    Northeastern University London.
+
+- question: What are Vishal's career goals?
+  answer: >
+    Vishal is progressing from data engineering into applied AI and machine
+    learning engineering. His trajectory shows a clear pattern of building on
+    each role: starting in finance and taxation, moving into commercial
+    analytics with Excel and Python-based reporting, then into full data
+    engineering with Databricks and cloud pipelines, and now pursuing an M.Sc.
+    in AI and Computer Science. His goal is to work on production ML and AI
+    systems, including large language model applications, where he can combine
+    his data engineering background with his growing deep learning expertise.
+
+- question: What are Vishal's technical strengths?
+  answer: >
+    Vishal's core strengths are in data pipeline engineering and applied
+    machine learning. He is proficient in Python, R, SQL, and DAX, and has
+    hands-on experience with tools like Databricks, Azure Data Factory, SSMS,
+    and MySQL. On the machine learning side he has built CNNs in TensorFlow/Keras
+    for image classification (achieving 74.06% validation accuracy on CIFAR-10),
+    logistic regression models for churn prediction (80% accuracy), and sales
+    forecasting models with 80-90% accuracy. He is also skilled with visualization
+    tools such as Power BI and Tableau for turning data into decision-ready
+    dashboards.
+
+- question: Tell me about Vishal's work experience.
+  answer: >
+    Vishal has worked across finance, commercial analytics, and data engineering.
+    From July 2018 to September 2020 he worked in finance, accounts, and taxation
+    roles. From January 2021 to August 2021 he was an E-commerce and Finance
+    Executive at Aryan Care Pvt. Ltd., where he achieved a 15% increase in sales
+    through branding strategies and managed GST and ITR filings and audits. From
+    August 2021 to December 2023 he was a Commercial Executive at Avant Garde
+    Clean Room & Engg. Solutions Pvt. Ltd., where he boosted Excel-based reporting
+    efficiency by 50% and built ML sales forecasting models with 80-90% accuracy.
+    Since June 2024 he has been a Data Engineer at Teleperformance Global Business
+    Pvt. Ltd., developing SSMS/Databricks pipelines for telecom data and migrating
+    on-prem schemas to Databricks for major efficiency and cost gains.
+
+- question: What is Vishal's educational background?
+  answer: >
+    Vishal holds a Bachelor of Commerce from the University of Delhi (Nov 2018 -
+    Nov 2021), completed an Executive PG Program in Data Science at IIIT
+    Bangalore (Jan 2022 - Jan 2023), and earned an M.Sc. in Data Science from
+    Liverpool John Moores University, UK (Mar 2023 - Mar 2024). He is currently
+    pursuing an M.Sc. in AI and Computer Science at Northeastern University
+    London (Jan 2026 - Jan 2027), continuing to build deeper expertise in
+    artificial intelligence.
+
+- question: What makes Vishal stand out from other candidates?
+  answer: >
+    Vishal combines a rare mix of backgrounds: finance and taxation operations,
+    commercial analytics, data engineering, and applied machine learning
+    research. Few candidates can point to both a 50% efficiency gain from a
+    real production data migration and an IEEE-published research paper on
+    reinforcement learning. He is also self-directed about his own growth,
+    progressively upgrading his qualifications from a Bachelor of Commerce to
+    an Executive PG in Data Science, an M.Sc. in Data Science, and now an M.Sc.
+    in AI and Computer Science, showing sustained commitment to becoming an
+    AI and machine learning practitioner.
+
+- question: What kind of role is Vishal looking for?
+  answer: >
+    Given his background as a Data Engineer with strong machine learning and
+    deep learning skills, Vishal is best suited for roles at the intersection
+    of data engineering, machine learning engineering, and applied AI, such as
+    ML Engineer, Data Scientist, or AI Engineer positions where he can build
+    data pipelines and productionize models end to end.
+
+- question: Does Vishal have research experience?
+  answer: >
+    Yes. Vishal authored "Reinforcement Learning for Real-Time Pricing
+    Optimization in E-Comm," published in an IEEE Journal in 2024, applying
+    reinforcement learning techniques to dynamic pricing problems in
+    e-commerce.
+
+- question: What certifications does Vishal hold?
+  answer: >
+    Vishal holds a Data Science Programming Bootcamp certificate, a
+    Machine/Deep Learning Certificate, a SQL certification from HackerRank,
+    an AWS Certificate from Great Learning, and a Data Toolkit certification.
+
+- question: Where is Vishal based and is he open to relocation or remote work?
+  answer: >
+    Vishal is based in London, UK. For specifics on his availability for
+    relocation, hybrid, or remote work arrangements, it is best to ask him
+    directly.

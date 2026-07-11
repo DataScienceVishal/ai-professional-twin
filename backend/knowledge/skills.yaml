@@ -1,0 +1,70 @@
+# Skills extracted from Vishal Khan's resume
+
+- category: Languages
+  skills: [Python, R, SQL, DAX]
+  proficiency: advanced
+
+- category: Machine Learning & Data Science
+  skills:
+    - Predictive Modeling
+    - Statistical Modeling
+    - Machine Learning
+    - Deep Learning
+    - Regression
+    - Clustering
+    - Time-series Forecasting
+    - NLP
+    - Neural Networks
+    - Transfer Learning
+    - Computer Vision
+  proficiency: advanced
+
+- category: Libraries & Frameworks
+  skills:
+    - Pandas
+    - NumPy
+    - PyTorch
+    - TensorFlow
+    - Keras
+    - Statsmodel
+    - Scikit-learn
+    - Plotly
+    - Matplotlib
+    - Seaborn
+    - OpenCV
+  proficiency: advanced
+
+- category: Statistics & EDA
+  skills:
+    - Univariate Analysis
+    - Bivariate Analysis
+    - Multivariate Analysis
+    - Hypothesis Testing
+    - Feature Engineering
+  proficiency: advanced
+
+- category: Data Engineering Tools
+  skills:
+    - MySQL
+    - SSMS
+    - DataBricks
+    - Azure Data Factory
+    - SAP 4HANA
+  proficiency: advanced
+
+- category: Cloud Platforms
+  skills: [AWS, Azure]
+  proficiency: intermediate
+
+- category: Visualization Tools
+  skills: [Power BI, Tableau, Microsoft Excel, Microsoft PowerPoint]
+  proficiency: advanced
+
+- category: Development Environment
+  skills:
+    - GitHub
+    - VS Code
+    - Anaconda Jupyter Notebooks
+    - Google Colab
+    - MS Office
+  proficiency: advanced
