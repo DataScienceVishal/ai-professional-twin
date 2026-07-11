@@ -48,14 +48,10 @@ async def chat(
     messages = [{"role": m.role, "content": m.content} for m in request.messages]
 
     async def event_stream() -> AsyncGenerator[dict[str, str]]:
-        async for chunk in llm.stream(
-            system_prompt=system_prompt, messages=messages
-        ):
+        async for chunk in llm.stream(system_prompt=system_prompt, messages=messages):
             yield {"data": json.dumps({"type": "chunk", "content": chunk})}
 
-        source_data = [
-            {"source": s.source, "detail": s.detail} for s in sources
-        ]
+        source_data = [{"source": s.source, "detail": s.detail} for s in sources]
         yield {"data": json.dumps({"type": "sources", "sources": source_data})}
         yield {"data": json.dumps({"type": "done"})}
 

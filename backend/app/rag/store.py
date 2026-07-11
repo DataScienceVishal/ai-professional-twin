@@ -50,12 +50,14 @@ class ChromaStore:
         search_results: list[SearchResult] = []
         if results["ids"] and results["ids"][0]:
             for i, doc_id in enumerate(results["ids"][0]):
-                search_results.append(SearchResult(
-                    id=doc_id,
-                    text=results["documents"][0][i] if results["documents"] else "",
-                    metadata=results["metadatas"][0][i] if results["metadatas"] else {},
-                    distance=results["distances"][0][i] if results["distances"] else 0.0,
-                ))
+                search_results.append(
+                    SearchResult(
+                        id=doc_id,
+                        text=results["documents"][0][i] if results["documents"] else "",
+                        metadata=results["metadatas"][0][i] if results["metadatas"] else {},
+                        distance=results["distances"][0][i] if results["distances"] else 0.0,
+                    )
+                )
         return search_results
 
     def count(self) -> int:
@@ -64,4 +66,5 @@ class ChromaStore:
     def reset(self) -> None:
         self.client.delete_collection(self.collection.name)
         self.collection = self.client.get_or_create_collection(
-            name=self.collection.name, metadata={"hnsw:space": "cosine"})
+            name=self.collection.name, metadata={"hnsw:space": "cosine"}
+        )

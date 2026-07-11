@@ -14,14 +14,57 @@ class QueryIntent(Enum):
 
 
 INTENT_KEYWORDS: dict[QueryIntent, list[str]] = {
-    QueryIntent.PROJECTS: ["project", "built", "build", "created", "portfolio", "github",
-                           "repository", "repo", "application", "app", "twin", "rag"],
-    QueryIntent.SKILLS: ["skill", "technology", "tech", "language", "framework", "tool", "know",
-                         "proficient", "experience with", "familiar", "stack"],
-    QueryIntent.EXPERIENCE: ["work", "job", "company", "role", "position", "accenture", "career",
-                             "employment", "professional", "engineer"],
-    QueryIntent.EDUCATION: ["study", "university", "degree", "msc", "course", "thesis", "academic",
-                            "northeastern", "student", "research"],
+    QueryIntent.PROJECTS: [
+        "project",
+        "built",
+        "build",
+        "created",
+        "portfolio",
+        "github",
+        "repository",
+        "repo",
+        "application",
+        "app",
+        "twin",
+        "rag",
+    ],
+    QueryIntent.SKILLS: [
+        "skill",
+        "technology",
+        "tech",
+        "language",
+        "framework",
+        "tool",
+        "know",
+        "proficient",
+        "experience with",
+        "familiar",
+        "stack",
+    ],
+    QueryIntent.EXPERIENCE: [
+        "work",
+        "job",
+        "company",
+        "role",
+        "position",
+        "accenture",
+        "career",
+        "employment",
+        "professional",
+        "engineer",
+    ],
+    QueryIntent.EDUCATION: [
+        "study",
+        "university",
+        "degree",
+        "msc",
+        "course",
+        "thesis",
+        "academic",
+        "northeastern",
+        "student",
+        "research",
+    ],
 }
 
 INTENT_FILTER_MAP: dict[QueryIntent, dict[str, str] | None] = {
@@ -67,7 +110,10 @@ def format_context(results: list[SearchResult]) -> tuple[str, list[SourceInfo]]:
 
 class Retriever:
     def __init__(
-        self, store: ChromaStore, embedding_service: EmbeddingService, top_k: int = 5,
+        self,
+        store: ChromaStore,
+        embedding_service: EmbeddingService,
+        top_k: int = 5,
     ) -> None:
         self.store = store
         self.embedding_service = embedding_service
@@ -79,7 +125,9 @@ class Retriever:
         query_embedding = await self.embedding_service.embed_query(query)
         metadata_filter = INTENT_FILTER_MAP.get(intent)
         results = self.store.query(
-            query_embedding=query_embedding, n_results=self.top_k, where=metadata_filter,
+            query_embedding=query_embedding,
+            n_results=self.top_k,
+            where=metadata_filter,
         )
         if not results and metadata_filter:
             results = self.store.query(query_embedding=query_embedding, n_results=self.top_k)
