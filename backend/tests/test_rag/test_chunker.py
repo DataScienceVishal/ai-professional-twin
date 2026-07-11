@@ -7,9 +7,17 @@ from app.rag.chunker import chunk_career_qa, chunk_projects, chunk_skills, chunk
 
 
 def test_chunk_projects() -> None:
-    projects = [{"name": "AI Twin", "slug": "ai-twin", "description": "A RAG-powered assistant",
-                 "tech_stack": ["Python", "FastAPI"], "github_url": "https://github.com/user/repo",
-                 "category": "AI/LLM", "highlights": ["Feature 1", "Feature 2"]}]
+    projects = [
+        {
+            "name": "AI Twin",
+            "slug": "ai-twin",
+            "description": "A RAG-powered assistant",
+            "tech_stack": ["Python", "FastAPI"],
+            "github_url": "https://github.com/user/repo",
+            "category": "AI/LLM",
+            "highlights": ["Feature 1", "Feature 2"],
+        }
+    ]
     docs = chunk_projects(projects)
     assert len(docs) == 1
     assert docs[0].metadata["source"] == "projects"
@@ -39,9 +47,20 @@ def test_chunk_career_qa() -> None:
 
 def test_chunk_yaml_file_projects() -> None:
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-        yaml.dump([{"name": "Test", "slug": "test", "description": "Desc",
-                    "tech_stack": ["Python"], "github_url": "https://gh.com",
-                    "category": "AI", "highlights": []}], f)
+        yaml.dump(
+            [
+                {
+                    "name": "Test",
+                    "slug": "test",
+                    "description": "Desc",
+                    "tech_stack": ["Python"],
+                    "github_url": "https://gh.com",
+                    "category": "AI",
+                    "highlights": [],
+                }
+            ],
+            f,
+        )
         f.flush()
         docs = chunk_yaml_file(Path(f.name), "projects")
     assert len(docs) == 1

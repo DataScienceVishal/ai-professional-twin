@@ -28,9 +28,7 @@ async def test_embed_single_text(embedding_service: EmbeddingService) -> None:
 
     assert len(result) == 1
     assert len(result[0]) == 1536
-    mock_create.assert_called_once_with(
-        model="text-embedding-3-small", input=["hello world"]
-    )
+    mock_create.assert_called_once_with(model="text-embedding-3-small", input=["hello world"])
 
 
 @pytest.mark.asyncio

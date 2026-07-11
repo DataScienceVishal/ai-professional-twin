@@ -28,10 +28,18 @@ def test_classify_general_query() -> None:
 
 def test_format_context_with_sources() -> None:
     results = [
-        SearchResult(id="doc1", text="Data Engineer at Accenture",
-                     metadata={"source": "resume", "section": "experience"}, distance=0.1),
-        SearchResult(id="doc2", text="AI Professional Twin project",
-                     metadata={"source": "projects", "name": "AI Twin"}, distance=0.2),
+        SearchResult(
+            id="doc1",
+            text="Data Engineer at Accenture",
+            metadata={"source": "resume", "section": "experience"},
+            distance=0.1,
+        ),
+        SearchResult(
+            id="doc2",
+            text="AI Professional Twin project",
+            metadata={"source": "projects", "name": "AI Twin"},
+            distance=0.2,
+        ),
     ]
     context, sources = format_context(results)
     assert "[Source: resume]" in context

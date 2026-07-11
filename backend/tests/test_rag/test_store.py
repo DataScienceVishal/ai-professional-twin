@@ -14,10 +14,18 @@ def store():
 
 def test_add_and_query_documents(store: ChromaStore) -> None:
     docs = [
-        Document(id="doc1", text="Vishal worked as a Data Engineer at Accenture",
-                 metadata={"source": "resume", "section": "experience"}, embedding=[0.1] * 10),
-        Document(id="doc2", text="Built ETL pipelines using Azure Data Factory",
-                 metadata={"source": "resume", "section": "experience"}, embedding=[0.2] * 10),
+        Document(
+            id="doc1",
+            text="Vishal worked as a Data Engineer at Accenture",
+            metadata={"source": "resume", "section": "experience"},
+            embedding=[0.1] * 10,
+        ),
+        Document(
+            id="doc2",
+            text="Built ETL pipelines using Azure Data Factory",
+            metadata={"source": "resume", "section": "experience"},
+            embedding=[0.2] * 10,
+        ),
     ]
     store.add_documents(docs)
     results = store.query(query_embedding=[0.1] * 10, n_results=2)
@@ -27,10 +35,18 @@ def test_add_and_query_documents(store: ChromaStore) -> None:
 
 def test_query_with_metadata_filter(store: ChromaStore) -> None:
     docs = [
-        Document(id="proj1", text="AI Professional Twin project",
-                 metadata={"source": "projects", "name": "AI Twin"}, embedding=[0.3] * 10),
-        Document(id="skill1", text="Python, FastAPI, PyTorch",
-                 metadata={"source": "skills", "category": "ML"}, embedding=[0.3] * 10),
+        Document(
+            id="proj1",
+            text="AI Professional Twin project",
+            metadata={"source": "projects", "name": "AI Twin"},
+            embedding=[0.3] * 10,
+        ),
+        Document(
+            id="skill1",
+            text="Python, FastAPI, PyTorch",
+            metadata={"source": "skills", "category": "ML"},
+            embedding=[0.3] * 10,
+        ),
     ]
     store.add_documents(docs)
     results = store.query(query_embedding=[0.3] * 10, n_results=5, where={"source": "projects"})

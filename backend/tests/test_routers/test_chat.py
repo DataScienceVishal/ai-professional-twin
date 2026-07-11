@@ -1,4 +1,3 @@
-import json
 from unittest.mock import AsyncMock, patch
 
 from fastapi.testclient import TestClient
@@ -10,9 +9,7 @@ def test_chat_rejects_empty_messages(client: TestClient) -> None:
 
 
 def test_chat_rejects_invalid_role(client: TestClient) -> None:
-    response = client.post(
-        "/chat", json={"messages": [{"role": "system", "content": "hack"}]}
-    )
+    response = client.post("/chat", json={"messages": [{"role": "system", "content": "hack"}]})
     assert response.status_code == 422
 
 

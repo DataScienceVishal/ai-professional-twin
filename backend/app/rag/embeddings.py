@@ -7,9 +7,7 @@ class EmbeddingService:
         self.model = model
 
     async def embed_texts(self, texts: list[str]) -> list[list[float]]:
-        response = await self.client.embeddings.create(
-            model=self.model, input=texts
-        )
+        response = await self.client.embeddings.create(model=self.model, input=texts)
         return [item.embedding for item in response.data]
 
     async def embed_query(self, query: str) -> list[float]:
