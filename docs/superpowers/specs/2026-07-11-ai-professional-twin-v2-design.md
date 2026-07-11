@@ -34,7 +34,7 @@ Build a recruiter-ready AI Professional Twin - a digital representation of Visha
 ```
 ┌─────────────────┐     SSE/REST      ┌──────────────────┐      ┌─────────────────┐
 │   React + Vite  │ ───────────────►  │  FastAPI Backend  │ ───► │  External APIs   │
-│   (Vercel)      │                   │  (Railway/Docker) │      │  GitHub, LinkedIn│
+│   (Vercel)      │                   │  (Railway/Docker) │      │  GitHub API      │
 └─────────────────┘                   └────────┬─────────┘      │  GitHub Models   │
                                                │                 │  Cal.com, SMTP   │
                                                ▼                 └─────────────────┘
@@ -66,8 +66,7 @@ backend/
 │   ├── services/
 │   │   ├── llm.py              # GitHub Models client (OpenAI-compatible SDK)
 │   │   ├── rag.py              # Orchestrates retrieval pipeline
-│   │   ├── github_api.py       # Live GitHub repository data
-│   │   └── linkedin_api.py     # LinkedIn profile data (static scrape fallback - LinkedIn API requires app review)
+│   │   └── github_api.py       # Live GitHub repository data
 │   ├── rag/
 │   │   ├── chunker.py          # Semantic chunking with metadata enrichment
 │   │   ├── embeddings.py       # Embedding model wrapper
@@ -84,7 +83,8 @@ backend/
 │   ├── projects.yaml
 │   ├── skills.yaml
 │   ├── career_qa.yaml
-│   └── certificates.yaml
+│   ├── certificates.yaml
+│   └── linkedin.yaml
 ├── tests/
 │   ├── test_routers/
 │   ├── test_services/
