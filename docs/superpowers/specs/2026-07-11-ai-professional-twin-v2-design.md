@@ -1,4 +1,4 @@
-# AI Professional Twin — V2 Design Specification
+# AI Professional Twin - V2 Design Specification
 
 **Date**: 2026-07-11
 **Status**: Approved
@@ -8,7 +8,7 @@
 
 ## 1. Vision
 
-Build a recruiter-ready AI Professional Twin — a digital representation of Vishal Khan's professional identity. Not a chatbot. A production-quality AI system that demonstrates modern AI engineering, software architecture, and LLM application design.
+Build a recruiter-ready AI Professional Twin - a digital representation of Vishal Khan's professional identity. Not a chatbot. A production-quality AI system that demonstrates modern AI engineering, software architecture, and LLM application design.
 
 **Success metric**: A recruiter spends 5 minutes with the app and leaves convinced this candidate understands production AI systems.
 
@@ -20,7 +20,7 @@ Build a recruiter-ready AI Professional Twin — a digital representation of Vis
 
 | Constraint | Value |
 |-----------|-------|
-| Budget | $0/month — free tiers only |
+| Budget | $0/month - free tiers only |
 | LLM Provider | GitHub Models (GPT-4.1-mini, text-embedding-3-small) |
 | Backend Hosting | Railway free tier ($5 credit/month) |
 | Frontend Hosting | Vercel free tier |
@@ -50,7 +50,7 @@ Two independently deployed services:
 
 ---
 
-## 4. Backend — FastAPI
+## 4. Backend - FastAPI
 
 ### 4.1 Project Structure
 
@@ -60,14 +60,14 @@ backend/
 │   ├── main.py                 # FastAPI app, lifespan events, middleware
 │   ├── config.py               # Pydantic Settings (env vars, typed config)
 │   ├── routers/
-│   │   ├── chat.py             # POST /chat — streaming SSE endpoint
+│   │   ├── chat.py             # POST /chat - streaming SSE endpoint
 │   │   ├── knowledge.py        # GET /projects, /skills, /resume
-│   │   └── health.py           # GET /health — service status
+│   │   └── health.py           # GET /health - service status
 │   ├── services/
 │   │   ├── llm.py              # GitHub Models client (OpenAI-compatible SDK)
 │   │   ├── rag.py              # Orchestrates retrieval pipeline
 │   │   ├── github_api.py       # Live GitHub repository data
-│   │   └── linkedin_api.py     # LinkedIn profile data (static scrape fallback — LinkedIn API requires app review)
+│   │   └── linkedin_api.py     # LinkedIn profile data (static scrape fallback - LinkedIn API requires app review)
 │   ├── rag/
 │   │   ├── chunker.py          # Semantic chunking with metadata enrichment
 │   │   ├── embeddings.py       # Embedding model wrapper
@@ -96,11 +96,11 @@ backend/
 
 ### 4.2 Key Design Decisions
 
-**Service layer pattern**: Routers are thin (validation + routing). Services hold business logic. This separation makes the code testable — services can be tested without HTTP.
+**Service layer pattern**: Routers are thin (validation + routing). Services hold business logic. This separation makes the code testable - services can be tested without HTTP.
 
 **Pydantic Settings**: All configuration loaded from environment variables with type validation. No hardcoded values. `.env.example` documents required vars with dummy values.
 
-**Lifespan events**: ChromaDB initialization and knowledge ingestion happen in FastAPI's lifespan context manager — once at startup, not per-request.
+**Lifespan events**: ChromaDB initialization and knowledge ingestion happen in FastAPI's lifespan context manager - once at startup, not per-request.
 
 **Dependency injection**: FastAPI's `Depends()` for service injection. Makes testing trivial (swap real services for mocks).
 
@@ -143,9 +143,9 @@ Documents → Loader → Chunker → Metadata Enricher → Embedder → ChromaDB
 ```
 
 **Loaders** (per file type):
-- `PyPDFLoader` — resume PDF, splits by page
-- Custom YAML loader — structured data (projects, skills, career Q&A)
-- Markdown loader — README files, documentation
+- `PyPDFLoader` - resume PDF, splits by page
+- Custom YAML loader - structured data (projects, skills, career Q&A)
+- Markdown loader - README files, documentation
 
 **Semantic Chunking Strategy**:
 
@@ -157,7 +157,7 @@ Documents → Loader → Chunker → Metadata Enricher → Embedder → ChromaDB
 | Career Q&A YAML | One chunk per Q&A pair | `{source, topic, question}` |
 | Certificates | One chunk per certificate | `{source, issuer, date, name}` |
 
-Metadata is the key differentiator. It enables filtered search — when someone asks about a specific project, we search only project chunks.
+Metadata is the key differentiator. It enables filtered search - when someone asks about a specific project, we search only project chunks.
 
 **Embeddings**: `text-embedding-3-small` via GitHub Models (OpenAI-compatible API). 1536 dimensions. Free.
 
@@ -169,20 +169,20 @@ Metadata is the key differentiator. It enables filtered search — when someone 
 Query → Classify Intent → Embed → Hybrid Search → Filter → Score → Assemble Context
 ```
 
-**Step 1 — Query Classification**:
+**Step 1 - Query Classification**:
 A lightweight classifier (keyword + pattern matching, not LLM-based) determines query intent:
 - Project query → filter `source: "projects"`
 - Skills query → filter `source: "skills"`
 - Experience query → filter `source: "resume", section: "experience"`
 - General → search all collections
 
-**Step 2 — Hybrid Search**:
+**Step 2 - Hybrid Search**:
 Combine dense (embedding similarity) and sparse (keyword BM25) retrieval using Reciprocal Rank Fusion:
 - Dense: ChromaDB cosine similarity search
 - Sparse: ChromaDB `where_document` keyword filtering
 - Fusion: RRF merges both ranked lists, top-k results
 
-**Step 3 — Context Assembly**:
+**Step 3 - Context Assembly**:
 Retrieved chunks formatted with source attribution:
 ```
 [Source: Resume > Experience > Accenture]
@@ -194,7 +194,7 @@ RAG-powered FastAPI application with semantic chunking,
 hybrid retrieval, and streaming responses...
 ```
 
-**Step 4 — Source Citations**:
+**Step 4 - Source Citations**:
 The prompt instructs the LLM to cite sources in `[Source: X]` notation. The backend parses citations from the response and sends them as structured data in the SSE stream's final `sources` event.
 
 ### 5.3 Performance Targets
@@ -217,11 +217,11 @@ Composable layers assembled per request:
 Final Prompt = Base Identity + Mode Layer + RAG Context + Response Rules
 ```
 
-### Layer 1 — Base Identity (~300 tokens, always present)
+### Layer 1 - Base Identity (~300 tokens, always present)
 
-Defines WHO the AI is: Vishal's professional twin. Speaks in third person. Never fabricates. Cites sources. No CV data here — that comes from RAG.
+Defines WHO the AI is: Vishal's professional twin. Speaks in third person. Never fabricates. Cites sources. No CV data here - that comes from RAG.
 
-### Layer 2 — Mode Templates (swapped per mode)
+### Layer 2 - Mode Templates (swapped per mode)
 
 | Mode | Behavior |
 |------|----------|
@@ -229,11 +229,11 @@ Defines WHO the AI is: Vishal's professional twin. Speaks in third person. Never
 | Recruiter | Concise, impact-first, quantified achievements, ends with next action (view project, download resume, book meeting) |
 | Interview | Technical depth, architecture decisions, tradeoffs, links to source code |
 
-### Layer 3 — RAG Context (dynamic per query)
+### Layer 3 - RAG Context (dynamic per query)
 
 Injected by the retrieval pipeline. Contains only relevant chunks with source attribution. Includes explicit instruction: "If the information below doesn't cover the question, say you don't have that information."
 
-### Layer 4 — Response Rules (guardrails)
+### Layer 4 - Response Rules (guardrails)
 
 - Cite sources using `[Source: X]` notation
 - Never invent projects, skills, or experience
@@ -243,7 +243,7 @@ Injected by the retrieval pipeline. Contains only relevant chunks with source at
 
 ---
 
-## 7. Frontend — React + Vite
+## 7. Frontend - React + Vite
 
 ### 7.1 Design Language
 
@@ -344,9 +344,9 @@ All knowledge stored as version-controlled files in `backend/knowledge/`:
 
 ### 9.1 File Formats
 
-**resume.pdf** — The primary resume document. Parsed by PyPDFLoader, chunked by section.
+**resume.pdf** - The primary resume document. Parsed by PyPDFLoader, chunked by section.
 
-**projects.yaml** — Structured project data:
+**projects.yaml** - Structured project data:
 ```yaml
 - name: AI Professional Twin
   slug: ai-professional-twin
@@ -360,7 +360,7 @@ All knowledge stored as version-controlled files in `backend/knowledge/`:
   category: AI/LLM
 ```
 
-**skills.yaml** — Skills grouped by category:
+**skills.yaml** - Skills grouped by category:
 ```yaml
 - category: Machine Learning
   skills: [PyTorch, TensorFlow, Scikit-Learn, XGBoost]
@@ -371,7 +371,7 @@ All knowledge stored as version-controlled files in `backend/knowledge/`:
   proficiency: advanced
 ```
 
-**career_qa.yaml** — Pre-written Q&A pairs for common questions:
+**career_qa.yaml** - Pre-written Q&A pairs for common questions:
 ```yaml
 - question: Why should we hire Vishal?
   answer: |
@@ -381,7 +381,7 @@ All knowledge stored as version-controlled files in `backend/knowledge/`:
   topic: hiring
 ```
 
-**certificates.yaml** — Certifications with metadata.
+**certificates.yaml** - Certifications with metadata.
 
 ### 9.2 Future Knowledge Sources (V3+)
 
@@ -490,7 +490,7 @@ The modular architecture is designed so V3/V4 features layer on without restruct
 ## 14. Out of Scope for V2
 
 - Persistent conversation history (V3)
-- User authentication (V3 — admin dashboard)
+- User authentication (V3 - admin dashboard)
 - Feedback collection (V3)
 - Analytics dashboard (V3)
 - Tool calling / function calling (V3)
