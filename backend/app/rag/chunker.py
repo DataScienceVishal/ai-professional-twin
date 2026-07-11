@@ -49,18 +49,28 @@ def chunk_career_qa(qa_pairs: list[dict]) -> list[Document]:
 def chunk_certificates(certs: list[dict]) -> list[Document]:
     docs: list[Document] = []
     for i, cert in enumerate(certs):
-        text = f"Certificate: {cert['name']}\nIssuer: {cert['issuer']}\nDate: {cert['date']}\n"
-        docs.append(Document(id=f"cert-{i}-{cert['name'].lower().replace(' ', '-')}",
-                             text=text, metadata={"source": "certificates", "issuer": cert["issuer"]}))
+        text = (f"Certificate: {cert['name']}\nIssuer: {cert['issuer']}\n"
+                f"Date: {cert['date']}\n")
+        cert_id = f"cert-{i}-{cert['name'].lower().replace(' ', '-')}"
+        docs.append(Document(
+            id=cert_id, text=text,
+            metadata={"source": "certificates", "issuer": cert["issuer"]},
+        ))
     return docs
 
 
 def chunk_linkedin(data: dict) -> list[Document]:
-    parts = [f"LinkedIn Profile: {data.get('headline', '')}",
-             f"Location: {data.get('location', '')}", f"Current Role: {data.get('current_role', '')}",
-             f"Summary: {data.get('summary', '')}"]
+    parts = [
+        f"LinkedIn Profile: {data.get('headline', '')}",
+        f"Location: {data.get('location', '')}",
+        f"Current Role: {data.get('current_role', '')}",
+        f"Summary: {data.get('summary', '')}",
+    ]
     for exp in data.get("experience", []):
-        parts.append(f"Experience: {exp['role']} at {exp['company']} ({exp['dates']}). {exp.get('description', '')}")
+        desc = exp.get("description", "")
+        parts.append(
+            f"Experience: {exp['role']} at {exp['company']} ({exp['dates']}). {desc}"
+        )
     for edu in data.get("education", []):
         parts.append(f"Education: {edu['degree']} at {edu['institution']} ({edu['dates']})")
     return [Document(id="linkedin-profile", text="\n".join(parts),
