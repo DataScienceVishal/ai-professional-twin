@@ -1,6 +1,7 @@
 # Pre-written Q&A pairs for recruiter and interviewer questions about Vishal Khan
 
-- question: Why should we hire Vishal?
+- topic: hiring
+  question: Why should we hire Vishal?
   answer: >
     Vishal is an industrious data engineer with 4+ years of experience spanning
     data pipelines, machine learning, and deep learning. At Teleperformance he
@@ -13,7 +14,8 @@
     deepening his expertise further with an M.Sc. in AI and Computer Science at
     Northeastern University London.
 
-- question: What are Vishal's career goals?
+- topic: career-goals
+  question: What are Vishal's career goals?
   answer: >
     Vishal is progressing from data engineering into applied AI and machine
     learning engineering. His trajectory shows a clear pattern of building on
@@ -24,7 +26,8 @@
     systems, including large language model applications, where he can combine
     his data engineering background with his growing deep learning expertise.
 
-- question: What are Vishal's technical strengths?
+- topic: technical-strengths
+  question: What are Vishal's technical strengths?
   answer: >
     Vishal's core strengths are in data pipeline engineering and applied
     machine learning. He is proficient in Python, R, SQL, and DAX, and has
@@ -36,7 +39,8 @@
     tools such as Power BI and Tableau for turning data into decision-ready
     dashboards.
 
-- question: Tell me about Vishal's work experience.
+- topic: work-experience
+  question: Tell me about Vishal's work experience.
   answer: >
     Vishal has worked across finance, commercial analytics, and data engineering.
     From July 2018 to September 2020 he worked in finance, accounts, and taxation
@@ -50,7 +54,8 @@
     Pvt. Ltd., developing SSMS/Databricks pipelines for telecom data and migrating
     on-prem schemas to Databricks for major efficiency and cost gains.
 
-- question: What is Vishal's educational background?
+- topic: education
+  question: What is Vishal's educational background?
   answer: >
     Vishal holds a Bachelor of Commerce from the University of Delhi (Nov 2018 -
     Nov 2021), completed an Executive PG Program in Data Science at IIIT
@@ -60,7 +65,8 @@
     London (Jan 2026 - Jan 2027), continuing to build deeper expertise in
     artificial intelligence.
 
-- question: What makes Vishal stand out from other candidates?
+- topic: differentiators
+  question: What makes Vishal stand out from other candidates?
   answer: >
     Vishal combines a rare mix of backgrounds: finance and taxation operations,
     commercial analytics, data engineering, and applied machine learning
@@ -72,7 +78,8 @@
     in AI and Computer Science, showing sustained commitment to becoming an
     AI and machine learning practitioner.
 
-- question: What kind of role is Vishal looking for?
+- topic: target-role
+  question: What kind of role is Vishal looking for?
   answer: >
     Given his background as a Data Engineer with strong machine learning and
     deep learning skills, Vishal is best suited for roles at the intersection
@@ -80,20 +87,23 @@
     ML Engineer, Data Scientist, or AI Engineer positions where he can build
     data pipelines and productionize models end to end.
 
-- question: Does Vishal have research experience?
+- topic: research
+  question: Does Vishal have research experience?
   answer: >
     Yes. Vishal authored "Reinforcement Learning for Real-Time Pricing
     Optimization in E-Comm," published in an IEEE Journal in 2024, applying
     reinforcement learning techniques to dynamic pricing problems in
     e-commerce.
 
-- question: What certifications does Vishal hold?
+- topic: certifications
+  question: What certifications does Vishal hold?
   answer: >
     Vishal holds a Data Science Programming Bootcamp certificate, a
     Machine/Deep Learning Certificate, a SQL certification from HackerRank,
     an AWS Certificate from Great Learning, and a Data Toolkit certification.
 
-- question: Where is Vishal based and is he open to relocation or remote work?
+- topic: location
+  question: Where is Vishal based and is he open to relocation or remote work?
   answer: >
     Vishal is based in London, UK. For specifics on his availability for
     relocation, hybrid, or remote work arrangements, it is best to ask him

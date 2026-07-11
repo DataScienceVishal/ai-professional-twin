@@ -39,9 +39,10 @@ def chunk_skills(skills: list[dict]) -> list[Document]:
 def chunk_career_qa(qa_pairs: list[dict]) -> list[Document]:
     docs: list[Document] = []
     for i, qa in enumerate(qa_pairs):
+        topic = qa.get("topic", "general")
         text = f"Question: {qa['question']}\nAnswer: {qa['answer']}\n"
-        docs.append(Document(id=f"career-qa-{i}-{qa['topic']}", text=text,
-                             metadata={"source": "career_qa", "topic": qa["topic"]}))
+        docs.append(Document(id=f"career-qa-{i}-{topic}", text=text,
+                             metadata={"source": "career_qa", "topic": topic}))
     return docs
 
 
