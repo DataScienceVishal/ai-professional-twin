@@ -10,7 +10,7 @@ const ACTIONS = [
   { label: 'Summarize Vishal in 60 seconds', message: 'Give me a 60-second summary of Vishal Khan as a candidate.' },
   { label: 'Why hire Vishal?', message: 'Why should we hire Vishal Khan?' },
   { label: 'Show AI projects', message: 'Show me Vishal\'s AI and LLM projects with details.' },
-  { label: 'Data Engineering experience', message: 'Tell me about Vishal\'s data engineering experience at Accenture.' },
+  { label: 'Data Engineering experience', message: 'Tell me about Vishal\'s data engineering experience at Teleperformance.' },
   { label: 'Generate interview questions', message: 'Generate 5 technical interview questions based on Vishal\'s background.' },
 ]
 
