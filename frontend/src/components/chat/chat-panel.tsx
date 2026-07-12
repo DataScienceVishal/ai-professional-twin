@@ -51,7 +51,11 @@ export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProp
           </div>
         )}
         {messages.map((msg, i) => (
-          <Message key={i} message={msg} />
+          <Message
+            key={i}
+            message={msg}
+            isStreaming={isStreaming && i === messages.length - 1 && msg.role === 'assistant'}
+          />
         ))}
         {isStreaming && (
           <div className="flex gap-1 px-4 py-2">
