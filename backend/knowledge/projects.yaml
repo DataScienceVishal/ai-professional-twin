@@ -1,72 +1,69 @@
-# Projects extracted from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
+# Projects from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
 
-- name: AI Professional Twin
-  slug: ai-professional-twin
+- name: AI Digital Twin & Interactive Responsive Portfolio
+  slug: ai-digital-twin
   description: >
-    A RAG-powered AI assistant that serves as a digital professional identity for
-    Vishal. Ingests his resume, skills, projects, and career Q&A into a vector
-    store and answers recruiter/interviewer questions through a streaming chat
-    interface. Built as a full-stack project with a FastAPI backend, ChromaDB
-    for retrieval, and a React frontend.
-  tech_stack: [Python, FastAPI, ChromaDB, React, TypeScript, Docker, uv]
+    Architected an always-on digital twin assistant to provide recruiters with
+    fluid, context-aware access to professional background data. Developed a
+    vanilla HTML5/CSS3/JS web app utilizing dynamic viewport height (dvh) for
+    mobile responsiveness; engineered a direct serverless gateway to OpenAI GPT
+    models featuring context-window prompt optimization and token streaming.
+    Deployed to Vercel CDN, implementing layout-adaptive rendering and
+    interactive inquiry chips that cut cold-start latency and increased mobile
+    engagement.
+  tech_stack: [HTML5, CSS3, JavaScript, OpenAI GPT, Vercel]
   github_url: https://github.com/DataScienceVishal/my-ai-resume
-  category: AI/LLM
+  category: Generative AI
   highlights:
-    - Retrieval-augmented generation pipeline over structured career knowledge
-    - FastAPI backend with health checks and streaming chat endpoints
-    - Dockerized, reproducible build using uv for dependency management
-    - Designed to answer recruiter-style questions with grounded, factual answers
+    - Always-on digital twin assistant for recruiter engagement
+    - Serverless gateway to OpenAI GPT models with token streaming
+    - Layout-adaptive rendering with dvh for mobile responsiveness
+    - Deployed on Vercel CDN with interactive inquiry chips
 
 - name: Image Classification with CNN (CIFAR-10)
   slug: image-classification-cnn-cifar10
   description: >
-    Built a Convolutional Neural Network to classify images from the CIFAR-10
-    dataset, focused on improving generalization through regularization
-    techniques.
+    Developed a Convolutional Neural Network model for image classification on
+    the CIFAR-10 dataset. Designed a CNN in TensorFlow/Keras with normalization,
+    dropout, and L2 regularization to enhance accuracy and generalization.
+    Achieved a training accuracy of 72.12% and a validation accuracy of 74.06%.
   tech_stack: [Python, TensorFlow, Keras]
   github_url: https://github.com/DataScienceVishal
   category: Deep Learning
   highlights:
-    - Designed a CNN architecture in TensorFlow/Keras
-    - Applied normalization, dropout, and L2 regularization to reduce overfitting
-    - Achieved 72.12% training accuracy and 74.06% validation accuracy after 5 epochs
+    - CNN architecture with normalization, dropout, and L2 regularization
+    - 72.12% training accuracy and 74.06% validation accuracy
+    - Focus on generalization through regularization techniques
 
 - name: Telecom Churn Prediction
   slug: telecom-churn-prediction
   description: >
-    A machine learning project to predict customer churn for a telecom
-    provider using 21 predictor variables, with a full exploratory data
-    analysis and preprocessing pipeline.
-  tech_stack: [Python, Pandas, Scikit-learn]
+    Predicted customer churn from 21 predictor variables and identified the
+    strongest retention levers. Ran EDA, preprocessing, and feature engineering
+    in Python/SQL, then benchmarked classification models including Logistic
+    Regression. Achieved ~80% accuracy and identified tenure as the strongest
+    churn predictor.
+  tech_stack: [Python, Pandas, Scikit-learn, SQL]
   github_url: https://github.com/DataScienceVishal
   category: Machine Learning
   highlights:
-    - Conducted thorough EDA and feature preprocessing for modeling
-    - Achieved 80% accuracy using Logistic Regression
-    - Identified customer tenure as the most significant churn predictor
+    - Full EDA, preprocessing, and feature engineering pipeline
+    - ~80% accuracy using Logistic Regression
+    - Identified customer tenure as the strongest churn predictor
 
-- name: Bank Loan Dashboard
-  slug: bank-loan-dashboard
+- name: Reinforcement Learning for Dynamic Pricing in E-commerce
+  slug: rl-dynamic-pricing
   description: >
-    A Power BI dashboard built for executives to monitor and analyze home
-    loan performance, recovery rates, and product mix.
-  tech_stack: [Power BI, DAX]
-  github_url: https://github.com/DataScienceVishal
-  category: Data Visualization
-  highlights:
-    - Designed an executive-facing Home Loan Dashboard in Microsoft Power BI
-    - Identified July 2019 as the peak month for loan disbursement
-    - Found group-insurance loans to be the top product with a 53% recovery rate
-
-- name: Reinforcement Learning for Real-Time Pricing Optimization in E-Commerce
-  slug: rl-real-time-pricing-optimization
-  description: >
-    Research publication exploring reinforcement learning techniques for
-    dynamic, real-time pricing optimization in e-commerce settings, published
-    in an IEEE Journal in 2024.
-  tech_stack: [Python, Reinforcement Learning]
+    MSc thesis testing whether RL can outperform pricing rules in a simulated
+    e-commerce environment. Built a custom Gym-style environment on real
+    e-commerce data, then trained DQN, A2C, and PPO agents over multi-episode
+    simulations. DQN produced the most stable profit curve. Wrote up the
+    comparative analysis as part of the dissertation at LJMU, 2024.
+  tech_stack: [Python, Reinforcement Learning, OpenAI Gym, DQN, A2C, PPO]
   github_url: ""
   category: Research
   highlights:
-    - Published in an IEEE Journal (2024)
-    - Applied reinforcement learning to real-time e-commerce pricing decisions
+    - Custom Gym-style environment on real e-commerce data
+    - Compared DQN, A2C, and PPO agents for dynamic pricing
+    - DQN produced the most stable profit curve
+    - MSc dissertation at LJMU (2024)

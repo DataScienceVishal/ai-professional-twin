@@ -33,6 +33,11 @@ export const SUGGESTION_CHIPS: Record<ChatMode, string[]> = {
     'Has he published any research papers?',
     'What did he study at Liverpool John Moores?',
     'What is his experience with Databricks?',
+    'What Generative AI tools does he know?',
+    'Has he worked with LangChain or FAISS?',
+    'What is his experience with RAG systems?',
+    'Does he know PyTorch or TensorFlow?',
+    'What web frameworks has he used?',
   ],
   recruiter: [
     'Summarize Vishal as a candidate in 60 seconds',
@@ -60,6 +65,8 @@ export const SUGGESTION_CHIPS: Record<ChatMode, string[]> = {
     'What is his approach to problem solving?',
     'Does he have experience with CI/CD pipelines?',
     'How has he demonstrated impact in previous roles?',
+    'Does he have Generative AI experience?',
+    'What is his experience with LLMs and RAG?',
   ],
   interview: [
     'Explain the RAG architecture in this project',
