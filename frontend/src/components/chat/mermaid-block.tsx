@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import DOMPurify from 'dompurify'
 import mermaid from 'mermaid'
 
 mermaid.initialize({
@@ -45,7 +44,7 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
       .render(idRef.current, code)
       .then(({ svg }) => {
         if (!cancelled && containerRef.current) {
-          containerRef.current.innerHTML = DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true } })
+          containerRef.current.innerHTML = svg
         }
       })
       .catch(() => {
