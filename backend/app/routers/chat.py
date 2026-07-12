@@ -51,7 +51,11 @@ async def chat(
         async for chunk in llm.stream(system_prompt=system_prompt, messages=messages):
             yield {"data": json.dumps({"type": "chunk", "content": chunk})}
 
-        source_data = [{"source": s.source, "detail": s.detail} for s in sources]
+        source_data = [
+            {"source": s.source, "detail": s.detail, "url": s.url}
+            for s in sources
+            if s.url
+        ]
         yield {"data": json.dumps({"type": "sources", "sources": source_data})}
         yield {"data": json.dumps({"type": "done"})}
 

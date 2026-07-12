@@ -9,6 +9,7 @@ export interface Message {
 export interface SourceInfo {
   source: string
   detail: string
+  url: string
 }
 
 export interface Project {
