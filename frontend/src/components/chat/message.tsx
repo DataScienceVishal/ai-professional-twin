@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { motion } from 'framer-motion'
+import { MermaidBlock } from './mermaid-block'
 import { SourceCitation } from './source-citation'
 import type { Message as MessageType } from '../../lib/types'
 
@@ -30,7 +31,22 @@ export function Message({ message }: MessageProps) {
           <p className="text-sm">{message.content}</p>
         ) : (
           <div className="prose prose-invert prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight]}
+              components={{
+                code({ className, children, ...props }) {
+                  const match = /language-mermaid/.exec(className || '')
+                  if (match) {
+                    return <MermaidBlock code={String(children).trim()} />
+                  }
+                  return <code className={className} {...props}>{children}</code>
+                },
+                pre({ children }) {
+                  return <>{children}</>
+                },
+              }}
+            >
               {message.content}
             </ReactMarkdown>
           </div>

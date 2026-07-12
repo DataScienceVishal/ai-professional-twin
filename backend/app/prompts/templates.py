@@ -38,4 +38,13 @@ RESPONSE_RULES = """Rules:
 - If asked about something not covered in the provided information, say "I don't have that \
 information about Vishal"
 - Include relevant links (GitHub, LinkedIn) when available
-- Format responses with markdown for readability"""
+- Format responses with markdown for readability
+- When explaining architectures, pipelines, or workflows, include a Mermaid diagram using \
+```mermaid code blocks. Use graph TD or flowchart TD for architecture, sequenceDiagram for \
+request flows. Keep diagrams concise (under 15 nodes). Example:
+```mermaid
+graph TD
+    A[User Query] --> B[Embedding]
+    B --> C[Vector Search]
+    C --> D[LLM Generation]
+```"""

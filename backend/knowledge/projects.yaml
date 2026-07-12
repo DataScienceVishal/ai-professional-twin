@@ -1,21 +1,44 @@
 # Projects from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
 
-- name: AI Digital Twin & Interactive Responsive Portfolio
-  slug: ai-digital-twin
+- name: AI Professional Twin V2 - Full-Stack RAG Application
+  slug: ai-professional-twin-v2
   description: >
-    Architected an always-on digital twin assistant to provide recruiters with
-    fluid, context-aware access to professional background data. Developed a
-    vanilla HTML5/CSS3/JS web app utilizing dynamic viewport height (dvh) for
-    mobile responsiveness; engineered a direct serverless gateway to OpenAI GPT
-    models featuring context-window prompt optimization and token streaming.
-    Deployed to Vercel CDN, implementing layout-adaptive rendering and
-    interactive inquiry chips that cut cold-start latency and increased mobile
-    engagement.
+    Built a production RAG (Retrieval-Augmented Generation) system as an
+    interactive AI twin for recruiter engagement. The backend uses FastAPI with
+    ChromaDB as a vector store, text-embedding-3-small for embeddings, and
+    gpt-4.1-mini for generation via GitHub Models (free tier). Documents from
+    YAML knowledge files, a resume PDF, and live GitHub repos are chunked,
+    embedded, and stored in ChromaDB on startup. The retriever performs cosine
+    similarity search to find relevant context, which is injected into the
+    system prompt alongside mode-specific instructions (General, Recruiter,
+    Interview). Responses stream via SSE. The React + Vite + Tailwind frontend
+    renders markdown with syntax highlighting and Mermaid diagrams, shows
+    clickable source citations with real URLs, and provides suggestion chips
+    that shuffle after each message. Deployed on Railway (backend) and Vercel
+    (frontend), both free tier.
+  tech_stack: [Python, FastAPI, ChromaDB, React, Vite, Tailwind CSS, GitHub Models, RAG, LangChain concepts, Docker]
+  github_url: https://github.com/DataScienceVishal/ai-professional-twin
+  category: Generative AI
+  highlights:
+    - Full RAG pipeline with chunking, embedding, retrieval, and generation
+    - ChromaDB vector store with cosine similarity search
+    - SSE streaming responses from FastAPI to React frontend
+    - Live GitHub repo and README ingestion on startup
+    - Three chat modes (General, Recruiter, Interview) with tailored prompts
+    - Deployed on Railway + Vercel free tier
+
+- name: AI Digital Twin V1 - Serverless Portfolio
+  slug: ai-digital-twin-v1
+  description: >
+    First iteration of the AI twin concept. Built a vanilla HTML5/CSS3/JS web
+    app with a direct serverless gateway to OpenAI GPT models featuring
+    context-window prompt optimization and token streaming. Used dynamic
+    viewport height (dvh) for mobile responsiveness and interactive inquiry
+    chips. Deployed to Vercel CDN.
   tech_stack: [HTML5, CSS3, JavaScript, OpenAI GPT, Vercel]
   github_url: https://github.com/DataScienceVishal/my-ai-resume
   category: Generative AI
   highlights:
-    - Always-on digital twin assistant for recruiter engagement
     - Serverless gateway to OpenAI GPT models with token streaming
     - Layout-adaptive rendering with dvh for mobile responsiveness
     - Deployed on Vercel CDN with interactive inquiry chips
