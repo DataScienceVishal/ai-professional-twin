@@ -35,13 +35,18 @@ export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProp
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full text-center gap-4">
-            <h1 className="text-3xl font-bold text-text-primary">
+          <div className="flex flex-col items-center justify-center h-full text-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center">
+              <svg className="w-6 h-6 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
               Vishal Khan's AI Twin
             </h1>
-            <p className="text-text-secondary max-w-md">
+            <p className="text-sm text-text-secondary max-w-sm leading-relaxed">
               Ask me anything about Vishal's experience, projects, skills, and career.
-              I'm grounded in real data and will cite my sources.
+              Grounded in real data with source citations.
             </p>
           </div>
         )}
@@ -50,16 +55,16 @@ export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProp
         ))}
         {isStreaming && (
           <div className="flex gap-1 px-4 py-2">
-            <span className="w-2 h-2 rounded-full bg-accent-cyan animate-bounce" />
-            <span className="w-2 h-2 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.1s]" />
-            <span className="w-2 h-2 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.2s]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.1s]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-bounce [animation-delay:0.2s]" />
           </div>
         )}
       </div>
       <SuggestionChips
         mode={mode}
         onSelect={onSend}
-        visible={messages.length === 0}
+        messageCount={messages.length}
       />
       <InputBar onSend={onSend} disabled={isStreaming} />
     </div>

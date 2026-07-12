@@ -94,17 +94,33 @@ class QueryClassifier:
 class SourceInfo:
     source: str
     detail: str
+    url: str
+
+
+def _extract_url(metadata: dict[str, str]) -> str:
+    return metadata.get("github_url") or metadata.get("url") or ""
+
+
+def _extract_detail(metadata: dict[str, str]) -> str:
+    skip = {"source", "github_url", "url", "page"}
+    parts = [v for k, v in metadata.items() if k not in skip and v]
+    return " - ".join(parts) if parts else ""
 
 
 def format_context(results: list[SearchResult]) -> tuple[str, list[SourceInfo]]:
     context_parts: list[str] = []
     sources: list[SourceInfo] = []
+    seen: set[str] = set()
     for result in results:
         source = result.metadata.get("source", "unknown")
-        detail_parts = [v for k, v in result.metadata.items() if k != "source" and v]
-        detail = " > ".join(detail_parts) if detail_parts else ""
+        url = _extract_url(result.metadata)
+        detail = _extract_detail(result.metadata)
+        key = f"{source}:{detail}:{url}"
+        if key in seen:
+            continue
+        seen.add(key)
         context_parts.append(f"[Source: {source}]\n{result.text}\n")
-        sources.append(SourceInfo(source=source, detail=detail))
+        sources.append(SourceInfo(source=source, detail=detail, url=url))
     return "\n".join(context_parts), sources
 
 

@@ -1,6 +1,6 @@
 import type { ChatMode, Project, SkillCategory, SSEEvent } from './types'
 
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 export async function* streamChat(
   messages: { role: string; content: string }[],

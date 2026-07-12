@@ -6,8 +6,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary: 'bg-accent-cyan text-bg-primary hover:bg-accent-cyan/90',
-  secondary: 'bg-bg-card border border-border text-text-primary hover:bg-border/50',
+  primary: 'bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan hover:bg-accent-cyan/25',
+  secondary: 'bg-bg-card border border-border text-text-primary hover:border-accent-cyan/30 hover:text-accent-cyan',
   ghost: 'text-text-secondary hover:text-text-primary hover:bg-bg-card',
 }
 
@@ -21,7 +21,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', className = '', ...props }, ref) => (
     <button
       ref={ref}
-      className={`rounded-lg font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`rounded-lg font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     />
   ),

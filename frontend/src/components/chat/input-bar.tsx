@@ -1,5 +1,4 @@
 import { type FormEvent, useState } from 'react'
-import { Button } from '../ui/button'
 
 interface InputBarProps {
   onSend: (message: string) => void
@@ -25,11 +24,15 @@ export function InputBar({ onSend, disabled }: InputBarProps) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Ask me anything about Vishal..."
         disabled={disabled}
-        className="flex-1 rounded-xl bg-bg-card border border-border px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/50 transition-colors"
+        className="flex-1 rounded-lg bg-bg-card border border-border px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
       />
-      <Button type="submit" disabled={disabled || !input.trim()}>
+      <button
+        type="submit"
+        disabled={disabled || !input.trim()}
+        className="rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan px-4 py-2.5 text-sm font-medium hover:bg-accent-cyan/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+      >
         Send
-      </Button>
+      </button>
     </form>
   )
 }
