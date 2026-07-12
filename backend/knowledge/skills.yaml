@@ -1,70 +1,66 @@
 # Skills extracted from Vishal Khan's resume
 
-- category: Languages
-  skills: [Python, R, SQL, DAX]
+- category: Programming
+  skills: [Python, SQL, R, HTML, CSS, JScript, Svelte]
   proficiency: advanced
 
-- category: Machine Learning & Data Science
+- category: Machine Learning
   skills:
-    - Predictive Modeling
-    - Statistical Modeling
-    - Machine Learning
+    - Reinforcement Learning (DQN, A2C, PPO)
     - Deep Learning
+    - Classification
     - Regression
-    - Clustering
-    - Time-series Forecasting
+    - Time-Series Forecasting
     - NLP
-    - Neural Networks
-    - Transfer Learning
-    - Computer Vision
+    - Feature Engineering
+    - Model Evaluation
+  proficiency: advanced
+
+- category: Generative AI
+  skills:
+    - LLMs
+    - RAG
+    - Prompt Engineering
+    - LangChain
+    - FAISS
+    - Gemini API
   proficiency: advanced
 
 - category: Libraries & Frameworks
   skills:
-    - Pandas
-    - NumPy
     - PyTorch
     - TensorFlow
     - Keras
-    - Statsmodel
     - Scikit-learn
-    - Plotly
+    - Pandas
+    - NumPy
+    - Statsmodels
     - Matplotlib
     - Seaborn
-    - OpenCV
+    - Plotly
   proficiency: advanced
 
-- category: Statistics & EDA
+- category: Data & Cloud
   skills:
-    - Univariate Analysis
-    - Bivariate Analysis
-    - Multivariate Analysis
-    - Hypothesis Testing
-    - Feature Engineering
-  proficiency: advanced
-
-- category: Data Engineering Tools
-  skills:
+    - ETL Pipelines
+    - Databricks
+    - Azure
+    - AWS
     - MySQL
-    - SSMS
-    - DataBricks
-    - Azure Data Factory
-    - SAP 4HANA
+    - SQL Server
+    - MongoDB
+    - Neo4js
   proficiency: advanced
 
-- category: Cloud Platforms
-  skills: [AWS, Azure]
-  proficiency: intermediate
-
-- category: Visualization Tools
-  skills: [Power BI, Tableau, Microsoft Excel, Microsoft PowerPoint]
+- category: Visualization & BI
+  skills: [Power BI, Tableau, Excel]
   proficiency: advanced
 
-- category: Development Environment
+- category: Tools
   skills:
-    - GitHub
+    - Git/GitHub
     - VS Code
-    - Anaconda Jupyter Notebooks
+    - Jupyter
+    - Streamlit
     - Google Colab
-    - MS Office
   proficiency: advanced

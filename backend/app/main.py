@@ -44,17 +44,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         collection_name="knowledge",
     )
 
-    if store.count() == 0:
-        await logger.ainfo("Knowledge base empty, ingesting documents")
-        knowledge_dir = Path(__file__).parent.parent / "knowledge"
-        docs = load_all_knowledge(knowledge_dir)
-        if docs:
-            texts = [d.text for d in docs]
-            embeddings = await embedding_service.embed_texts(texts)
-            for doc, emb in zip(docs, embeddings, strict=True):
-                doc.embedding = emb
-            store.add_documents(docs)
-            await logger.ainfo("Ingested documents", count=len(docs))
+    store.reset()
+    await logger.ainfo("Knowledge base reset, ingesting documents")
+    knowledge_dir = Path(__file__).parent.parent / "knowledge"
+    docs = load_all_knowledge(knowledge_dir)
+    if docs:
+        texts = [d.text for d in docs]
+        embeddings = await embedding_service.embed_texts(texts)
+        for doc, emb in zip(docs, embeddings, strict=True):
+            doc.embedding = emb
+        store.add_documents(docs)
+        await logger.ainfo("Ingested documents", count=len(docs))
 
     retriever = Retriever(
         store=store,
