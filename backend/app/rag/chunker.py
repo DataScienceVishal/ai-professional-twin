@@ -142,6 +142,41 @@ def chunk_yaml_file(path: Path, file_type: str) -> list[Document]:
     return chunker(data)
 
 
+def chunk_github_repos(repos: list[dict], readmes: dict[str, str] | None = None) -> list[Document]:
+    docs: list[Document] = []
+    readmes = readmes or {}
+    for repo in repos:
+        name = repo["name"]
+        parts = [f"GitHub Repository: {name}"]
+        if repo.get("description"):
+            parts.append(f"Description: {repo['description']}")
+        if repo.get("language"):
+            parts.append(f"Primary Language: {repo['language']}")
+        if repo.get("topics"):
+            parts.append(f"Topics: {', '.join(repo['topics'])}")
+        parts.append(f"URL: {repo['html_url']}")
+        if repo.get("stargazers_count"):
+            parts.append(f"Stars: {repo['stargazers_count']}")
+        readme = readmes.get(name, "")
+        if readme:
+            trimmed = readme[:2000]
+            parts.append(f"README:\n{trimmed}")
+        slug = name.lower().replace(" ", "-")
+        docs.append(
+            Document(
+                id=f"github-repo-{slug}",
+                text="\n".join(parts),
+                metadata={
+                    "source": "github",
+                    "name": name,
+                    "github_url": repo.get("html_url", ""),
+                    "language": repo.get("language", ""),
+                },
+            )
+        )
+    return docs
+
+
 def load_all_knowledge(knowledge_dir: Path) -> list[Document]:
     docs: list[Document] = []
     yaml_files = {

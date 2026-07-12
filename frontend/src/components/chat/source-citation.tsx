@@ -11,6 +11,7 @@ const SOURCE_LABELS: Record<string, string> = {
   certificates: 'Certificate',
   linkedin: 'LinkedIn Profile',
   resume: 'Resume',
+  github: 'GitHub Repo',
 }
 
 export function SourceCitation({ source }: SourceCitationProps) {

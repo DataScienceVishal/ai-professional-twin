@@ -14,7 +14,8 @@ from starlette.responses import JSONResponse
 
 from app.config import get_settings
 from app.logging_config import setup_logging
-from app.rag.chunker import load_all_knowledge
+from app.rag.chunker import chunk_github_repos, load_all_knowledge
+from app.services.github_api import GitHubAPIService
 from app.rag.embeddings import EmbeddingService
 from app.rag.retriever import Retriever
 from app.rag.store import ChromaStore
@@ -55,6 +56,30 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
             doc.embedding = emb
         store.add_documents(docs)
         await logger.ainfo("Ingested documents", count=len(docs))
+
+    github_service = GitHubAPIService(
+        token=settings.github_token,
+        username=settings.github_username,
+    )
+    repos = await github_service.fetch_repos(per_page=30)
+    if repos:
+        readmes: dict[str, str] = {}
+        for repo in repos:
+            readme = await github_service.fetch_readme(repo["name"])
+            if readme:
+                readmes[repo["name"]] = readme
+        github_docs = chunk_github_repos(repos, readmes)
+        if github_docs:
+            gh_texts = [d.text for d in github_docs]
+            gh_embeddings = await embedding_service.embed_texts(gh_texts)
+            for doc, emb in zip(github_docs, gh_embeddings, strict=True):
+                doc.embedding = emb
+            store.add_documents(github_docs)
+            await logger.ainfo(
+                "Ingested GitHub repos",
+                count=len(github_docs),
+                with_readme=len(readmes),
+            )
 
     retriever = Retriever(
         store=store,
