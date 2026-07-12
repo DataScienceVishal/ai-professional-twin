@@ -9,6 +9,7 @@ import type { Message as MessageType } from '../../lib/types'
 
 interface MessageProps {
   message: MessageType
+  isStreaming?: boolean
 }
 
 function extractMermaid(children: ReactNode): string | null {
@@ -22,7 +23,7 @@ function extractMermaid(children: ReactNode): string | null {
   return null
 }
 
-export function Message({ message }: MessageProps) {
+export function Message({ message, isStreaming = false }: MessageProps) {
   const isUser = message.role === 'user'
 
   return (
@@ -48,6 +49,7 @@ export function Message({ message }: MessageProps) {
               rehypePlugins={[rehypeHighlight]}
               components={{
                 pre({ children }) {
+                  if (isStreaming) return <pre>{children}</pre>
                   const mermaidCode = extractMermaid(children)
                   if (mermaidCode) return <MermaidBlock code={mermaidCode} />
                   return <pre>{children}</pre>
