@@ -1,3 +1,4 @@
+import { isValidElement, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
@@ -8,6 +9,17 @@ import type { Message as MessageType } from '../../lib/types'
 
 interface MessageProps {
   message: MessageType
+}
+
+function extractMermaid(children: ReactNode): string | null {
+  const child = Array.isArray(children) ? children[0] : children
+  if (!isValidElement(child)) return null
+  const props = child.props as { className?: string; children?: ReactNode }
+  const className = props.className || ''
+  if (/language-mermaid/.test(className)) {
+    return String(props.children || '').trim()
+  }
+  return null
 }
 
 export function Message({ message }: MessageProps) {
@@ -35,15 +47,10 @@ export function Message({ message }: MessageProps) {
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
               components={{
-                code({ className, children, ...props }) {
-                  const match = /language-mermaid/.exec(className || '')
-                  if (match) {
-                    return <MermaidBlock code={String(children).trim()} />
-                  }
-                  return <code className={className} {...props}>{children}</code>
-                },
                 pre({ children }) {
-                  return <>{children}</>
+                  const mermaidCode = extractMermaid(children)
+                  if (mermaidCode) return <MermaidBlock code={mermaidCode} />
+                  return <pre>{children}</pre>
                 },
               }}
             >
