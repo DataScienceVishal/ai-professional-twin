@@ -17,7 +17,7 @@ export function Sidebar({ mode, onModeChange, onClear }: SidebarProps) {
         <img
           src={PROFILE.avatarUrl}
           alt={PROFILE.name}
-          className="w-20 h-20 rounded-full border-2 border-accent-cyan/30 shadow-lg shadow-accent-cyan/5"
+          className="w-28 h-28 rounded-full border-2 border-accent-cyan/30 shadow-lg shadow-accent-cyan/5"
         />
         <div className="text-center">
           <h2 className="font-semibold text-text-primary">{PROFILE.name}</h2>
