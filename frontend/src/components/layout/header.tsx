@@ -26,7 +26,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
             onClick={() => onModeChange(m)}
             className={`px-2 py-1 text-xs rounded-md transition-colors ${
               mode === m
-                ? 'bg-accent-cyan text-bg-primary'
+                ? 'bg-accent-cyan text-white'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >

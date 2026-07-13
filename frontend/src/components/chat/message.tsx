@@ -43,7 +43,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
         {isUser ? (
           <p className="text-sm">{message.content}</p>
         ) : (
-          <div className="prose prose-invert prose-sm max-w-none">
+          <div className="prose prose-sm max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight]}
