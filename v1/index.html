@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: 'unsafe-inline'; script-src 'self' https: 'unsafe-inline' 'unsafe-eval';">
+    <title>Vishal Khan - AI Twin Executive Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f3f5f9;
+            --surface-color: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --primary: #4f72aa;
+            --primary-light: #eef2f7;
+            --accent: #2ecc71;
+            --border-color: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        /* Fixed viewport calculation utilizing Dynamic Viewport Height (dvh) */
+        html, body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            display: flex; 
+            height: 100vh; 
+            height: 100dvh; 
+            width: 100vw;
+            overflow: hidden; 
+        }
+
+        /* Desktop Sidebar Styles */
+        .sidebar {
+            width: 340px;
+            background: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .profile-container { position: relative; margin-bottom: 24px; }
+        .profile-pic {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid var(--surface-color);
+            box-shadow: 0 10px 25px rgba(79, 114, 170, 0.25);
+            object-fit: cover;
+        }
+        .badge {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            background: var(--accent);
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid var(--surface-color);
+        }
+        
+        .name { font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+        .tagline { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.4; }
+        .links-container { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .btn-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: var(--primary-light);
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Chat Layout Structure */
+        .chat-container { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            min-width: 0;
+            height: 100%; 
+            background: #f8fafc; 
+            overflow: hidden; 
+        }
+        .chat-header {
+            padding: 20px 40px;
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .chat-title-main { font-size: 18px; font-weight: 700; color: #1e293b; }
+        
+        /* Message Area with explicit overflow containment */
+        .chat-messages { 
+            flex: 1; 
+            padding: 40px; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 24px; 
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .message { max-width: 75%; padding: 16px 20px; border-radius: 16px; font-size: 15px; line-height: 1.6; box-shadow: 0 2px 12px rgba(0,0,0,0.02); word-wrap: break-word; }
+        .message.assistant { background: var(--surface-color); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
+        .message.user { background: #343a40; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+
+        .typing-indicator { display: flex; gap: 4px; padding: 4px 0; }
+        .typing-dot { width: 8px; height: 8px; background: var(--text-muted); border-radius: 50%; animation: wave 1.3s infinite ease-in-out; }
+        @keyframes wave { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+        .suggestions-wrapper { padding: 0 40px; margin-bottom: 12px; flex-shrink: 0; }
+        .suggestions-title { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .suggestions-box { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+        .suggestions-box::-webkit-scrollbar { display: none; }
+        
+        .suggestion-chip {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Fixed Footer Inputs wrapper containing layout controls */
+        .chat-input-area { 
+            padding: 16px 40px 16px 40px; 
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            background: var(--surface-color); 
+            border-top: 1px solid var(--border-color); 
+            flex-shrink: 0;
+        }
+        .input-row {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+        .chat-input { flex: 1; padding: 14px 20px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; outline: none; background: #f8fafc; }
+        .btn-send { padding: 0 24px; background: #1e293b; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        .disclaimer-text { font-size: 11px; color: #8a8a8a; text-align: center; font-family: sans-serif; margin-top: 2px; }
+
+        .message.assistant ul, .message.assistant ol { margin-left: 20px; margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+        .message.assistant p { margin-bottom: 8px; }
+        .message.assistant p:last-child { margin-bottom: 0; }
+
+        /* 📱 EXPLICIT RESPONSIVE FIXES FOR MOBILE VIEWPORTS */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            
+            /* Highly Condensed Mobile Profile Bar */
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                padding: 12px 16px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                gap: 12px;
+                text-align: left;
+            }
+            .profile-container { margin-bottom: 0; }
+            .profile-pic { width: 44px; height: 44px; border-width: 2px; }
+            .badge { width: 10px; height: 10px; bottom: 2px; right: 2px; border-width: 1.5px; }
+            
+            .sidebar-text-group { display: flex; flex-direction: column; }
+            .name { font-size: 16px; margin-bottom: 2px; }
+            .tagline { font-size: 12px; margin-bottom: 0; }
+            .links-container { display: none; }
+
+            /* Re-calibrated Streaming Chat Section bounding limits */
+            .chat-header { padding: 10px 16px; }
+            .chat-title-main { font-size: 14px; }
+            .chat-messages { padding: 16px; gap: 16px; }
+            .message { max-width: 88%; padding: 12px 14px; font-size: 14px; }
+            
+            .suggestions-wrapper { padding: 0 16px; margin-bottom: 8px; }
+            .chat-input-area { padding: 12px 16px 16px 16px; }
+            .chat-input { padding: 10px 14px; font-size: 14px; }
+            .btn-send { padding: 0 16px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="profile-container">
+            <img src="https://github.com/DataScienceVishal.png" class="profile-pic" alt="Vishal Khan">
+            <div class="badge"></div>
+        </div>
+        <div class="sidebar-text-group">
+            <div class="name">Vishal Khan</div>
+            <div class="tagline">Data Engineer & AI Researcher • 📍 London, UK</div>
+        </div>
+        <div class="links-container">
+            <a href="https://linkedin.com/in/vishalkhandatascience" target="_blank" class="btn-link">🌐 LinkedIn</a>
+            <a href="https://github.com/DataScienceVishal" target="_blank" class="btn-link">💻 GitHub</a>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-title-main">🤖 AI Executive Assistant (Digital Twin)</div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">Hello! Welcome to my digital portfolio space. I am Vishal's AI Digital Twin, trained to provide comprehensive insights into my technical experience, academic research at Northeastern University London, and architectural proficiency. How can I support your search today?</div>
+        </div>
+
+        <div class="suggestions-wrapper">
+            <div class="suggestions-title">💡 Select an inquiry thread</div>
+            <div class="suggestions-box" id="suggestionsBox"></div>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="input-row">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask a question about my background...">
+                <button class="btn-send" id="btnSend">Send</button>
+            </div>
+            <!-- Secure Nested Disclaimer UI Element -->
+            <p class="disclaimer-text">🤖 Vishal's Digital Twin can make mistakes. Please verify critical background milestones independently via LinkedIn.</p>
+        </div>
+    </div>
+
+    <script>
+        const queryPool = [
+            "Why did you choose to move to the UK?",
+            "What drove your transition from Finance to AI?",
+            "Why pursue a second Master's degree in London?",
+            "What are your 2026 career goals?",
+            "Describe your impact at Teleperformance",
+            "What is your experience with Azure?",
+            "Show me your technical skills",
+            "How can I schedule an interview?",
+            "What are you researching at Northeastern?",
+            "How have you used Databricks in projects?",
+            "Tell me about your SQL background",
+            "Tell me about your Reinforcement Learning MSc thesis",
+            "What is your UK work authorization status?"
+        ];
+
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const btnSend = document.getElementById('btnSend');
+        const suggestionsBox = document.getElementById('suggestionsBox');
+
+        let chatContextHistory = [
+            {
+                role: "system",
+                content: `You are the AI Digital Twin of Vishal Khan, a professional Data Engineer & AI Researcher based in London, UK. You must speak in the FIRST PERSON ('I', 'me', 'my') as if you are Vishal himself. Never refer to Vishal in the third person ('he', 'his', 'Vishal'). 
+                Keep responses highly professional, technically precise, conversational, and tailored for technical recruiters.
+                Answer queries naturally in a polished, conversational, yet professional tone.
+
+                CRITICAL LAYOUT STRUCTURING RULES:
+                - Use adaptive formatting based on the intent of the question. Do NOT use the exact same layout for every response.
+                - Only generate a Table if the user explicitly asks for a matrix, summary table, or comparison. Otherwise, omit tables.
+                - For personal, backstory, or conversational questions (e.g., "Why did you come to the UK?"), answer with clean, direct, and engaging paragraphs.
+                - For objective listings (e.g., "What are your skills?"), use bullet points or bold inline terms to maximize scannability.
+                - Avoid structural repetition; let the response flow naturally like a real human assistant writing a message.
+
+                =========================================
+                OFFICIAL CV BACKGROUND DATA:
+                =========================================
+                # Vishal Khan
+                London, UK | +44 7721551497 | vishalkhan251@gmail.com
+                LinkedIn: https://www.linkedin.com/in/vishalkhandatascience/
+                GitHub: https://github.com/DataScienceVishal
+
+                ## Profile Summary
+                MSc student in AI & Computer Science at Northeastern University London, with a prior MSc in Data Science from LJMU. Around 2 years as a Data Engineer at Teleperformance plus 2+ years translating commercial requirements into analytics and ML forecasting models. Comfortable across the full analytics chain, framing problems, building models in Python, and shipping end-to-end applications. MSc thesis compared DQN, A2C, and PPO for dynamic pricing in e-commerce.
+
+                ## Core Tools & Skills Matrix
+                - Programming: Python, SQL, R, HTML, CSS, JScript, Svelte
+                - Machine Learning: Reinforcement Learning, Deep Learning, Classification, Regression, Time-Series Forecasting, NLP, Feature Engineering, Model Evaluation
+                - Generative AI: LLMs, RAG, Prompt Engineering, LangChain, FAISS, HuggingFace API, LiteLLM, Transformer Models
+                - Libraries: PyTorch, TensorFlow, Keras, Scikit-learn, Pandas, NumPy, Statsmodels, Matplotlib, Seaborn, Plotly, OpenAI
+                - Data & Cloud: ETL Pipelines, Databricks, Azure, AWS, MySQL, SQL Server, MongoDB, Neo4js
+                - Viz & BI: Power BI, Tableau, Excel
+                - Tooling Ecosystem: Git/GitHub, VS Code, Jupyter, Streamlit, Google Colab
+
+                ## Professional Experience
+                ### Teleperformance Global Business Pvt. Ltd. — Data Engineer (June 2024 – Jan 2026)
+                - Built and maintained Databricks pipelines processing millions of telecom records (CDRs, billing, agent performance), feeding a data engineering team of 50+ across multiple regions.
+                - Migrated on-prem SQL Server schemas to Databricks, improving query performance by ~20% and cutting infrastructure costs by ~20%.
+                - Partnered with analytics and reporting stakeholders to translate ambiguous business questions into pipeline requirements, surfacing data they could actually use for decisions.
+
+                ### Avant Garde Clean Room & Engg. Solutions Pvt. Ltd. — Commercial Executive (Aug 2021 – Dec 2023)
+                - Built ML sales forecasting models reaching 80–90% accuracy on monthly revenue projections, used daily by the business for commercial planning.
+                - Translated commercial questions into analytical workflows in Python and SQL, turning ad-hoc requests into recurring reports the team relied on.
+                - Rebuilt revenue and collections reporting in advanced Excel (formulas, macros, VBA), cutting monthly reporting time from ~2 hours to ~30 minutes.
+
+                ## Academic Background
+                - M.Sc. in AI and CS | Northeastern University London, UK (Jan 2026 – Jan 2027)
+                - M.Sc. in Data Science | Liverpool John Moores University, UK (Mar 2023 – Mar 2024)
+                - Executive PG Program in Data Science | IIIT Bangalore, India (Jan 2022 – Jan 2023)
+                - Bachelor of Commerce | University of Delhi (Nov 2018 – Nov 2021)
+
+                ## Dedicated Technical Projects
+                ### AI Digital Twin & Interactive Portfolio (Generative AI)
+                - Approach: Built a RAG pipeline using LangChain, FAISS, and Gemini 2.0 Flash, with GitHub API integration for live data, served through a custom Streamlit UI. Deployed custom UI with dynamic "Slot-Refill" inquiry pills for high recruiter engagement.
+                ### Image Classification (Deep Learning)
+                - Approach: Designed a CNN in TensorFlow/Keras with normalization, dropout, and L2 regularization to enhance accuracy and generalization on the CIFAR-10 dataset. Achieved a training accuracy of 72.12% and validation accuracy of 74.06%.
+                ### Telecom Churn Prediction (Machine Learning)
+                - Approach: Run EDA, preprocessing, and feature engineering in Python/SQL, then benchmarked classification models including Logistic Regression. Achieved ~80% accuracy and identified tenure as the strongest churn predictor.
+
+                ## Core Research Works
+                ### MSc Thesis: Reinforcement Learning for Dynamic Pricing in E-commerce (LJMU, 2024)
+                - Objective: Test whether RL can outperform pricing rules in a simulated e-commerce environment.
+                - Approach: Built a custom Gym-style environment on real e-commerce data, then trained DQN, A2C, and PPO agents over multi-episode simulations.
+                - Result: DQN produced the most stable profit curve. Wrote up the comparative analysis as part of the dissertation.
+
+                =========================================
+                STRATEGIC PERSONAL NARRATIVE ANSWERS:
+                =========================================
+                1. Why did you choose to move to the UK?
+                - Coming abroad for advanced global academic pursuits has always been a lifetime goal. Moving to the UK allowed me to match my technical passions with an environment at the forefront of AI research and engineering innovation.
+
+                2. What drove your transition from Finance to AI/Data Engineering?
+                - I started my career parsing operational datasets in advanced corporate environments utilizing Excel, analysis configurations, and macro projections. My natural curiosity about "what comes next" beyond tabular reporting led me to research advanced technical domains. This drove me to learn Python and SQL, which quickly turned into a passionate technical pursuit. I structured this transition intentionally by securing an Executive PG Program in Data Science from IIITB, followed by an MSc in Data Science, evolving into a cloud data pipeline engineer.
+
+                3. Why pursue a second Master's degree in London (Northeastern London)?
+                - To build a robust foundation, my first Master's degree (from LJMU) was completed remotely while engineering production workflows. Eager for an immersive, on-campus collaborative academic experience, I sought a top-tier physical setting in London. Intellectually, I asked myself "what's next after pure data science?" This curiosity drove me straight into specialized core AI infrastructures and computing systems, leading to my enrollment at Northeastern University London.
+                =========================================
+
+                Keep your outputs concise, organic, adaptive, and completely tethered to these real records.`
+            }
+        ];
+
+        function renderPills() {
+            suggestionsBox.innerHTML = '';
+            const shuffled = [...queryPool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            shuffled.forEach(text => {
+                const chip = document.createElement('div');
+                chip.className = 'suggestion-chip';
+                chip.innerText = text;
+                chip.onclick = () => { handleInquiry(text); };
+                suggestionsBox.appendChild(chip);
+            });
+        }
+
+        function appendMessage(role, text) {
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+            
+            if (role === 'assistant') {
+                try {
+                    // Safe execution fallback check
+                    msg.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
+                } catch (e) {
+                    console.warn("Markdown engine blocked, falling back to clean text formatting.", e);
+                    msg.innerText = text;
+                }
+            } else {
+                msg.innerText = text;
+            }
+            
+            chatMessages.appendChild(msg);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return msg;
+        }
+
+        function appendTypingIndicator() {
+            const indicator = document.createElement('div');
+            indicator.className = 'message assistant';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `<div class="typing-indicator"><div class="typing-dot" style="animation-delay:0s"></div><div class="typing-dot" style="animation-delay:0.15s"></div><div class="typing-dot" style="animation-delay:0.3s"></div></div>`;
+            chatMessages.appendChild(indicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const ind = document.getElementById('typingIndicator');
+            if (ind) ind.remove();
+        }
+
+        function streamOutputText(element, rawText, processingCompleteCallback) {
+            let currentIndex = 0;
+            element.innerHTML = "";
+            const intervalSpeed = rawText.length > 300 ? 4 : 10;
+
+            const streamTimer = setInterval(() => {
+                if (currentIndex <= rawText.length) {
+                    const currentChunk = rawText.substring(0, currentIndex);
+                    try {
+                        element.innerHTML = typeof marked !== 'undefined' ? marked.parse(currentChunk) : currentChunk;
+                    } catch(e) {
+                        element.innerText = currentChunk;
+                    }
+                    currentIndex += 3;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                } else {
+                    clearInterval(streamTimer);
+                    try {
+                        element.innerHTML = typeof marked !== 'undefined' ? marked.parse(rawText) : rawText;
+                    } catch(e) {
+                        element.innerText = rawText;
+                    }
+                    if(processingCompleteCallback) processingCompleteCallback();
+                }
+            }, intervalSpeed);
+        }
+
+        const PROXY_URL = "/api";
+
+        async function handleInquiry(userText) {
+            appendMessage('user', userText);
+            chatContextHistory.push({ role: "user", content: userText });
+            appendTypingIndicator();
+            
+            try {
+                const response = await fetch(PROXY_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ messages: chatContextHistory })
+                });
+
+                if (!response.ok) throw new Error("API Gateway issue.");
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                const modelReply = data.choices[0].message.content;
+                const activeResponseBox = appendMessage('assistant', "");
+                
+                streamOutputText(activeResponseBox, modelReply, () => {
+                    chatContextHistory.push({ role: "assistant", content: modelReply });
+                });
+
+            } catch (error) {
+                console.error(error);
+                removeTypingIndicator();
+                appendMessage('assistant', "I'm experiencing a brief connection issue. Please connect with me via LinkedIn or email at vishalkhan251@gmail.com!");
+            }
+            renderPills();
+        }
+
+        function processCustomInput() {
+            const inputFieldText = chatInput.value.trim();
+            if (!inputFieldText) return;
+            chatInput.value = '';
+            handleInquiry(inputFieldText);
+        }
+
+        btnSend.onclick = processCustomInput;
+        chatInput.onkeypress = (e) => { if (e.key === 'Enter') processCustomInput(); };
+        renderPills();
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
