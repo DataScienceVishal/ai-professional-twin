@@ -1,10 +1,13 @@
 import json
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from openai import AsyncOpenAI
 
 from app.tools import ToolRegistry
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionMessageParam
 
 MAX_TOOL_CALLS = 3
 TOOL_RESULT_SUMMARY_LIMIT = 200
@@ -20,9 +23,13 @@ class LLMService:
         system_prompt: str,
         messages: list[dict[str, str]],
     ) -> str:
+        all_messages = cast(
+            "list[ChatCompletionMessageParam]",
+            [{"role": "system", "content": system_prompt}, *messages],
+        )
         response = await self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "system", "content": system_prompt}, *messages],
+            messages=all_messages,
             temperature=0.3,
         )
         return response.choices[0].message.content or ""
@@ -32,9 +39,13 @@ class LLMService:
         system_prompt: str,
         messages: list[dict[str, str]],
     ) -> AsyncGenerator[str]:
+        all_messages = cast(
+            "list[ChatCompletionMessageParam]",
+            [{"role": "system", "content": system_prompt}, *messages],
+        )
         response = await self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "system", "content": system_prompt}, *messages],
+            messages=all_messages,
             temperature=0.3,
             stream=True,
         )

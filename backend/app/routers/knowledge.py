@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import yaml
 from fastapi import APIRouter, HTTPException
@@ -11,7 +12,7 @@ router = APIRouter()
 KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
 
 
-def _load_yaml(filename: str) -> list | dict:
+def _load_yaml(filename: str) -> Any:
     path = KNOWLEDGE_DIR / filename
     if not path.exists():
         return []

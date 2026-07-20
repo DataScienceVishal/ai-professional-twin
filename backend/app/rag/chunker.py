@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 import yaml
 from pypdf import PdfReader
@@ -6,7 +7,7 @@ from pypdf import PdfReader
 from app.rag.store import Document
 
 
-def chunk_projects(projects: list[dict]) -> list[Document]:
+def chunk_projects(projects: list[dict[str, Any]]) -> list[Document]:
     docs: list[Document] = []
     for p in projects:
         tech = ", ".join(p.get("tech_stack", []))
@@ -34,7 +35,7 @@ def chunk_projects(projects: list[dict]) -> list[Document]:
     return docs
 
 
-def chunk_skills(skills: list[dict]) -> list[Document]:
+def chunk_skills(skills: list[dict[str, Any]]) -> list[Document]:
     docs: list[Document] = []
     for i, cat in enumerate(skills):
         skill_list = ", ".join(cat["skills"])
@@ -56,7 +57,7 @@ def chunk_skills(skills: list[dict]) -> list[Document]:
     return docs
 
 
-def chunk_career_qa(qa_pairs: list[dict]) -> list[Document]:
+def chunk_career_qa(qa_pairs: list[dict[str, Any]]) -> list[Document]:
     docs: list[Document] = []
     for i, qa in enumerate(qa_pairs):
         topic = qa.get("topic", "general")
@@ -71,7 +72,7 @@ def chunk_career_qa(qa_pairs: list[dict]) -> list[Document]:
     return docs
 
 
-def chunk_certificates(certs: list[dict]) -> list[Document]:
+def chunk_certificates(certs: list[dict[str, Any]]) -> list[Document]:
     docs: list[Document] = []
     for i, cert in enumerate(certs):
         text = f"Certificate: {cert['name']}\nIssuer: {cert['issuer']}\nDate: {cert['date']}\n"
@@ -86,7 +87,7 @@ def chunk_certificates(certs: list[dict]) -> list[Document]:
     return docs
 
 
-def chunk_linkedin(data: dict) -> list[Document]:
+def chunk_linkedin(data: dict[str, Any]) -> list[Document]:
     parts = [
         f"LinkedIn Profile: {data.get('headline', '')}",
         f"Location: {data.get('location', '')}",
@@ -142,7 +143,9 @@ def chunk_yaml_file(path: Path, file_type: str) -> list[Document]:
     return chunker(data)
 
 
-def chunk_github_repos(repos: list[dict], readmes: dict[str, str] | None = None) -> list[Document]:
+def chunk_github_repos(
+    repos: list[dict[str, Any]], readmes: dict[str, str] | None = None
+) -> list[Document]:
     docs: list[Document] = []
     readmes = readmes or {}
     for repo in repos:

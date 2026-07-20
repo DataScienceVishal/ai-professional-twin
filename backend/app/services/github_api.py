@@ -1,3 +1,5 @@
+from typing import Any
+
 import httpx
 import structlog
 
@@ -10,7 +12,7 @@ class GitHubAPIService:
         self.username = username
         self.base_url = "https://api.github.com"
 
-    async def fetch_repos(self, per_page: int = 10) -> list[dict]:
+    async def fetch_repos(self, per_page: int = 10) -> list[dict[str, Any]]:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(

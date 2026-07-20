@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 import chromadb
 
@@ -34,7 +35,7 @@ class ChromaStore:
             ids=[d.id for d in documents],
             documents=[d.text for d in documents],
             metadatas=[d.metadata for d in documents],
-            embeddings=[d.embedding for d in documents] if documents[0].embedding else None,
+            embeddings=[d.embedding for d in documents] if documents[0].embedding else None,  # type: ignore[arg-type]
         )
 
     def query(
@@ -43,7 +44,7 @@ class ChromaStore:
         n_results: int = 5,
         where: dict[str, str] | None = None,
     ) -> list[SearchResult]:
-        kwargs: dict = {"query_embeddings": [query_embedding], "n_results": n_results}
+        kwargs: dict[str, Any] = {"query_embeddings": [query_embedding], "n_results": n_results}
         if where:
             kwargs["where"] = where
         results = self.collection.query(**kwargs)
@@ -54,7 +55,7 @@ class ChromaStore:
                     SearchResult(
                         id=doc_id,
                         text=results["documents"][0][i] if results["documents"] else "",
-                        metadata=results["metadatas"][0][i] if results["metadatas"] else {},
+                        metadata=dict(results["metadatas"][0][i]) if results["metadatas"] else {},  # type: ignore[arg-type]
                         distance=results["distances"][0][i] if results["distances"] else 0.0,
                     )
                 )
