@@ -13,7 +13,7 @@ def create_github_tools(
     async def _get_repos() -> list[dict]:
         nonlocal cached_repos
         if not cached_repos:
-            cached_repos = await github_service.fetch_repos(per_page=30)
+            cached_repos = await github_service.fetch_repos(per_page=100)
         return cached_repos
 
     async def search_repos(query: str, language: str = "") -> str:

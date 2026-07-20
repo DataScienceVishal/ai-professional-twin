@@ -65,7 +65,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         token=settings.github_token,
         username=settings.github_username,
     )
-    repos = await github_service.fetch_repos(per_page=30)
+    repos = await github_service.fetch_repos(per_page=100)
     if repos:
         readmes: dict[str, str] = {}
         for repo in repos:
