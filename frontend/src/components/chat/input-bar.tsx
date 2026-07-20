@@ -25,8 +25,7 @@ export function InputBar({ onSend, disabled }: InputBarProps) {
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Ask me anything about Vishal..."
-        disabled={disabled}
+        placeholder={disabled ? 'Thinking...' : 'Ask me anything about Vishal...'}
         autoFocus
         className="flex-1 rounded-lg bg-bg-card border border-border px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
       />
