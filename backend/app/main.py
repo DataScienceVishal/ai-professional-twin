@@ -22,6 +22,10 @@ from app.rag.store import ChromaStore
 from app.routers import chat, health, knowledge
 from app.routers.chat import init_chat_dependencies
 from app.services.llm import LLMService
+from app.tools import ToolRegistry
+from app.tools.action_tools import create_action_tools
+from app.tools.github_tools import create_github_tools
+from app.tools.portfolio_tools import create_portfolio_tools
 
 limiter = Limiter(key_func=get_remote_address, default_limits=["30/minute"])
 
@@ -92,7 +96,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         model=settings.llm_model,
     )
 
-    init_chat_dependencies(retriever=retriever, llm_service=llm_service)
+    api_base_url = settings.cors_origins[0] if settings.cors_origins else ""
+    registry = ToolRegistry()
+    for name, func in create_github_tools(github_service).items():
+        registry.register(name, func)
+    for name, func in create_portfolio_tools(knowledge_dir).items():
+        registry.register(name, func)
+    for name, func in create_action_tools(api_base_url).items():
+        registry.register(name, func)
+    await logger.ainfo("Registered tools", count=len(registry.tools))
+
+    init_chat_dependencies(
+        retriever=retriever, llm_service=llm_service, tool_registry=registry
+    )
 
     yield
 
@@ -104,7 +120,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="AI Professional Twin",
-        version="0.2.0",
+        version="0.3.0",
         lifespan=lifespan,
     )
 
