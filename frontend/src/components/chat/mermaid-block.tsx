@@ -58,7 +58,7 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
 
   if (error) {
     return (
-      <pre className="rounded-lg bg-bg-primary border border-border p-3 text-xs text-text-secondary overflow-x-auto">
+      <pre className="rounded-lg bg-bg-secondary border border-border p-3 text-xs text-text-secondary overflow-x-auto whitespace-pre-wrap">
         <code>{code}</code>
       </pre>
     )
