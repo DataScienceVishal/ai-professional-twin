@@ -48,7 +48,7 @@ def create_github_tools(
                         "stars": repo.get("stargazers_count", 0),
                     }
                 )
-        return json.dumps({"repos": matches[:10]})
+        return json.dumps({"total_matching": len(matches), "repos": matches[:10]})
 
     async def get_repo_stats(repo_name: str) -> str:
         repos = await _get_repos()
