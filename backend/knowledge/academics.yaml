@@ -1,0 +1,182 @@
+- institution: Northeastern University London
+  degree: MSc Artificial Intelligence & Computer Science
+  location: London, United Kingdom
+  dates: January 2026 - January 2027
+  status: Currently enrolled
+  mode: Full-time, On Ground
+  scholarship: >
+    Awarded NU London Scholarship (GBP 6,900) and Early Acceptance Funding
+    (GBP 1,000), totalling GBP 7,900 in tuition scholarship funding.
+  highlights:
+    - Part of Northeastern University's Global Campus Network
+    - Campus overlooks the River Thames and Tower Bridge
+    - Ran for Academic Officer in student elections
+  key_topics:
+    - Artificial Intelligence
+    - Computer Science
+    - Machine Learning
+    - Programming Design Paradigms
+
+- institution: Liverpool John Moores University (LJMU)
+  degree: MSc Data Science
+  location: United Kingdom (via UpGrad)
+  dates: March 2023 - August 2024
+  status: Completed
+  result: Pass (Award Mark 58)
+  level: FHEQ Level 7
+  total_credits: 180
+  modules:
+    - name: Year M 110 Credits
+      credits: 110
+      grade: Pass
+      note: Credit from International Institute of Information Technology (RPL)
+    - name: Research Methods
+      credits: 10
+      mark: 61
+      grade: Pass
+    - name: Project Dissertation
+      credits: 60
+      mark: 58
+      grade: Pass
+  thesis:
+    title: Reinforcement Learning for Dynamic Pricing in E-commerce
+    description: >
+      Compared reinforcement learning approaches for dynamic pricing strategies
+      in e-commerce environments. Explored how RL agents can learn optimal
+      pricing policies that maximize revenue while adapting to changing market
+      conditions.
+
+- institution: International Institute of Information Technology Bangalore (IIIT-B)
+  degree: Executive Post Graduate Programme in Data Science
+  location: Bangalore, India
+  dates: March 2022 - April 2023
+  status: Completed
+  specialization: Deep Learning
+  result: "CGPA 3.64 / 4.00"
+  modules:
+    - name: Data Toolkit
+      code: EPGDS 110
+      credits: 8
+      grade: A-
+      grade_point: 3.70
+      topics:
+        - Python programming
+        - NumPy and Pandas
+        - SQL and Advanced SQL
+        - Data visualization
+        - Exploratory Data Analysis (EDA)
+        - Inferential statistics
+        - Hypothesis testing
+    - name: Machine Learning 1
+      code: EPGDS 107
+      credits: 7
+      grade: A-
+      grade_point: 3.70
+      topics:
+        - Linear regression
+        - Logistic regression
+        - Unsupervised learning and clustering
+        - Business problem solving
+        - Basics of NLP
+    - name: Machine Learning 2
+      code: EPGDS 108
+      credits: 7
+      grade: B+
+      grade_point: 3.40
+      topics:
+        - Decision trees
+        - Random forests
+        - Ensemble methods
+    - name: Deep Learning
+      code: EPGDS 213
+      credits: 7
+      grade: B+
+      grade_point: 3.40
+      topics:
+        - Neural networks
+        - Convolutional Neural Networks (CNNs)
+        - Image classification
+    - name: Capstone Project
+      code: EPGDS 301
+      credits: 7
+      grade: A
+      grade_point: 4.00
+
+- institution: University of Delhi - School of Open Learning
+  degree: Bachelor of Commerce (B.Com.)
+  location: Delhi, India
+  dates: November 2018 - November 2021
+  status: Completed
+  result: "1st Division (910/1350 - 67.4%)"
+  modules:
+    - name: Financial Accounting
+      marks: "55/75"
+    - name: Business Organisation & Management
+      marks: "37/75"
+    - name: Business & Industrial Law
+      marks: "44/75"
+    - name: Economics I - Principles of Economics
+      marks: "47/100"
+    - name: Hindi - A
+      marks: "44/100"
+    - name: Business Mathematics & Statistics
+      marks: "65/75"
+    - name: Corporate Accounting
+      marks: "66/75"
+    - name: Company & Compensation Laws
+      marks: "49/75"
+    - name: Income Tax & Auditing
+      marks: "65/75"
+    - name: Economics II - Macro Economics
+      marks: "50/100"
+    - name: English
+      marks: "58/100"
+    - name: Cost Accounting
+      marks: "62/75"
+    - name: Computer Application in Business
+      marks: "59/75"
+    - name: Economics III - Economic Development and Policy
+      marks: "77/100"
+    - name: Business English
+      marks: "73/100"
+    - name: Financial Management
+      marks: "59/75"
+
+- institution: Sarvodaya Bal Vidyalaya No 2 C Block Janakpuri, Delhi
+  degree: Senior School Certificate (Class 12 / CBSE)
+  location: Delhi, India
+  dates: "2018"
+  status: Completed
+  stream: Commerce
+  subjects:
+    - name: English Core
+      marks: 57
+      grade: C2
+    - name: Economics
+      marks: 73
+      grade: B2
+    - name: Mathematics
+      marks: 65
+      grade: B2
+    - name: Business Studies
+      marks: 71
+      grade: B2
+    - name: Accountancy
+      marks: 73
+      grade: A2
+    - name: Physical Education
+      marks: 70
+      grade: B2
+
+- institution: Angel Public School, Om Vihar, Uttam Nagar, Delhi
+  degree: Secondary School Certificate (Class 10 / CBSE)
+  location: Delhi, India
+  dates: "2016"
+  status: Completed
+  result: "CGPA 7.2 (Grade X-A2, Grade IX-B1)"
+  subjects:
+    - name: English Language & Literature
+    - name: Hindi Course-A
+    - name: Mathematics
+    - name: Science
+    - name: Social Science
