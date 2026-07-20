@@ -35,9 +35,9 @@ def create_portfolio_tools(
                     start = parse_date(parts[0].strip())
                     end_str = parts[1].strip()
                     if end_str.lower() == "present":
-                        from datetime import datetime, timezone
+                        from datetime import UTC, datetime
 
-                        end = datetime.now(timezone.utc)
+                        end = datetime.now(UTC)
                     else:
                         end = parse_date(end_str)
                     months = (end.year - start.year) * 12 + (end.month - start.month)

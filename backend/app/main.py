@@ -15,12 +15,12 @@ from starlette.responses import JSONResponse
 from app.config import get_settings
 from app.logging_config import setup_logging
 from app.rag.chunker import chunk_github_repos, load_all_knowledge
-from app.services.github_api import GitHubAPIService
 from app.rag.embeddings import EmbeddingService
 from app.rag.retriever import Retriever
 from app.rag.store import ChromaStore
 from app.routers import chat, health, knowledge
 from app.routers.chat import init_chat_dependencies
+from app.services.github_api import GitHubAPIService
 from app.services.llm import LLMService
 from app.tools import ToolRegistry
 from app.tools.action_tools import create_action_tools
