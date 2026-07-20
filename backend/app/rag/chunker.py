@@ -124,11 +124,64 @@ def chunk_resume_pdf(pdf_path: Path) -> list[Document]:
     return docs
 
 
+def chunk_academics(academics: list[dict[str, Any]]) -> list[Document]:
+    docs: list[Document] = []
+    for i, entry in enumerate(academics):
+        institution = entry.get("institution", "")
+        degree = entry.get("degree", "")
+        parts = [
+            f"Education: {degree}",
+            f"Institution: {institution}",
+            f"Location: {entry.get('location', '')}",
+            f"Dates: {entry.get('dates', '')}",
+            f"Status: {entry.get('status', '')}",
+        ]
+        if entry.get("result"):
+            parts.append(f"Result: {entry['result']}")
+        if entry.get("specialization"):
+            parts.append(f"Specialization: {entry['specialization']}")
+        if entry.get("scholarship"):
+            parts.append(f"Scholarship: {entry['scholarship'].strip()}")
+        if entry.get("thesis"):
+            thesis = entry["thesis"]
+            parts.append(f"Thesis: {thesis.get('title', '')}")
+            if thesis.get("description"):
+                parts.append(thesis["description"].strip())
+        if entry.get("modules"):
+            module_lines = []
+            for m in entry["modules"]:
+                line = m["name"]
+                if m.get("grade"):
+                    line += f" - Grade: {m['grade']}"
+                if m.get("marks"):
+                    line += f" - Marks: {m['marks']}"
+                if m.get("topics"):
+                    line += f" (Topics: {', '.join(m['topics'])})"
+                module_lines.append(f"  - {line}")
+            parts.append("Modules/Subjects:\n" + "\n".join(module_lines))
+        if entry.get("highlights"):
+            parts.append("Highlights:\n" + "\n".join(f"  - {h}" for h in entry["highlights"]))
+        slug = institution.lower().replace(" ", "-").replace(",", "")[:40]
+        docs.append(
+            Document(
+                id=f"academics-{i}-{slug}",
+                text="\n".join(parts),
+                metadata={
+                    "source": "academics",
+                    "institution": institution,
+                    "degree": degree,
+                },
+            )
+        )
+    return docs
+
+
 CHUNKER_MAP = {
     "projects": chunk_projects,
     "skills": chunk_skills,
     "career_qa": chunk_career_qa,
     "certificates": chunk_certificates,
+    "academics": chunk_academics,
 }
 
 
@@ -188,6 +241,7 @@ def load_all_knowledge(knowledge_dir: Path) -> list[Document]:
         "career_qa.yaml": "career_qa",
         "certificates.yaml": "certificates",
         "linkedin.yaml": "linkedin",
+        "academics.yaml": "academics",
     }
     for filename, file_type in yaml_files.items():
         path = knowledge_dir / filename
