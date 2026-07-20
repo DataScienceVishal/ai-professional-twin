@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { streamChat } from '../lib/api'
-import type { ChatMode, Message, SourceInfo } from '../lib/types'
+import type { ChatMode, Message, SourceInfo, ToolActivity } from '../lib/types'
 
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -16,7 +16,12 @@ export function useChat() {
       setMessages(updatedMessages)
       setIsStreaming(true)
 
-      const assistantMessage: Message = { role: 'assistant', content: '', sources: [] }
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: '',
+        sources: [],
+        toolsUsed: [],
+      }
       setMessages([...updatedMessages, assistantMessage])
 
       try {
@@ -27,6 +32,7 @@ export function useChat() {
 
         let fullContent = ''
         let sources: SourceInfo[] = []
+        const toolsUsed: ToolActivity[] = []
 
         for await (const event of streamChat(chatMessages, mode)) {
           if (event.type === 'chunk') {
@@ -39,6 +45,29 @@ export function useChat() {
               }
               return next
             })
+          } else if (event.type === 'tool_start') {
+            toolsUsed.push({ tool: event.tool, args: event.args })
+            setMessages((prev) => {
+              const next = [...prev]
+              next[next.length - 1] = {
+                ...next[next.length - 1],
+                toolsUsed: [...toolsUsed],
+              }
+              return next
+            })
+          } else if (event.type === 'tool_result') {
+            const last = toolsUsed[toolsUsed.length - 1]
+            if (last && last.tool === event.tool) {
+              last.summary = event.summary
+            }
+            setMessages((prev) => {
+              const next = [...prev]
+              next[next.length - 1] = {
+                ...next[next.length - 1],
+                toolsUsed: [...toolsUsed],
+              }
+              return next
+            })
           } else if (event.type === 'sources') {
             sources = event.sources
           } else if (event.type === 'done') {
@@ -48,6 +77,7 @@ export function useChat() {
                 ...next[next.length - 1],
                 content: fullContent,
                 sources,
+                toolsUsed: toolsUsed.length > 0 ? toolsUsed : undefined,
               }
               return next
             })

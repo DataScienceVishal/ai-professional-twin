@@ -1,9 +1,16 @@
 export type ChatMode = 'default' | 'recruiter' | 'interview'
 
+export interface ToolActivity {
+  tool: string
+  args?: Record<string, unknown>
+  summary?: string
+}
+
 export interface Message {
   role: 'user' | 'assistant'
   content: string
   sources?: SourceInfo[]
+  toolsUsed?: ToolActivity[]
 }
 
 export interface SourceInfo {
@@ -42,4 +49,21 @@ export interface SSEDoneEvent {
   type: 'done'
 }
 
-export type SSEEvent = SSEChunkEvent | SSESourcesEvent | SSEDoneEvent
+export interface SSEToolStartEvent {
+  type: 'tool_start'
+  tool: string
+  args: Record<string, unknown>
+}
+
+export interface SSEToolResultEvent {
+  type: 'tool_result'
+  tool: string
+  summary: string
+}
+
+export type SSEEvent =
+  | SSEChunkEvent
+  | SSESourcesEvent
+  | SSEDoneEvent
+  | SSEToolStartEvent
+  | SSEToolResultEvent
