@@ -8,9 +8,9 @@ from app.services.github_api import GitHubAPIService
 def create_github_tools(
     github_service: GitHubAPIService,
 ) -> dict[str, Callable[..., Coroutine[Any, Any, str]]]:
-    cached_repos: list[dict] = []
+    cached_repos: list[dict[str, Any]] = []
 
-    async def _get_repos() -> list[dict]:
+    async def _get_repos() -> list[dict[str, Any]]:
         nonlocal cached_repos
         if not cached_repos:
             cached_repos = await github_service.fetch_repos(per_page=100)
