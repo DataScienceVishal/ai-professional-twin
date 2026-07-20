@@ -106,9 +106,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         registry.register(name, func)
     await logger.ainfo("Registered tools", count=len(registry.tools))
 
-    init_chat_dependencies(
-        retriever=retriever, llm_service=llm_service, tool_registry=registry
-    )
+    init_chat_dependencies(retriever=retriever, llm_service=llm_service, tool_registry=registry)
 
     yield
 

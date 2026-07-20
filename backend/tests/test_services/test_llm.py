@@ -59,6 +59,7 @@ async def test_stream_yields_chunks(llm_service: LLMService) -> None:
 @pytest.mark.asyncio
 async def test_stream_with_tools_no_tool_call(llm_service: LLMService) -> None:
     """When the LLM responds with text only, stream_with_tools yields text chunks."""
+
     async def mock_stream():
         for text in ["Hello ", "world"]:
             chunk = MagicMock()
@@ -80,6 +81,7 @@ async def test_stream_with_tools_no_tool_call(llm_service: LLMService) -> None:
         mock_create.return_value = mock_stream()
 
         from app.tools import ToolRegistry
+
         registry = ToolRegistry()
 
         events = []
@@ -106,6 +108,7 @@ async def test_stream_with_tools_executes_tool(llm_service: LLMService) -> None:
         call_count += 1
 
         if call_count == 1:
+
             async def tool_call_stream():
                 chunk = MagicMock()
                 chunk.choices = [MagicMock()]
@@ -124,8 +127,10 @@ async def test_stream_with_tools_executes_tool(llm_service: LLMService) -> None:
                 final.choices[0].delta.tool_calls = None
                 final.choices[0].finish_reason = "tool_calls"
                 yield final
+
             return tool_call_stream()
         else:
+
             async def text_stream():
                 chunk = MagicMock()
                 chunk.choices = [MagicMock()]
@@ -139,6 +144,7 @@ async def test_stream_with_tools_executes_tool(llm_service: LLMService) -> None:
                 final.choices[0].delta.tool_calls = None
                 final.choices[0].finish_reason = "stop"
                 yield final
+
             return text_stream()
 
     with patch.object(
@@ -147,6 +153,7 @@ async def test_stream_with_tools_executes_tool(llm_service: LLMService) -> None:
         mock_create.side_effect = mock_create_fn
 
         from app.tools import ToolRegistry
+
         registry = ToolRegistry()
 
         async def test_tool(arg: str) -> str:
