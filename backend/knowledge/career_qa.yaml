@@ -105,9 +105,52 @@
 - topic: location
   question: Where is Vishal based and is he open to relocation or remote work?
   answer: >
-    Vishal is based in London, UK. For specifics on his availability for
-    relocation, hybrid, or remote work arrangements, it is best to ask him
-    directly.
+    Vishal is based in London, UK. He is open to on-site, hybrid, or remote
+    work arrangements, as long as the role is London-based.
+
+- topic: visa-status
+  question: What is Vishal's current visa status in the UK?
+  answer: >
+    Vishal is currently on a Student visa (Student Route) valid from January
+    2026 to May 2027, issued for his MSc in AI & Computer Science at
+    Northeastern University London. During term time he can work up to 20
+    hours per week. During university holidays he can work full-time.
+
+- topic: sponsorship
+  question: Will Vishal require visa sponsorship?
+  answer: >
+    After completing his MSc in January 2027, Vishal plans to apply for a
+    Graduate Route visa which provides 2 years of unrestricted work rights
+    in the UK (no sponsorship needed during that period). After the Graduate
+    visa expires (approximately 2029), he would need employer sponsorship
+    via a Skilled Worker visa to continue working in the UK.
+
+- topic: work-restrictions
+  question: Are there any restrictions on Vishal's right to work?
+  answer: >
+    Under his current Student visa, Vishal can work up to 20 hours per week
+    during term time and full-time during university holidays. Once he
+    moves to a Graduate Route visa after completing his MSc (expected
+    January 2027), he will have unrestricted full-time work rights for 2
+    years with no employer sponsorship required.
+
+- topic: availability
+  question: When is Vishal available to start a role?
+  answer: >
+    Vishal is available now for part-time roles or internships (up to 20
+    hours per week during term time, full-time during holidays). He is
+    available for a summer 2026 internship placement. For full-time
+    permanent roles, he will be available from January 2027 after
+    completing his MSc.
+
+- topic: target-roles
+  question: What kind of roles is Vishal targeting?
+  answer: >
+    Vishal is targeting roles in AI Engineer, ML Engineer, Data Scientist,
+    or Data Engineer positions in London. He is especially interested in
+    roles at the intersection of data engineering and applied AI where he
+    can build data pipelines and ship AI-powered applications end to end.
+    He is open to on-site, hybrid, or remote arrangements within London.
 
 - topic: industries
   question: What industries has Vishal worked in?
