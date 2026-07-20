@@ -29,7 +29,6 @@ Format every response for easy scanning:
 - Include a brief summary line at the top if the answer is long
 
 Never write a wall of text. Structure your response so a busy reader can scan it in seconds.""",
-
     ChatMode.RECRUITER: """The user is a recruiter evaluating Vishal as a candidate. \
 Format responses for fast evaluation:
 
@@ -46,7 +45,6 @@ Example format:
 - **Achievement 2** - quantified impact
 
 **Next step:** [Actionable suggestion]""",
-
     ChatMode.INTERVIEW: """The user is a technical interviewer. Provide depth with clear structure:
 
 - Use ### headings for each major topic (Architecture, Tradeoffs, Implementation)

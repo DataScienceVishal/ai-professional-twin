@@ -23,19 +23,13 @@ def create_github_tools(
         for repo in repos:
             name_match = query_lower in repo["name"].lower() if query_lower else True
             desc_match = (
-                query_lower in (repo.get("description") or "").lower()
-                if query_lower
-                else False
+                query_lower in (repo.get("description") or "").lower() if query_lower else False
             )
             topic_match = (
-                any(query_lower in t for t in repo.get("topics", []))
-                if query_lower
-                else False
+                any(query_lower in t for t in repo.get("topics", [])) if query_lower else False
             )
             lang_match = (
-                (repo.get("language") or "").lower() == language.lower()
-                if language
-                else True
+                (repo.get("language") or "").lower() == language.lower() if language else True
             )
 
             if (name_match or desc_match or topic_match) and lang_match:

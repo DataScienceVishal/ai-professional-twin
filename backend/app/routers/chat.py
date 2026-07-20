@@ -74,9 +74,7 @@ async def chat(
                 yield {"data": json.dumps({"type": "chunk", "content": chunk})}
 
         source_data = [
-            {"source": s.source, "detail": s.detail, "url": s.url}
-            for s in sources
-            if s.url
+            {"source": s.source, "detail": s.detail, "url": s.url} for s in sources if s.url
         ]
         yield {"data": json.dumps({"type": "sources", "sources": source_data})}
         yield {"data": json.dumps({"type": "done"})}
