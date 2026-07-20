@@ -108,3 +108,48 @@
     Vishal is based in London, UK. For specifics on his availability for
     relocation, hybrid, or remote work arrangements, it is best to ask him
     directly.
+
+- topic: industries
+  question: What industries has Vishal worked in?
+  answer: >
+    Vishal has worked across multiple industries. He spent 2 years in
+    finance and taxation (PJRJ Associates), then moved into e-commerce
+    (Aryan Care Pvt. Ltd.), followed by manufacturing and clean room
+    engineering (Avant Garde Clean Room & Engg. Solutions), and most
+    recently telecom (Teleperformance Global Business), where he built
+    data pipelines processing millions of CDR, billing, and agent
+    performance records. His education spans data science and AI, giving
+    him cross-domain versatility.
+
+- topic: impact
+  question: How has Vishal demonstrated impact in previous roles?
+  answer: >
+    At Teleperformance, Vishal migrated on-prem SQL Server schemas to
+    Databricks, improving query performance by approximately 20% and
+    cutting infrastructure costs by approximately 20%. He built and
+    maintained pipelines processing millions of telecom records for a
+    team of 50+ across multiple regions. At Avant Garde, he built ML
+    sales forecasting models achieving 80-90% accuracy on monthly
+    revenue projections used daily by the business, and rebuilt revenue
+    reporting in advanced Excel cutting monthly reporting time from
+    approximately 2 hours to approximately 30 minutes.
+
+- topic: cloud-platforms
+  question: Does Vishal have experience with cloud platforms?
+  answer: >
+    Yes. Vishal has hands-on experience with Azure (through Databricks
+    at Teleperformance), AWS (coursework from Great Learning), and
+    cloud-based AI services including GitHub Models API for LLM and
+    embedding inference. He has deployed applications on Railway and
+    Vercel, and worked with cloud databases and data warehousing tools.
+
+- topic: genai
+  question: Does Vishal have Generative AI experience?
+  answer: >
+    Yes. Vishal has practical Generative AI skills including building
+    RAG (Retrieval-Augmented Generation) systems, prompt engineering,
+    working with LLMs (GPT-4, Gemini), vector databases (ChromaDB,
+    FAISS), and frameworks like LangChain. His AI Professional Twin
+    project is a full-stack RAG application with tool calling, SSE
+    streaming, and semantic search, demonstrating end-to-end GenAI
+    engineering skills.
