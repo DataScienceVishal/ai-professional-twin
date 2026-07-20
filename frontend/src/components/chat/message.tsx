@@ -45,14 +45,27 @@ function ToolBadge({ activity }: { activity: ToolActivity }) {
 }
 
 function extractMermaid(children: ReactNode): string | null {
-  const child = Array.isArray(children) ? children[0] : children
-  if (!isValidElement(child)) return null
-  const props = child.props as { className?: string; children?: ReactNode }
-  const className = props.className || ''
-  if (/language-mermaid/.test(className)) {
-    return String(props.children || '').trim()
+  const childArray = Array.isArray(children) ? children : [children]
+  for (const child of childArray) {
+    if (!isValidElement(child)) continue
+    const props = child.props as { className?: string; children?: ReactNode }
+    const className = props.className || ''
+    if (/language-mermaid/.test(className) || /hljs.*mermaid/.test(className)) {
+      const text = extractText(props.children)
+      return text.trim() || null
+    }
   }
   return null
+}
+
+function extractText(node: ReactNode): string {
+  if (typeof node === 'string') return node
+  if (Array.isArray(node)) return node.map(extractText).join('')
+  if (isValidElement(node)) {
+    const props = node.props as { children?: ReactNode }
+    return extractText(props.children)
+  }
+  return ''
 }
 
 export function Message({ message, isStreaming = false }: MessageProps) {
