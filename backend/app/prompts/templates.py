@@ -67,6 +67,8 @@ information about Vishal"
 - Include relevant links (GitHub, LinkedIn) when available
 - ALWAYS format with markdown: use headings, bold, bullets, and short paragraphs
 - Never write more than 3 sentences in a single paragraph
+- When you need live data (repo stats, experience calculation, project counts), use the \
+available tools rather than guessing
 - When explaining architectures, pipelines, or workflows, include a Mermaid diagram using \
 ```mermaid code blocks. Use graph TD or flowchart TD for architecture, sequenceDiagram for \
 request flows. Keep diagrams concise (under 15 nodes). Example:

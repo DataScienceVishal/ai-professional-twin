@@ -19,6 +19,6 @@ def client() -> TestClient:
         yield "test response"
 
     mock_llm.stream = mock_stream
-    init_chat_dependencies(retriever=mock_retriever, llm_service=mock_llm)
+    init_chat_dependencies(retriever=mock_retriever, llm_service=mock_llm, tool_registry=None)
 
     return TestClient(app)
