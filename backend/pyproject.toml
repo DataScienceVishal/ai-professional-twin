@@ -1,7 +1,7 @@
 [project]
-name = "professional-profile-assistant"
+name = "ai-professional-twin"
 version = "0.2.0"
-description = "RAG-powered professional profile assistant"
+description = "RAG-powered digital professional identity"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
