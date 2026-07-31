@@ -36,12 +36,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     setup_logging(settings.log_level)
     logger = structlog.get_logger()
 
-    await logger.ainfo("Starting AI Professional Twin backend")
+    await logger.ainfo("Starting backend")
 
     embedding_service = EmbeddingService(
-        api_key=settings.github_token,
-        base_url=settings.github_models_base_url,
+        api_key=settings.azure_openai_api_key or settings.github_token,
         model=settings.embedding_model,
+        azure_endpoint=settings.azure_openai_endpoint or None,
+        api_version=settings.azure_openai_api_version if settings.azure_openai_endpoint else None,
     )
 
     store = ChromaStore(
@@ -91,9 +92,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     )
 
     llm_service = LLMService(
-        api_key=settings.github_token,
-        base_url=settings.github_models_base_url,
+        api_key=settings.azure_openai_api_key or settings.github_token,
         model=settings.llm_model,
+        azure_endpoint=settings.azure_openai_endpoint or None,
+        api_version=settings.azure_openai_api_version if settings.azure_openai_endpoint else None,
     )
 
     api_base_url = settings.cors_origins[0] if settings.cors_origins else ""
@@ -117,7 +119,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     app = FastAPI(
-        title="AI Professional Twin",
+        title="Professional Profile Assistant",
         version="0.3.0",
         lifespan=lifespan,
     )

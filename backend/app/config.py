@@ -5,14 +5,16 @@ from pydantic_settings import BaseSettings, NoDecode
 
 
 class Settings(BaseSettings):
-    github_token: str
+    github_token: str = ""
     github_username: str = "DataScienceVishal"
     cors_origins: Annotated[list[str], NoDecode] = ["http://localhost:5173"]
     chroma_persist_dir: str = "./chromadb_data"
     log_level: str = "info"
-    llm_model: str = "gpt-4.1-mini"
+    llm_model: str = "gpt-5-mini"
     embedding_model: str = "text-embedding-3-small"
-    github_models_base_url: str = "https://models.github.ai/inference"
+    azure_openai_endpoint: str = ""
+    azure_openai_api_version: str = "2024-10-21"
+    azure_openai_api_key: str = ""
     rate_limit: str = "30/minute"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

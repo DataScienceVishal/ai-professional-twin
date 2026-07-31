@@ -182,7 +182,7 @@
   answer: >
     Yes. Vishal has hands-on experience with Azure (through Databricks
     at Teleperformance), AWS (coursework from Great Learning), and
-    cloud-based AI services including GitHub Models API for LLM and
+    cloud-based model services including Azure OpenAI for LLM and
     embedding inference. He has deployed applications on Railway and
     Vercel, and worked with cloud databases and data warehousing tools.
 
@@ -192,7 +192,7 @@
     Yes. Vishal has practical Generative AI skills including building
     RAG (Retrieval-Augmented Generation) systems, prompt engineering,
     working with LLMs (GPT-4, Gemini), vector databases (ChromaDB,
-    FAISS), and frameworks like LangChain. His AI Professional Twin
+    FAISS), and frameworks like LangChain. His professional profile assistant
     project is a full-stack RAG application with tool calling, SSE
     streaming, and semantic search, demonstrating end-to-end GenAI
     engineering skills.

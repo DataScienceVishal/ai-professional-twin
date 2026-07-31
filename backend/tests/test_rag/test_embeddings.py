@@ -9,8 +9,9 @@ from app.rag.embeddings import EmbeddingService
 def embedding_service() -> EmbeddingService:
     return EmbeddingService(
         api_key="test-key",
-        base_url="https://models.github.ai/inference",
         model="text-embedding-3-small",
+        azure_endpoint="https://example.openai.azure.com",
+        api_version="2024-10-21",
     )
 
 
