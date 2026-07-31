@@ -17,7 +17,7 @@ async def test_fetch_repos_returns_list(github_service: GitHubAPIService) -> Non
     mock_response.json.return_value = [
         {
             "name": "my-ai-resume",
-            "description": "AI Professional Twin",
+            "description": "Professional profile assistant",
             "html_url": "https://github.com/DataScienceVishal/my-ai-resume",
             "language": "Python",
             "stargazers_count": 5,

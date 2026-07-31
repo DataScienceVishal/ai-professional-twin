@@ -8,5 +8,5 @@ async def health() -> dict[str, str]:
     return {
         "status": "healthy",
         "version": "0.2.0",
-        "service": "ai-professional-twin",
+        "service": "backend",
     }

@@ -1,12 +1,12 @@
 # Projects from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
 
-- name: AI Professional Twin V2 - Full-Stack RAG Application
-  slug: ai-professional-twin-v2
+- name: Professional Profile Assistant V2 - Full-Stack RAG Application
+  slug: professional-profile-assistant-v2
   description: >
-    Built a production RAG (Retrieval-Augmented Generation) system as an
-    interactive AI twin for recruiter engagement. The backend uses FastAPI with
-    ChromaDB as a vector store, text-embedding-3-small for embeddings, and
-    gpt-4.1-mini for generation via GitHub Models (free tier). Documents from
+    Built a production RAG (Retrieval-Augmented Generation) system for
+    recruiter engagement. The backend uses FastAPI with ChromaDB as a vector store,
+    text-embedding-3-small for embeddings, and GPT-5 mini for generation via
+    Azure OpenAI. Documents from
     YAML knowledge files, a resume PDF, and live GitHub repos are chunked,
     embedded, and stored in ChromaDB on startup. The retriever performs cosine
     similarity search to find relevant context, which is injected into the
@@ -16,9 +16,9 @@
     clickable source citations with real URLs, and provides suggestion chips
     that shuffle after each message. Deployed on Railway (backend) and Vercel
     (frontend), both free tier.
-  tech_stack: [Python, FastAPI, ChromaDB, React, Vite, Tailwind CSS, GitHub Models, RAG, LangChain concepts, Docker]
+  tech_stack: [Python, FastAPI, ChromaDB, React, Vite, Tailwind CSS, Azure OpenAI, RAG, LangChain concepts, Docker]
   github_url: https://github.com/DataScienceVishal/ai-professional-twin
-  category: Generative AI
+  category: Software Engineering
   highlights:
     - Full RAG pipeline with chunking, embedding, retrieval, and generation
     - ChromaDB vector store with cosine similarity search
@@ -27,17 +27,17 @@
     - Three chat modes (General, Recruiter, Interview) with tailored prompts
     - Deployed on Railway + Vercel free tier
 
-- name: AI Digital Twin V1 - Serverless Portfolio
-  slug: ai-digital-twin-v1
+- name: Professional Profile Assistant V1 - Serverless Portfolio
+  slug: professional-profile-assistant-v1
   description: >
-    First iteration of the AI twin concept. Built a vanilla HTML5/CSS3/JS web
-    app with a direct serverless gateway to OpenAI GPT models featuring
-    context-window prompt optimization and token streaming. Used dynamic
+    First iteration of the project. Built a vanilla HTML5/CSS3/JS web
+    app with a direct serverless gateway to OpenAI-compatible models featuring
+    context-window prompt optimization and streaming responses. Used dynamic
     viewport height (dvh) for mobile responsiveness and interactive inquiry
     chips. Deployed to Vercel CDN.
-  tech_stack: [HTML5, CSS3, JavaScript, OpenAI GPT, Vercel]
+  tech_stack: [HTML5, CSS3, JavaScript, OpenAI-compatible API, Vercel]
   github_url: https://github.com/DataScienceVishal/my-ai-resume
-  category: Generative AI
+  category: Software Engineering
   highlights:
     - Serverless gateway to OpenAI GPT models with token streaming
     - Layout-adaptive rendering with dvh for mobile responsiveness

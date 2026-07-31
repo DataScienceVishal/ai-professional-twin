@@ -5,7 +5,7 @@ from app.prompts.templates import ChatMode
 def test_build_default_prompt_contains_identity() -> None:
     prompt = build_system_prompt(mode=ChatMode.DEFAULT, rag_context="")
     assert "Vishal Khan" in prompt
-    assert "AI Professional Twin" in prompt
+    assert "professional assistant" in prompt.lower()
 
 
 def test_build_recruiter_prompt_contains_mode_instructions() -> None:

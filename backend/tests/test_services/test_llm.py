@@ -9,8 +9,9 @@ from app.services.llm import LLMService
 def llm_service() -> LLMService:
     return LLMService(
         api_key="test-key",
-        base_url="https://models.github.ai/inference",
-        model="gpt-4.1-mini",
+        model="gpt-5-mini",
+        azure_endpoint="https://example.openai.azure.com",
+        api_version="2024-10-21",
     )
 
 

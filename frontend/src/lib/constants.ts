@@ -80,7 +80,7 @@ export const SUGGESTION_CHIPS: Record<ChatMode, string[]> = {
     'What is your testing strategy for ML systems?',
     'How would you implement caching for this RAG system?',
     'Explain vector similarity search',
-    'What are the limitations of this AI twin approach?',
+    'What are the limitations of this assistant approach?',
     'How do you handle prompt injection?',
     'What would you change about this architecture?',
     'How do you monitor ML models in production?',
@@ -101,7 +101,7 @@ export function getShuffledChips(mode: ChatMode, seed: number, count = 5): strin
 
 export const PROFILE = {
   name: 'Vishal Khan',
-  title: 'AI Engineer & MSc AI Student',
+  title: 'Data & ML Engineer',
   avatarUrl: 'https://github.com/DataScienceVishal.png',
   githubUrl: 'https://github.com/DataScienceVishal',
   linkedinUrl: 'https://www.linkedin.com/in/vishal-khan-a53aboraaa',

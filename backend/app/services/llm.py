@@ -2,7 +2,7 @@ import json
 from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Any, cast
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, AsyncAzureOpenAI
 
 from app.tools import ToolRegistry
 
@@ -14,8 +14,22 @@ TOOL_RESULT_SUMMARY_LIMIT = 200
 
 
 class LLMService:
-    def __init__(self, api_key: str, base_url: str, model: str) -> None:
-        self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        azure_endpoint: str | None = None,
+        api_version: str | None = None,
+        base_url: str | None = None,
+    ) -> None:
+        if azure_endpoint:
+            self.client = AsyncAzureOpenAI(
+                api_key=api_key,
+                azure_endpoint=azure_endpoint,
+                api_version=api_version or "2024-10-21",
+            )
+        else:
+            self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
         self.model = model
 
     async def chat(
