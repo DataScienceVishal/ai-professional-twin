@@ -153,41 +153,31 @@ def test_tools_included_only_when_provided() -> None:
 
 
 @pytest.mark.asyncio
-async def test_chat_sends_the_built_kwargs_to_the_api() -> None:
-    """Guards against the kwargs builder being bypassed by a future edit."""
+async def test_stream_sends_the_built_kwargs_to_the_api() -> None:
+    """Guards against the kwargs builder being bypassed by a future edit.
+
+    Targets `stream` because that is a live code path - the non-streaming
+    `chat()` helper it used to cover was never called outside this test.
+    """
     service = _service("gpt-5-mini", max_output_tokens=256)
-    mock_response = MagicMock()
-    mock_response.choices = [MagicMock()]
-    mock_response.choices[0].message.content = "ok"
+
+    async def empty_stream():  # type: ignore[no-untyped-def]
+        return
+        yield  # pragma: no cover - makes this an async generator
 
     with patch.object(
         service.client.chat.completions, "create", new_callable=AsyncMock
     ) as mock_create:
-        mock_create.return_value = mock_response
-        await service.chat(system_prompt="s", messages=[{"role": "user", "content": "hi"}])
+        mock_create.return_value = empty_stream()
+        async for _ in service.stream(
+            system_prompt="s", messages=[{"role": "user", "content": "hi"}]
+        ):
+            pass
 
     sent = mock_create.call_args.kwargs
     assert "temperature" not in sent
     assert sent["max_completion_tokens"] == 256
-
-
-@pytest.mark.asyncio
-async def test_chat_returns_text(llm_service: LLMService) -> None:
-    mock_response = MagicMock()
-    mock_choice = MagicMock()
-    mock_choice.message.content = "Vishal is an AI Engineer"
-    mock_response.choices = [mock_choice]
-
-    with patch.object(
-        llm_service.client.chat.completions, "create", new_callable=AsyncMock
-    ) as mock_create:
-        mock_create.return_value = mock_response
-        result = await llm_service.chat(
-            system_prompt="You are a test assistant",
-            messages=[{"role": "user", "content": "Who is Vishal?"}],
-        )
-
-    assert result == "Vishal is an AI Engineer"
+    assert sent["stream"] is True
 
 
 @pytest.mark.asyncio

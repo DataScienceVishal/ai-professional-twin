@@ -96,9 +96,3 @@ class ChromaStore:
 
     def count(self) -> int:
         return self.collection.count()
-
-    def reset(self) -> None:
-        self.client.delete_collection(self.collection.name)
-        self.collection = self.client.get_or_create_collection(
-            name=self.collection.name, metadata={"hnsw:space": "cosine"}
-        )
