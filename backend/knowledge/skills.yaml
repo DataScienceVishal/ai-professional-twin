@@ -1,66 +1,100 @@
-# Skills extracted from Vishal Khan's resume
+# Skills for Vishal Khan
+#
+# Proficiency is deliberately differentiated. Marking every category "advanced"
+# devalues the areas of genuine depth and invites scepticism in interviews.
 
-- category: Programming
-  skills: [Python, SQL, R, HTML, CSS, JScript, Svelte]
+- category: Core Programming
+  skills: [Python, SQL]
+  proficiency: advanced
+
+- category: Data Engineering
+  skills:
+    - ETL Pipelines
+    - Databricks
+    - Apache Spark (via Databricks)
+    - Data Modelling
+    - SQL Server
+    - MySQL
+    - Data Warehouse Migration
   proficiency: advanced
 
 - category: Machine Learning
   skills:
-    - Reinforcement Learning (DQN, A2C, PPO)
-    - Deep Learning
     - Classification
     - Regression
     - Time-Series Forecasting
-    - NLP
     - Feature Engineering
     - Model Evaluation
+    - Deep Learning
+    - NLP
   proficiency: advanced
+
+- category: Reinforcement Learning
+  skills:
+    - DQN
+    - A2C
+    - PPO
+    - Custom Gym Environments
+  proficiency: intermediate
 
 - category: Generative AI
   skills:
     - LLMs
     - RAG
     - Prompt Engineering
+    - Vector Databases (ChromaDB, FAISS)
     - LangChain
-    - FAISS
+    - Azure OpenAI
     - Gemini API
+    - Tool / Function Calling
   proficiency: advanced
 
 - category: Libraries & Frameworks
   skills:
+    - Pandas
+    - NumPy
+    - Scikit-learn
     - PyTorch
     - TensorFlow
     - Keras
-    - Scikit-learn
-    - Pandas
-    - NumPy
     - Statsmodels
     - Matplotlib
     - Seaborn
     - Plotly
   proficiency: advanced
 
-- category: Data & Cloud
+- category: Cloud & Databases
   skills:
-    - ETL Pipelines
-    - Databricks
     - Azure
     - AWS
-    - MySQL
-    - SQL Server
     - MongoDB
-    - Neo4js
-  proficiency: advanced
+    - Neo4j
+    - Railway
+    - Vercel
+  proficiency: intermediate
 
 - category: Visualization & BI
-  skills: [Power BI, Tableau, Excel]
+  skills: [Power BI, Tableau, Excel (advanced formulas, macros, VBA)]
   proficiency: advanced
 
-- category: Tools
+- category: Backend & API
+  skills: [FastAPI, REST APIs, Docker, Server-Sent Events, Pydantic]
+  proficiency: intermediate
+
+- category: Statistical Programming
+  skills: [R]
+  proficiency: intermediate
+
+- category: Web & Frontend
+  skills: [HTML, CSS, JavaScript, TypeScript, React, Svelte, Streamlit]
+  proficiency: working knowledge
+
+- category: Tools & Practices
   skills:
     - Git/GitHub
     - VS Code
     - Jupyter
-    - Streamlit
     - Google Colab
-  proficiency: advanced
+    - CI/CD (GitHub Actions)
+    - Unit Testing (pytest)
+  proficiency: intermediate

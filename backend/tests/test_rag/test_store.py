@@ -2,7 +2,7 @@ import tempfile
 
 import pytest
 
-from app.rag.store import ChromaStore, Document
+from app.rag.store import CONTENT_HASH_KEY, ChromaStore, Document
 
 
 @pytest.fixture
@@ -61,3 +61,58 @@ def test_document_count(store: ChromaStore) -> None:
     ]
     store.add_documents(docs)
     assert store.count() == 2
+
+
+def test_manifest_is_empty_for_a_fresh_collection(store: ChromaStore) -> None:
+    assert store.manifest() == {}
+
+
+def test_manifest_returns_hashes_and_sources(store: ChromaStore) -> None:
+    store.add_documents(
+        [
+            Document(
+                id="d1",
+                text="text 1",
+                metadata={"source": "projects", CONTENT_HASH_KEY: "abc123"},
+                embedding=[0.1] * 10,
+            )
+        ]
+    )
+
+    manifest = store.manifest()
+
+    assert manifest["d1"].content_hash == "abc123"
+    assert manifest["d1"].source == "projects"
+
+
+def test_manifest_tolerates_documents_without_a_hash(store: ChromaStore) -> None:
+    """Documents written before hashing existed must look "changed", not crash."""
+    store.add_documents(
+        [Document(id="d1", text="t", metadata={"source": "projects"}, embedding=[0.1] * 10)]
+    )
+
+    assert store.manifest()["d1"].content_hash == ""
+
+
+def test_delete_removes_documents(store: ChromaStore) -> None:
+    store.add_documents(
+        [
+            Document(id="d1", text="one", metadata={"source": "t"}, embedding=[0.1] * 10),
+            Document(id="d2", text="two", metadata={"source": "t"}, embedding=[0.2] * 10),
+        ]
+    )
+
+    store.delete(["d1"])
+
+    assert store.count() == 1
+    assert set(store.manifest()) == {"d2"}
+
+
+def test_delete_with_no_ids_is_a_noop(store: ChromaStore) -> None:
+    store.add_documents(
+        [Document(id="d1", text="one", metadata={"source": "t"}, embedding=[0.1] * 10)]
+    )
+
+    store.delete([])
+
+    assert store.count() == 1

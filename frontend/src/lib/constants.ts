@@ -67,7 +67,7 @@ export const SUGGESTION_CHIPS: Record<ChatMode, string[]> = {
     'Explain the prompt engineering approach',
     'How do embeddings work in this system?',
     'What chunking strategy did you use and why?',
-    'How does hybrid search work here?',
+    'Why did you choose dense vector search over BM25?',
     'How do you handle streaming responses?',
     'Explain your reinforcement learning research',
     'What is your approach to data pipeline design?',
@@ -104,5 +104,29 @@ export const PROFILE = {
   title: 'Data & ML Engineer',
   avatarUrl: 'https://github.com/DataScienceVishal.png',
   githubUrl: 'https://github.com/DataScienceVishal',
-  linkedinUrl: 'https://www.linkedin.com/in/vishal-khan-a53aboraaa',
+  linkedinUrl: 'https://www.linkedin.com/in/vishalkhandatascience/',
+  email: 'vishalkhan251@gmail.com',
 }
+
+/** Availability line shown next to the contact call-to-action. */
+export const AVAILABILITY = 'Open to full-time AI/ML roles in London from January 2027'
+
+const CONTACT_SUBJECT = 'AI/ML opportunity for Vishal Khan'
+
+const CONTACT_BODY = [
+  'Hi Vishal,',
+  '',
+  "I came across your AI twin and I'd like to talk about a role.",
+  '',
+  'Role:',
+  'Company:',
+  'Location:',
+  'Start date:',
+  '',
+  'Best regards,',
+].join('\n')
+
+/** `mailto:` link with a pre-filled subject and a short recruiter template. */
+export const CONTACT_MAILTO = `mailto:${PROFILE.email}?subject=${encodeURIComponent(
+  CONTACT_SUBJECT,
+)}&body=${encodeURIComponent(CONTACT_BODY)}`

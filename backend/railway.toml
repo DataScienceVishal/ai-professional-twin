@@ -3,7 +3,16 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# /health is a pure liveness probe and does not wait on ingestion, which now
+# runs in the background. Use /ready (503 until the knowledge base is indexed)
+# for readiness checks - do NOT point healthcheckPath at it, or a cold boot
+# with an empty store would restart-loop.
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
+
+# NOTE: attach a Railway volume mounted at /data (CHROMA_PERSIST_DIR is
+# /data/chromadb in the Dockerfile). Without it the vector store is wiped on
+# every restart and the content-hash manifest cannot prevent re-embedding, so
+# each cold start bills a full set of Azure embedding calls.

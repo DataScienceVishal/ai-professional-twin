@@ -1,4 +1,5 @@
 import { PROFILE, MODE_LABELS } from '../../lib/constants'
+import { ContactCtaCompact } from './contact-cta'
 import type { ChatMode } from '../../lib/types'
 
 interface HeaderProps {
@@ -19,7 +20,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
         />
         <span className="font-medium text-sm">{PROFILE.name}</span>
       </div>
-      <div className="flex gap-1">
+      <div className="flex items-center gap-1">
         {modes.map((m) => (
           <button
             key={m}
@@ -33,6 +34,7 @@ export function Header({ mode, onModeChange }: HeaderProps) {
             {MODE_LABELS[m]}
           </button>
         ))}
+        <ContactCtaCompact />
       </div>
     </header>
   )

@@ -6,9 +6,12 @@ from typing import Any
 def create_action_tools(
     api_base_url: str,
 ) -> dict[str, Callable[..., Coroutine[Any, Any, str]]]:
+    """`api_base_url` is this api's own public origin: the links built below
+    (/resume/download) are served by this service, not by the frontend."""
+    base_url = api_base_url.rstrip("/")
 
     async def get_resume_download_link() -> str:
-        url = f"{api_base_url}/resume/download"
+        url = f"{base_url}/resume/download"
         return json.dumps(
             {
                 "url": url,

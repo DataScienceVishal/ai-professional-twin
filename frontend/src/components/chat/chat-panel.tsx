@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Message } from './message'
 import { InputBar } from './input-bar'
 import { SuggestionChips } from './suggestion-chips'
+import { ContactCta } from '../layout/contact-cta'
 import type { Message as MessageType, ChatMode } from '../../lib/types'
 
 interface ChatPanelProps {
@@ -9,9 +10,10 @@ interface ChatPanelProps {
   isStreaming: boolean
   mode: ChatMode
   onSend: (message: string) => void
+  onStop?: () => void
 }
 
-export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProps) {
+export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const isAtBottom = useRef(true)
 
@@ -48,6 +50,8 @@ export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProp
               Ask me anything about Vishal's experience, projects, skills, and career.
               Grounded in real data with source citations.
             </p>
+            {/* Desktop users already have the CTA in the sidebar. */}
+            <ContactCta className="lg:hidden w-full max-w-xs text-left mt-2" />
           </div>
         )}
         {messages.map((msg, i) => (
@@ -70,7 +74,7 @@ export function ChatPanel({ messages, isStreaming, mode, onSend }: ChatPanelProp
         onSelect={onSend}
         messageCount={messages.length}
       />
-      <InputBar onSend={onSend} disabled={isStreaming} />
+      <InputBar onSend={onSend} onStop={onStop} disabled={isStreaming} />
     </div>
   )
 }

@@ -11,6 +11,8 @@ export interface Message {
   content: string
   sources?: SourceInfo[]
   toolsUsed?: ToolActivity[]
+  /** Set when the turn failed; rendered with error styling. */
+  isError?: boolean
 }
 
 export interface SourceInfo {
@@ -49,6 +51,11 @@ export interface SSEDoneEvent {
   type: 'done'
 }
 
+export interface SSEErrorEvent {
+  type: 'error'
+  message: string
+}
+
 export interface SSEToolStartEvent {
   type: 'tool_start'
   tool: string
@@ -65,5 +72,6 @@ export type SSEEvent =
   | SSEChunkEvent
   | SSESourcesEvent
   | SSEDoneEvent
+  | SSEErrorEvent
   | SSEToolStartEvent
   | SSEToolResultEvent

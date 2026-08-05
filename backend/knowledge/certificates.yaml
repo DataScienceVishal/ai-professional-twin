@@ -1,31 +1,38 @@
-# Certifications extracted from Vishal Khan's resume
+# Certifications for Vishal Khan
+# Verification URLs extracted from the hyperlinks embedded in his CV.
+
+- name: Executive PG Program in Data Science
+  issuer: IIIT Bangalore (with upGrad)
+  date: Jan 2022 - Jan 2023
+  credential_id: ""
+  url: ""
 
 - name: Data Science Programming Bootcamp
-  issuer: ""
+  issuer: Credential.net (verified)
   date: ""
-  credential_id: ""
-  url: ""
+  credential_id: 6ff84013-7819-4cf0-9f41-55ac79afe5f4
+  url: https://www.credential.net/6ff84013-7819-4cf0-9f41-55ac79afe5f4
 
-- name: Machine/Deep Learning Certificate
-  issuer: ""
+- name: Machine Learning and Deep Learning Certificate
+  issuer: Credential.net (verified)
   date: ""
-  credential_id: ""
-  url: ""
+  credential_id: 72805e09-3bbf-480c-b0dc-63192a534b51
+  url: https://www.credential.net/72805e09-3bbf-480c-b0dc-63192a534b51
 
 - name: SQL Certification
   issuer: HackerRank
   date: ""
-  credential_id: ""
-  url: ""
+  credential_id: 1dd8ae464322
+  url: https://www.hackerrank.com/certificates/1dd8ae464322
 
-- name: AWS Certificate
+- name: AWS Coursework
   issuer: Great Learning
   date: ""
-  credential_id: ""
-  url: ""
+  credential_id: PVHDBGBL
+  url: https://www.mygreatlearning.com/certificate/PVHDBGBL
 
 - name: Data Toolkit
-  issuer: ""
+  issuer: Credential.net (verified)
   date: ""
-  credential_id: ""
-  url: ""
+  credential_id: 0beca770-96dc-4dc0-833a-5d70e3a79b3c
+  url: https://www.credential.net/0beca770-96dc-4dc0-833a-5d70e3a79b3c

@@ -79,10 +79,13 @@ export function Message({ message, isStreaming = false }: MessageProps) {
       className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div
+        role={message.isError ? 'alert' : undefined}
         className={`max-w-[80%] rounded-xl px-4 py-3 ${
           isUser
             ? 'bg-accent-cyan/10 border border-accent-cyan/20 text-text-primary'
-            : 'bg-bg-card border border-border text-text-primary'
+            : message.isError
+              ? 'bg-red-50 border border-red-200 text-red-900'
+              : 'bg-bg-card border border-border text-text-primary'
         }`}
       >
         {isUser ? (

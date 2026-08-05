@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Button } from '../ui/button'
-import { getResumeDownloadUrl } from '../../lib/api'
+import { ContactCta } from '../layout/contact-cta'
 
 interface RecruiterPanelProps {
   onAction: (message: string) => void
@@ -19,8 +19,10 @@ export function RecruiterPanel({ onAction }: RecruiterPanelProps) {
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="hidden xl:flex flex-col w-64 border-l border-border bg-bg-secondary p-4 gap-3"
+      className="hidden xl:flex flex-col w-64 border-l border-border bg-bg-secondary p-4 gap-3 overflow-y-auto"
     >
+      <ContactCta title="Ready to talk?" />
+
       <h3 className="text-sm font-semibold text-text-primary">Quick Actions</h3>
       {ACTIONS.map((action) => (
         <Button
@@ -33,16 +35,6 @@ export function RecruiterPanel({ onAction }: RecruiterPanelProps) {
           {action.label}
         </Button>
       ))}
-      <hr className="border-border" />
-      <a
-        href={getResumeDownloadUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Button variant="primary" size="sm" className="w-full">
-          Download Resume
-        </Button>
-      </a>
     </motion.div>
   )
 }
