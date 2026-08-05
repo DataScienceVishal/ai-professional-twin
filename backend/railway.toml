@@ -16,3 +16,8 @@ restartPolicyMaxRetries = 3
 # /data/chromadb in the Dockerfile). Without it the vector store is wiped on
 # every restart and the content-hash manifest cannot prevent re-embedding, so
 # each cold start bills a full set of Azure embedding calls.
+#
+# The same volume holds the question analytics log, which defaults to a sibling
+# of CHROMA_PERSIST_DIR at /data/analytics/queries.jsonl. Without the volume it
+# is wiped on every restart too. Set ANALYTICS_TOKEN to enable GET /analytics;
+# with it unset the endpoint 404s.

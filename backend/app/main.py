@@ -13,6 +13,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from app import __version__
+from app.analytics import build_query_analytics
 from app.config import Settings, get_settings
 from app.ingest import IngestionState, run_ingestion
 from app.logging_config import setup_logging
@@ -20,7 +21,7 @@ from app.rag.embeddings import EmbeddingService
 from app.rag.retriever import Retriever
 from app.rag.store import ChromaStore
 from app.rate_limit import DailyChatBudget, limiter
-from app.routers import chat, health, knowledge
+from app.routers import analytics, chat, health, knowledge
 from app.routers.chat import init_chat_dependencies
 from app.services.github_api import GitHubAPIService
 from app.services.llm import LLMService
@@ -73,6 +74,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     app.state.store = store
     app.state.ingestion = state
 
+    # Created before the credentials check so the directory exists on the
+    # volume either way, and the first chat request never pays for the mkdir.
+    query_analytics = build_query_analytics(settings)
+    query_analytics.ensure_directory()
+
     api_key = settings.azure_openai_api_key or settings.github_token
     if not api_key:
         # Nothing can be embedded or generated without credentials. Stay up and
@@ -120,6 +126,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         llm_service=llm_service,
         tool_registry=registry,
         budget=DailyChatBudget(settings.daily_chat_budget),
+        analytics=query_analytics,
     )
 
     # Ingestion runs in the background so /health answers immediately. The task
@@ -178,5 +185,6 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(chat.router)
     app.include_router(knowledge.router)
+    app.include_router(analytics.router)
 
     return app
