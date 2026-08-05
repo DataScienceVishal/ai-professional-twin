@@ -107,6 +107,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         temperature=settings.llm_temperature,
         max_output_tokens=settings.llm_max_output_tokens,
         send_temperature=settings.llm_send_temperature,
+        reasoning_effort=settings.llm_reasoning_effort,
         stream_usage=settings.llm_stream_usage,
     )
 

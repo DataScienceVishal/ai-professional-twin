@@ -1,13 +1,15 @@
 import { AVAILABILITY, CONTACT_MAILTO, PROFILE } from '../../lib/constants'
 import { getResumeDownloadUrl } from '../../lib/api'
 
+// `min-h-11` keeps every link a 44px touch target on phones and tablets; the
+// desktop sidebar (`lg` and up) is mouse-driven and stays compact.
 const PRIMARY_LINK =
-  'flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 ' +
+  'flex min-h-11 items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200 ' +
   'bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan hover:bg-accent-cyan/25 ' +
-  'px-3 py-1.5 text-xs'
+  'px-3 py-1.5 text-xs lg:min-h-0'
 
 const QUIET_LINK =
-  'flex items-center gap-1.5 text-xs text-text-secondary hover:text-accent-cyan transition-colors'
+  'flex min-h-11 items-center gap-1.5 text-xs text-text-secondary hover:text-accent-cyan transition-colors lg:min-h-0'
 
 function MailIcon() {
   return (
@@ -87,7 +89,7 @@ export function ContactCtaCompact() {
   return (
     <a
       href={CONTACT_MAILTO}
-      className="flex items-center gap-1.5 rounded-md border border-accent-cyan/30 bg-accent-cyan/15 px-2 py-1 text-xs font-medium text-accent-cyan transition-colors hover:bg-accent-cyan/25"
+      className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-md border border-accent-cyan/30 bg-accent-cyan/15 px-3 py-1 text-xs font-medium text-accent-cyan transition-colors hover:bg-accent-cyan/25"
     >
       <MailIcon />
       Hire

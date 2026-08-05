@@ -58,16 +58,20 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
 
   if (error) {
     return (
-      <pre className="rounded-lg bg-bg-secondary border border-border p-3 text-xs text-text-secondary overflow-x-auto whitespace-pre-wrap">
+      <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-bg-secondary p-3 text-xs text-text-secondary">
         <code>{code}</code>
       </pre>
     )
   }
 
+  // Diagrams are routinely wider than a phone. Scroll them inside their own
+  // container rather than letting them widen the message list; `mx-auto`
+  // still centres anything that does fit. `justify-center` on a flex parent
+  // would overflow to both sides and make the left half unreachable.
   return (
     <div
       ref={containerRef}
-      className="my-3 flex justify-center [&_svg]:max-w-full"
+      className="my-3 max-w-full overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto"
     />
   )
 }

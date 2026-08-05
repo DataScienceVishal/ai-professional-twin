@@ -20,7 +20,12 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t border-border">
+    <form
+      onSubmit={handleSubmit}
+      // `pb` clears the iOS home indicator when the page opts into the safe
+      // area; it falls back to the normal 1rem everywhere else.
+      className="flex shrink-0 gap-2 border-t border-border p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+    >
       <input
         ref={inputRef}
         type="text"
@@ -28,13 +33,14 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
         onChange={(e) => setInput(e.target.value)}
         placeholder={disabled ? 'Thinking...' : 'Ask me anything about Vishal...'}
         autoFocus
-        className="flex-1 rounded-lg bg-bg-card border border-border px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
+        // 16px text stops iOS Safari from zooming the viewport on focus.
+        className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-bg-card px-4 py-2.5 text-base text-text-primary transition-all placeholder:text-text-muted focus:border-accent-cyan/40 focus:outline-none focus:ring-1 focus:ring-accent-cyan/20 lg:text-sm"
       />
       {disabled && onStop ? (
         <button
           type="button"
           onClick={onStop}
-          className="rounded-lg bg-bg-card border border-border text-text-secondary px-4 py-2.5 text-sm font-medium hover:border-accent-cyan/30 hover:text-accent-cyan transition-all"
+          className="min-h-11 shrink-0 rounded-lg border border-border bg-bg-card px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-accent-cyan/30 hover:text-accent-cyan"
         >
           Stop
         </button>
@@ -42,7 +48,7 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
         <button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan px-4 py-2.5 text-sm font-medium hover:bg-accent-cyan/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="min-h-11 shrink-0 rounded-lg border border-accent-cyan/30 bg-accent-cyan/15 px-4 py-2.5 text-sm font-medium text-accent-cyan transition-all hover:bg-accent-cyan/25 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Send
         </button>

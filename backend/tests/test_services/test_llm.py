@@ -97,6 +97,53 @@ def test_stream_usage_can_be_disabled() -> None:
     assert "stream_options" not in kwargs
 
 
+def test_reasoning_effort_sent_for_gpt5() -> None:
+    kwargs = _service("gpt-5-mini", reasoning_effort="low").build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert kwargs["reasoning_effort"] == "low"
+
+
+def test_reasoning_effort_never_sent_to_a_non_reasoning_model() -> None:
+    """A GPT-4 deployment rejects the parameter, so the model name gates it."""
+    kwargs = _service("gpt-4o-mini", reasoning_effort="low").build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert "reasoning_effort" not in kwargs
+
+
+def test_reasoning_effort_omitted_when_blank() -> None:
+    kwargs = _service("gpt-5-mini", reasoning_effort="").build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert "reasoning_effort" not in kwargs
+
+
+@pytest.mark.parametrize("effort", ["minimal", "low", "medium", "high"])
+def test_all_documented_efforts_are_accepted(effort: str) -> None:
+    kwargs = _service("gpt-5-mini", reasoning_effort=effort).build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert kwargs["reasoning_effort"] == effort
+
+
+@pytest.mark.parametrize("effort", ["  LOW  ", "Medium"])
+def test_reasoning_effort_is_normalised(effort: str) -> None:
+    kwargs = _service("gpt-5-mini", reasoning_effort=effort).build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert kwargs["reasoning_effort"] == effort.strip().lower()
+
+
+def test_unrecognised_reasoning_effort_is_dropped_not_sent() -> None:
+    """A typo in an env var must degrade to the service default rather than
+    400 every request in production."""
+    kwargs = _service("gpt-5-mini", reasoning_effort="lowest").build_completion_kwargs(
+        MESSAGES, stream=False
+    )
+    assert "reasoning_effort" not in kwargs
+
+
 def test_tools_included_only_when_provided() -> None:
     service = _service("gpt-5-mini")
     tool = [{"type": "function", "function": {"name": "t"}}]

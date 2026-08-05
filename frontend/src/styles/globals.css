@@ -19,6 +19,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*
+ * The app shell is a fixed-height `h-dvh` flex column, so nothing should ever
+ * scroll the document itself - a stray wide element must not turn into a
+ * horizontally scrolling page on a phone.
+ */
+html,
+body,
+#root {
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+/* Swipeable chip strip on mobile: scrolling without a visible scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .prose h1, .prose h2, .prose h3, .prose h4 {
   color: var(--color-text-primary);
   font-weight: 600;
@@ -47,4 +69,43 @@ body {
 
 .prose a:hover {
   text-decoration: underline;
+}
+
+/*
+ * Long unbroken strings - bare URLs, package names, snake_case identifiers -
+ * are the usual reason a chat bubble blows out on a 375px screen. Break them
+ * anywhere rather than letting them set the bubble's min-content width.
+ */
+.prose p,
+.prose li,
+.prose td,
+.prose th,
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose a,
+.prose code {
+  overflow-wrap: anywhere;
+}
+
+/* Code inside a `<pre>` scrolls instead (see `CodeBlock` in `message.tsx`). */
+.prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.prose pre code {
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+/*
+ * GFM tables are wrapped in an `overflow-x-auto` div by `message.tsx`.
+ * `max-content` lets a wide table scroll there instead of squeezing every
+ * column down to one word per line on a phone.
+ */
+.prose table {
+  width: max-content;
+  max-width: none;
 }

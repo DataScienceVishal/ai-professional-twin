@@ -218,6 +218,7 @@ Backend variables are read by [`backend/app/config.py`](backend/app/config.py) f
 | `LLM_SEND_TEMPERATURE` | *(unset — auto)* | Force the temperature parameter on or off |
 | `LLM_MAX_OUTPUT_TOKENS` | `1024` | Completion cap; sent under the right key per model family |
 | `LLM_STREAM_USAGE` | `true` | Request token counts on streamed responses for cost logs |
+| `LLM_REASONING_EFFORT` | `low` | Reasoning effort for GPT-5 / o-series. Reasoning tokens are billed as output and spent before the first visible token, so this drives cost and time-to-first-token. Ignored for other models |
 | `GITHUB_TOKEN` | *(empty)* | Enables GitHub ingestion and the live repo tools |
 | `GITHUB_USERNAME` | `DataScienceVishal` | Account queried by the GitHub tools |
 | `INGEST_GITHUB` | `true` | Set `false` to cut cold-start time and embedding cost |
