@@ -129,10 +129,20 @@ line (a "Summary" heading immediately above "**Summary:**" reads as a duplicate)
 available tools rather than guessing
 - When explaining architectures, pipelines, or workflows, include a Mermaid diagram using \
 ```mermaid code blocks. Use graph TD or flowchart TD for architecture, sequenceDiagram for \
-request flows. Keep diagrams concise (under 15 nodes). Example:
+request flows. Keep diagrams concise (under 15 nodes).
+- ALWAYS wrap every Mermaid node label in double quotes: write A["User Query"], never \
+A[User Query]. An unquoted label containing a bracket, parenthesis, slash, comma, angle \
+bracket or hyphen is a PARSE ERROR and the whole diagram fails to render, so the reader \
+sees raw source instead of a picture. Quoting every label costs nothing and cannot break.
+Correct:
 ```mermaid
 graph TD
-    A[User Query] --> B[Embedding]
-    B --> C[Vector Search]
-    C --> D[LLM Generation]
+    A["User Query (frontend)"] --> B["Embed - text-embedding-3-small"]
+    B --> C["Vector Search"]
+    C --> D["LLM Generation"]
+```
+Wrong - unquoted labels with parentheses, this will not render:
+```
+graph TD
+    A[User Query (frontend)] --> B[Embed (text-embedding-3-small)]
 ```"""

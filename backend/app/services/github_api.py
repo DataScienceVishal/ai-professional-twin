@@ -33,15 +33,23 @@ class GitHubAPIService:
                 )
                 return []
 
+            # description, language and topics are nullable in the API response,
+            # so `or` rather than a dict default: the key is present and set to
+            # null for a repo with no description at all.
             return [
                 {
                     "name": repo["name"],
-                    "description": repo.get("description", ""),
+                    "description": repo.get("description") or "",
                     "html_url": repo["html_url"],
-                    "language": repo.get("language", ""),
+                    "language": repo.get("language") or "",
                     "stargazers_count": repo.get("stargazers_count", 0),
-                    "topics": repo.get("topics", []),
+                    "topics": repo.get("topics") or [],
                     "updated_at": repo.get("updated_at", ""),
+                    # Ingestion quality gates. Both are always present on the
+                    # list-repos payload; defaulted anyway so a trimmed fixture
+                    # or a future API change cannot drop a real repo.
+                    "fork": bool(repo.get("fork", False)),
+                    "archived": bool(repo.get("archived", False)),
                 }
                 for repo in response.json()
             ]

@@ -51,13 +51,26 @@ class Settings(BaseSettings):
     github_repo_limit: int = 100
     github_concurrency: int = 5
 
+    # Repos never ingested, whatever they contain (comma-separated, matched
+    # case-insensitively on the exact repo name). my-ai-resume is the retired V1
+    # of this project: still a public repo, but citing it as evidence for the
+    # current one is actively misleading.
+    github_exclude_repos: Annotated[list[str], NoDecode] = ["my-ai-resume"]
+    # Quality gates applied before a repo is embedded. Each one is a judgement
+    # call, so each is switchable: forks are not his own work, archived repos are
+    # dead, and a repo with neither a description nor a README has nothing worth
+    # embedding beyond its name.
+    github_skip_forks: bool = True
+    github_skip_archived: bool = True
+    github_require_content: bool = True
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "github_exclude_repos", mode="before")
     @classmethod
-    def _split_cors_origins(cls, value: object) -> object:
+    def _split_csv(cls, value: object) -> object:
         if isinstance(value, str):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
+            return [item.strip() for item in value.split(",") if item.strip()]
         return value
 
     @field_validator("public_base_url")
