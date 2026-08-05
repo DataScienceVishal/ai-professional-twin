@@ -7,16 +7,37 @@ interface SourceCitationProps {
 const SOURCE_LABELS: Record<string, string> = {
   projects: 'Project',
   skills: 'Skills',
-  career_qa: 'Career Info',
+  career_qa: 'Career Q&A',
   certificates: 'Certificate',
-  linkedin: 'LinkedIn Profile',
-  resume: 'Resume',
-  github: 'GitHub Repo',
+  linkedin: 'LinkedIn',
+  resume: 'CV',
+  academics: 'Academics',
+  github: 'GitHub',
+}
+
+/**
+ * Metadata values arrive as internal slugs (`technical-strengths`,
+ * `years-of-experience`). Rendered raw they read like leaked database keys, so
+ * turn them into prose. Values that are already human (`AI Twin`) survive
+ * unchanged.
+ */
+function humanizeDetail(detail: string): string {
+  return detail
+    .split(' - ')
+    .map((part) =>
+      part
+        .replace(/[-_]+/g, ' ')
+        .trim()
+        .replace(/\b\p{Ll}/gu, (c) => c.toUpperCase()),
+    )
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function SourceCitation({ source }: SourceCitationProps) {
   const label = SOURCE_LABELS[source.source] || source.source
-  const displayText = source.detail ? `${label}: ${source.detail}` : label
+  const detail = humanizeDetail(source.detail)
+  const displayText = detail ? `${label} · ${detail}` : label
 
   if (source.url) {
     return (

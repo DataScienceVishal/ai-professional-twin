@@ -148,7 +148,13 @@ async def chat(
             # per-entry link, so filtering on `url` stripped the citations from
             # exactly the answers a recruiter is reading. The frontend renders
             # url-less sources as plain chips.
-            source_data = [{"source": s.source, "detail": s.detail, "url": s.url} for s in sources]
+            #
+            # Linkable sources (GitHub repos, certificates, LinkedIn) are
+            # externally verifiable and carry far more weight with a reader than
+            # a chip pointing at an internal YAML file, so surface them first.
+            # sorted() is stable, so relevance order holds within each group.
+            ordered = sorted(sources, key=lambda s: not s.url)
+            source_data = [{"source": s.source, "detail": s.detail, "url": s.url} for s in ordered]
             yield _sse({"type": "sources", "sources": source_data})
         except Exception as exc:
             # Azure can fail mid-stream (rate limit, content filter, auth). Log
