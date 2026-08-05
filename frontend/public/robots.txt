@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The API is proxied through this origin but holds nothing worth indexing.
+Disallow: /api/
+
+Sitemap: https://ai-professional-twin.vercel.app/sitemap.xml

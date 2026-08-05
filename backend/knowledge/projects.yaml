@@ -1,47 +1,33 @@
 # Projects from Vishal Khan's resume and GitHub (github.com/DataScienceVishal)
 
-- name: Professional Profile Assistant V2 - Full-Stack RAG Application
-  slug: professional-profile-assistant-v2
+- name: AI Digital Twin - Full-Stack RAG Assistant
+  slug: ai-digital-twin
   description: >
-    Built a production RAG (Retrieval-Augmented Generation) system for
-    recruiter engagement. The backend uses FastAPI with ChromaDB as a vector store,
-    text-embedding-3-small for embeddings, and GPT-5 mini for generation via
-    Azure OpenAI. Documents from
-    YAML knowledge files, a resume PDF, and live GitHub repos are chunked,
-    embedded, and stored in ChromaDB on startup. The retriever performs cosine
-    similarity search to find relevant context, which is injected into the
-    system prompt alongside mode-specific instructions (General, Recruiter,
-    Interview). Responses stream via SSE. The React + Vite + Tailwind frontend
-    renders markdown with syntax highlighting and Mermaid diagrams, shows
-    clickable source citations with real URLs, and provides suggestion chips
-    that shuffle after each message. Deployed on Railway (backend) and Vercel
-    (frontend), both free tier.
-  tech_stack: [Python, FastAPI, ChromaDB, React, Vite, Tailwind CSS, Azure OpenAI, RAG, LangChain concepts, Docker]
+    This site. A production RAG (Retrieval-Augmented Generation) assistant that
+    answers recruiter and technical-interview questions from grounded, cited
+    evidence rather than free-form generation. The FastAPI backend indexes a
+    curated YAML knowledge base, a resume PDF, and live GitHub repositories into
+    ChromaDB using Azure OpenAI text-embedding-3-small, and generates answers
+    with GPT-5 mini. Retrieval combines intent classification, over-fetching with
+    source boosting, a relevance threshold, and conversation-aware query
+    expansion so follow-up questions keep their subject. Answers stream over
+    Server-Sent Events with tool calling and inline source citations. The
+    React 19 + Vite + Tailwind frontend renders markdown, Mermaid diagrams and
+    three tailored modes (General, Recruiter, Interview). Rebuilt from an
+    earlier vanilla-JavaScript prototype, which is now retired.
+  tech_stack: [Python, FastAPI, ChromaDB, Azure OpenAI, RAG, React 19, TypeScript, Vite, Tailwind CSS, Docker, Railway, Vercel]
   github_url: https://github.com/DataScienceVishal/ai-professional-twin
   category: Software Engineering
   highlights:
-    - Full RAG pipeline with chunking, embedding, retrieval, and generation
-    - ChromaDB vector store with cosine similarity search
-    - SSE streaming responses from FastAPI to React frontend
-    - Live GitHub repo and README ingestion on startup
-    - Three chat modes (General, Recruiter, Interview) with tailored prompts
-    - Deployed on Railway + Vercel free tier
-
-- name: Professional Profile Assistant V1 - Serverless Portfolio
-  slug: professional-profile-assistant-v1
-  description: >
-    First iteration of the project. Built a vanilla HTML5/CSS3/JS web
-    app with a direct serverless gateway to OpenAI-compatible models featuring
-    context-window prompt optimization and streaming responses. Used dynamic
-    viewport height (dvh) for mobile responsiveness and interactive inquiry
-    chips. Deployed to Vercel CDN.
-  tech_stack: [HTML5, CSS3, JavaScript, OpenAI-compatible API, Vercel]
-  github_url: https://github.com/DataScienceVishal/my-ai-resume
-  category: Software Engineering
-  highlights:
-    - Serverless gateway to OpenAI GPT models with token streaming
-    - Layout-adaptive rendering with dvh for mobile responsiveness
-    - Deployed on Vercel CDN with interactive inquiry chips
+    - Full RAG pipeline - chunking, embedding, retrieval, generation, citations
+    - Source boosting with a relevance threshold instead of hard metadata filtering
+    - Conversation-aware retrieval so follow-up questions keep their context
+    - SSE streaming with tool calling and live GitHub repository ingestion
+    - Non-blocking background ingestion with a content-hash manifest, so
+      unchanged documents are never re-embedded and cold starts stay fast
+    - Cost and abuse controls - per-IP rate limiting and a global daily budget
+    - Prompt-injection hardening on untrusted ingested content
+    - 178 automated tests in CI with ruff, mypy --strict, oxlint and vitest
 
 - name: Image Classification with CNN (CIFAR-10)
   slug: image-classification-cnn-cifar10

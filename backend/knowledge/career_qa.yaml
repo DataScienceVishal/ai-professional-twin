@@ -49,10 +49,12 @@
     experience across Azure, AWS, MySQL, SQL Server, MongoDB and Neo4j. In ML
     he has worked with Reinforcement Learning (DQN, A2C, PPO), Deep Learning,
     Classification, Regression, Time-Series Forecasting and NLP using PyTorch,
-    TensorFlow, Keras and Scikit-learn. He also has Generative AI skills
-    including LLMs, RAG, Prompt Engineering, LangChain, FAISS and the Gemini
-    API. He works with Power BI, Tableau and Excel for visualization and uses
-    Git, VS Code, Jupyter, Streamlit and Google Colab as his development tools.
+    TensorFlow, Keras and Scikit-learn. His Generative AI skills cover LLMs,
+    RAG, prompt engineering, fine-tuning, agentic AI and the Model Context
+    Protocol (MCP), tool and function calling, vector databases (ChromaDB,
+    FAISS) and LangChain. He works with Power BI, Tableau and Excel for
+    visualization and uses Git, VS Code, Jupyter, Streamlit and Google Colab
+    as his development tools, deploying to Railway and Vercel.
 
 - topic: work-experience
   question: Tell me about Vishal's work experience.
@@ -258,11 +260,13 @@
   answer: >
     Yes. Vishal has practical Generative AI skills including building
     RAG (Retrieval-Augmented Generation) systems, prompt engineering,
-    working with LLMs (GPT-4, GPT-5 mini, Gemini), vector databases
-    (ChromaDB, FAISS), and frameworks like LangChain. His professional
-    profile assistant project is a full-stack RAG application with tool
-    calling, SSE streaming, and semantic search, demonstrating end-to-end
-    GenAI engineering skills.
+    fine-tuning LLMs, agentic AI and the Model Context Protocol (MCP),
+    tool and function calling, vector databases (ChromaDB, FAISS), and
+    frameworks like LangChain. This assistant is his own work: a full-stack
+    RAG application with tool calling, SSE streaming, semantic search with
+    source citations, and prompt-injection hardening, deployed on Railway
+    and Vercel with 178 automated tests in CI. It demonstrates end-to-end
+    GenAI engineering rather than notebook experiments.
 
 - topic: contact
   question: How can I get in touch with Vishal?

@@ -11,3 +11,16 @@ dist/
 *.egg-info/
 chromadb_data/
 knowledge/Academic/
+
+# Local AI assistant / editor tooling - never publish
+.claude/
+.remember/
+.cursor/
+.aider*
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
+# Local log dumps and scratch output
+logs*.json
+*.log
