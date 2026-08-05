@@ -40,13 +40,15 @@
 - category: Generative AI
   skills:
     - LLMs
-    - RAG
+    - RAG (Retrieval-Augmented Generation)
     - Prompt Engineering
+    - Fine-Tuning LLMs
+    - Agentic AI
+    - MCP (Model Context Protocol)
+    - Tool / Function Calling
     - Vector Databases (ChromaDB, FAISS)
     - LangChain
     - Azure OpenAI
-    - Gemini API
-    - Tool / Function Calling
   proficiency: advanced
 
 - category: Libraries & Frameworks
@@ -86,7 +88,7 @@
   proficiency: intermediate
 
 - category: Web & Frontend
-  skills: [HTML, CSS, JavaScript, TypeScript, React, Svelte, Streamlit]
+  skills: [HTML, CSS, JavaScript, TypeScript, React, Streamlit]
   proficiency: working knowledge
 
 - category: Tools & Practices
