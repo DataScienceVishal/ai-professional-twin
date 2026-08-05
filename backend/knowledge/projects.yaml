@@ -51,7 +51,7 @@
     dropout, and L2 regularization to enhance accuracy and generalization.
     Achieved a training accuracy of 72.12% and a validation accuracy of 74.06%.
   tech_stack: [Python, TensorFlow, Keras]
-  github_url: https://github.com/DataScienceVishal
+  github_url: https://github.com/DataScienceVishal/CIFAR-10-CNN
   category: Deep Learning
   highlights:
     - CNN architecture with normalization, dropout, and L2 regularization
@@ -67,7 +67,7 @@
     Regression. Achieved ~80% accuracy and identified tenure as the strongest
     churn predictor.
   tech_stack: [Python, Pandas, Scikit-learn, SQL]
-  github_url: https://github.com/DataScienceVishal
+  github_url: https://github.com/DataScienceVishal/Telecom_Churn
   category: Machine Learning
   highlights:
     - Full EDA, preprocessing, and feature engineering pipeline

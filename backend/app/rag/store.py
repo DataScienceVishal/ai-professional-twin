@@ -3,6 +3,10 @@ from typing import Any
 
 import chromadb
 
+# Metadata key holding the sha256 of a document's content. Written on ingest and
+# read back on boot so unchanged documents are never re-embedded.
+CONTENT_HASH_KEY = "content_hash"
+
 
 @dataclass
 class Document:
@@ -18,6 +22,12 @@ class SearchResult:
     text: str
     metadata: dict[str, str]
     distance: float
+
+
+@dataclass
+class ManifestEntry:
+    content_hash: str
+    source: str
 
 
 class ChromaStore:
@@ -60,6 +70,29 @@ class ChromaStore:
                     )
                 )
         return search_results
+
+    def manifest(self) -> dict[str, ManifestEntry]:
+        """What is already ingested, keyed by document id.
+
+        The persisted collection *is* the manifest: keeping the hashes in
+        document metadata means there is no second file that can drift out of
+        sync with the vectors it describes.
+        """
+        result = self.collection.get(include=["metadatas"])
+        entries: dict[str, ManifestEntry] = {}
+        metadatas = result.get("metadatas") or []
+        for i, doc_id in enumerate(result.get("ids") or []):
+            metadata = dict(metadatas[i]) if i < len(metadatas) and metadatas[i] else {}
+            entries[doc_id] = ManifestEntry(
+                content_hash=str(metadata.get(CONTENT_HASH_KEY, "")),
+                source=str(metadata.get("source", "")),
+            )
+        return entries
+
+    def delete(self, ids: list[str]) -> None:
+        if not ids:
+            return
+        self.collection.delete(ids=ids)
 
     def count(self) -> int:
         return self.collection.count()

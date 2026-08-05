@@ -45,3 +45,36 @@ async def test_embed_multiple_texts(embedding_service: EmbeddingService) -> None
         result = await embedding_service.embed_texts(["text one", "text two"])
 
     assert len(result) == 2
+
+
+@pytest.mark.asyncio
+async def test_embed_texts_batches_large_inputs(embedding_service: EmbeddingService) -> None:
+    """A full re-ingest must not post every document in one oversized request."""
+
+    async def fake_create(model: str, input: list[str]) -> MagicMock:
+        response = MagicMock()
+        response.data = [MagicMock(embedding=[0.1] * 4) for _ in input]
+        return response
+
+    with patch.object(
+        embedding_service.client.embeddings, "create", new_callable=AsyncMock
+    ) as mock_create:
+        mock_create.side_effect = fake_create
+        result = await embedding_service.embed_texts([f"t{i}" for i in range(150)], batch_size=64)
+
+    assert len(result) == 150
+    assert mock_create.call_count == 3
+    assert [len(call.kwargs["input"]) for call in mock_create.call_args_list] == [64, 64, 22]
+
+
+@pytest.mark.asyncio
+async def test_embed_texts_makes_no_call_for_empty_input(
+    embedding_service: EmbeddingService,
+) -> None:
+    with patch.object(
+        embedding_service.client.embeddings, "create", new_callable=AsyncMock
+    ) as mock_create:
+        result = await embedding_service.embed_texts([])
+
+    assert result == []
+    mock_create.assert_not_called()

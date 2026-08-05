@@ -6,7 +6,8 @@ import { RecruiterPanel } from '../components/modes/recruiter-panel'
 import { InterviewPanel } from '../components/modes/interview-panel'
 
 export default function Home() {
-  const { messages, isStreaming, mode, setMode, sendMessage, clearMessages } = useChat()
+  const { messages, isStreaming, mode, setMode, sendMessage, clearMessages, stopStreaming } =
+    useChat()
 
   return (
     <div className="flex h-dvh bg-bg-primary text-text-primary">
@@ -19,6 +20,7 @@ export default function Home() {
           isStreaming={isStreaming}
           mode={mode}
           onSend={sendMessage}
+          onStop={stopStreaming}
         />
       </div>
 

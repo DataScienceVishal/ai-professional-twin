@@ -2,10 +2,11 @@ import { type FormEvent, useRef, useState } from 'react'
 
 interface InputBarProps {
   onSend: (message: string) => void
+  onStop?: () => void
   disabled?: boolean
 }
 
-export function InputBar({ onSend, disabled }: InputBarProps) {
+export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -29,13 +30,23 @@ export function InputBar({ onSend, disabled }: InputBarProps) {
         autoFocus
         className="flex-1 rounded-lg bg-bg-card border border-border px-4 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-cyan/40 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
       />
-      <button
-        type="submit"
-        disabled={disabled || !input.trim()}
-        className="rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan px-4 py-2.5 text-sm font-medium hover:bg-accent-cyan/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-      >
-        Send
-      </button>
+      {disabled && onStop ? (
+        <button
+          type="button"
+          onClick={onStop}
+          className="rounded-lg bg-bg-card border border-border text-text-secondary px-4 py-2.5 text-sm font-medium hover:border-accent-cyan/30 hover:text-accent-cyan transition-all"
+        >
+          Stop
+        </button>
+      ) : (
+        <button
+          type="submit"
+          disabled={disabled || !input.trim()}
+          className="rounded-lg bg-accent-cyan/15 border border-accent-cyan/30 text-accent-cyan px-4 py-2.5 text-sm font-medium hover:bg-accent-cyan/25 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          Send
+        </button>
+      )}
     </form>
   )
 }

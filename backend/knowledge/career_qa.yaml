@@ -1,4 +1,8 @@
 # Pre-written Q&A pairs for recruiter and interviewer questions about Vishal Khan
+#
+# MAINTENANCE NOTE: entries tagged `time_sensitive: true` contain dates or
+# availability windows that go stale. Review them whenever term dates, visa
+# status, or job-search priorities change.
 
 - topic: hiring
   question: Why should we hire Vishal?
@@ -6,12 +10,24 @@
     Vishal brings around 2 years of hands-on data engineering at Teleperformance
     where he built Databricks pipelines processing millions of telecom records
     and migrated on-prem SQL Server schemas, improving query performance by ~20%
-    and cutting costs by ~20%. Before that, he spent 2+ years translating
-    commercial requirements into analytics and ML forecasting models (80-90%
-    accuracy). He holds an MSc in Data Science from LJMU and is currently
-    deepening his expertise with an MSc in AI and Computer Science at
-    Northeastern University London. His MSc thesis compared Reinforcement
-    Learning algorithms (DQN, A2C, PPO) for dynamic pricing in e-commerce.
+    and cutting costs by ~20%. Before that he spent ~4 years across finance,
+    accounts and commercial analytics, where he moved from taxation into
+    Python/SQL analytics and ML forecasting models reaching 80-90% accuracy.
+    He holds an MSc in Data Science from LJMU and is currently deepening his
+    expertise with an MSc in AI and Computer Science at Northeastern University
+    London. His MSc thesis compared Reinforcement Learning algorithms (DQN, A2C,
+    PPO) for dynamic pricing in e-commerce.
+
+- topic: years-of-experience
+  question: How many years of experience does Vishal have?
+  answer: >
+    Vishal has approximately 6 years of professional experience. That breaks
+    down as roughly 4 years across finance, accounts and commercial analytics
+    (PJRJ Associates, Aryan Care, and Avant Garde, where he progressed from
+    taxation work into Python/SQL analytics and ML forecasting), and
+    approximately 2 years in data engineering as a Data Engineer at
+    Teleperformance Global Business. His AI and machine learning work spans
+    both his commercial analytics period and his two master's degrees.
 
 - topic: career-goals
   question: What are Vishal's career goals?
@@ -29,14 +45,14 @@
   question: What are Vishal's technical strengths?
   answer: >
     Vishal's core strengths span data engineering and applied ML/AI. He is
-    proficient in Python, SQL, and R with hands-on experience in Databricks,
-    Azure, AWS, MySQL, SQL Server, MongoDB, and Neo4js. In ML he has worked
-    with Reinforcement Learning (DQN, A2C, PPO), Deep Learning, Classification,
-    Regression, Time-Series Forecasting, and NLP using PyTorch, TensorFlow,
-    Keras, and Scikit-learn. He also has Generative AI skills including LLMs,
-    RAG, Prompt Engineering, LangChain, FAISS, and Gemini API. He is skilled
-    with Power BI, Tableau, and Excel for visualization and uses Git, VS Code,
-    Jupyter, Streamlit, and Google Colab as his development tools.
+    most proficient in Python, SQL and Databricks, with strong working
+    experience across Azure, AWS, MySQL, SQL Server, MongoDB and Neo4j. In ML
+    he has worked with Reinforcement Learning (DQN, A2C, PPO), Deep Learning,
+    Classification, Regression, Time-Series Forecasting and NLP using PyTorch,
+    TensorFlow, Keras and Scikit-learn. He also has Generative AI skills
+    including LLMs, RAG, Prompt Engineering, LangChain, FAISS and the Gemini
+    API. He works with Power BI, Tableau and Excel for visualization and uses
+    Git, VS Code, Jupyter, Streamlit and Google Colab as his development tools.
 
 - topic: work-experience
   question: Tell me about Vishal's work experience.
@@ -52,7 +68,31 @@
     ~30 minutes. From Jun 2024 to Jan 2026 he was a Data Engineer at
     Teleperformance, building Databricks pipelines processing millions of
     telecom records for a team of 50+ and migrating on-prem SQL Server to
-    Databricks.
+    Databricks. He is now a full-time MSc student in London.
+
+- topic: career-gap
+  question: Why is there a gap between December 2023 and June 2024?
+  answer: >
+    Vishal left Avant Garde in December 2023 and joined Teleperformance in
+    June 2024. During that period he was completing his MSc in Data Science at
+    Liverpool John Moores University, which ran from March 2023 to March 2024,
+    and he used the time to focus on his dissertation. His thesis compared
+    Reinforcement Learning algorithms (DQN, A2C, PPO) for dynamic pricing in
+    e-commerce, which required building a custom Gym-style environment and
+    running multi-episode training experiments. He took a short planned break
+    after submission before starting at Teleperformance.
+
+- topic: study-while-working
+  question: Why do Vishal's study dates overlap with his employment dates?
+  answer: >
+    The overlaps are intentional, not errors. Vishal completed his Executive PG
+    Program in Data Science at IIIT Bangalore (Jan 2022 - Jan 2023) and his MSc
+    in Data Science at Liverpool John Moores University (Mar 2023 - Mar 2024)
+    part-time and online while working full-time in India. His Bachelor of
+    Commerce at the University of Delhi (Nov 2018 - Nov 2021) was also completed
+    alongside his early finance roles. Only his current MSc in AI and Computer
+    Science at Northeastern University London (Jan 2026 - Jan 2027) is a
+    full-time, on-campus programme.
 
 - topic: education
   question: What is Vishal's educational background?
@@ -62,7 +102,8 @@
     Bangalore (Jan 2022 - Jan 2023), earned an MSc in Data Science from
     Liverpool John Moores University, UK (Mar 2023 - Mar 2024), and is currently
     pursuing an MSc in AI and Computer Science at Northeastern University London
-    (Jan 2026 - Jan 2027).
+    (Jan 2026 - Jan 2027). The IIIT Bangalore and LJMU programmes were completed
+    part-time and online alongside full-time work.
 
 - topic: differentiators
   question: What makes Vishal stand out from other candidates?
@@ -73,9 +114,9 @@
     real production data migration and an MSc thesis comparing RL algorithms
     (DQN, A2C, PPO) for dynamic pricing. He also has Generative AI skills
     (LLMs, RAG, LangChain, FAISS) and is comfortable across the full analytics
-    chain from framing problems to shipping end-to-end applications. His
-    progressive education path shows sustained commitment to growing as an AI
-    practitioner.
+    chain from framing problems to shipping end-to-end applications. He funded
+    and completed two postgraduate qualifications while working full-time,
+    which shows sustained commitment to growing as an AI practitioner.
 
 - topic: target-role
   question: What kind of role is Vishal looking for?
@@ -98,9 +139,13 @@
 - topic: certifications
   question: What certifications does Vishal hold?
   answer: >
-    Vishal holds a Data Science Programming Bootcamp certificate, a
-    Machine/Deep Learning Certificate, a SQL certification from HackerRank,
-    AWS Coursework from Great Learning, and a Data Toolkit certification.
+    Vishal's most substantial credential is his Executive PG Program in Data
+    Science from IIIT Bangalore (Jan 2022 - Jan 2023). Alongside it he holds a
+    Data Science Programming Bootcamp certificate and a Machine/Deep Learning
+    certificate (both verifiable on Credential.net), a SQL certification from
+    HackerRank, AWS coursework from Great Learning, and a Data Toolkit
+    certificate. All of these are hyperlinked to their verification pages in
+    his CV, which can be downloaded from this site.
 
 - topic: location
   question: Where is Vishal based and is he open to relocation or remote work?
@@ -109,60 +154,82 @@
     work arrangements, as long as the role is London-based.
 
 - topic: visa-status
+  time_sensitive: true
   question: What is Vishal's current visa status in the UK?
   answer: >
-    Vishal is currently on a Student visa (Student Route) valid from January
-    2026 to May 2027, issued for his MSc in AI & Computer Science at
-    Northeastern University London. During term time he can work up to 20
-    hours per week. During university holidays he can work full-time.
+    Vishal holds a UK Student visa (Student Route) valid from January 2026 to
+    May 2027, issued for his MSc in AI & Computer Science at Northeastern
+    University London. He has the right to work in the UK now: up to 20 hours
+    per week during term time, and full-time during university holidays.
 
 - topic: sponsorship
+  time_sensitive: true
   question: Will Vishal require visa sponsorship?
   answer: >
-    After completing his MSc in January 2027, Vishal plans to apply for a
-    Graduate Route visa which provides 2 years of unrestricted work rights
-    in the UK (no sponsorship needed during that period). After the Graduate
-    visa expires (approximately 2029), he would need employer sponsorship
-    via a Skilled Worker visa to continue working in the UK.
+    Not to start. Vishal has the right to work in the UK now on his Student
+    visa, and on completing his MSc in January 2027 he plans to move to the UK
+    Graduate Route (Post-Study Work) visa, which grants unrestricted full-time
+    work rights with no employer sponsorship and no salary threshold. That means
+    an employer can hire him for a full-time role from January 2027 with no
+    sponsorship cost, no Certificate of Sponsorship, and no Home Office
+    paperwork. Under the current rules the Graduate Route runs for 18 months,
+    taking him to approximately mid-2028. Only after that would he need an
+    employer to sponsor a Skilled Worker visa, so a hiring team has around 18
+    months to work with him before any sponsorship decision is needed. He is
+    happy to confirm exact dates and current entitlements directly.
 
 - topic: work-restrictions
+  time_sensitive: true
   question: Are there any restrictions on Vishal's right to work?
   answer: >
-    Under his current Student visa, Vishal can work up to 20 hours per week
-    during term time and full-time during university holidays. Once he
-    moves to a Graduate Route visa after completing his MSc (expected
-    January 2027), he will have unrestricted full-time work rights for 2
-    years with no employer sponsorship required.
+    Under his current Student visa Vishal can work up to 20 hours per week
+    during term time and full-time during university holidays. Once he moves to
+    the Graduate Route visa after completing his MSc in January 2027, he will
+    have unrestricted full-time work rights for 18 months with no employer
+    sponsorship required.
 
 - topic: availability
+  time_sensitive: true
   question: When is Vishal available to start a role?
   answer: >
-    Vishal is available now for part-time roles or internships (up to 20
-    hours per week during term time, full-time during holidays). He is
-    available for a summer 2026 internship placement. For full-time
-    permanent roles, he will be available from January 2027 after
-    completing his MSc.
+    Vishal's priority is a full-time permanent role starting January 2027, when
+    he completes his MSc in AI and Computer Science at Northeastern University
+    London. He is happy to interview and accept an offer well in advance of that
+    date. In the meantime he is available immediately for part-time work of up
+    to 20 hours per week during term time and full-time during university
+    holidays, and he is actively looking for AI and machine learning internship
+    or placement opportunities that fit alongside his studies.
+
+- topic: salary-expectations
+  question: What are Vishal's salary expectations?
+  answer: >
+    Vishal is flexible on compensation and would rather discuss the role first.
+    If a figure is needed as a starting point: for a full-time permanent role
+    from January 2027 he is looking at around £35,000 per year, and for
+    part-time work or an internship alongside his studies around £16,000 per
+    year pro rata. Both are indicative rather than fixed, and he is open to a
+    package that reflects the scope, seniority and location of the role. He is
+    happy to talk through compensation directly.
 
 - topic: target-roles
   question: What kind of roles is Vishal targeting?
   answer: >
-    Vishal is targeting roles in AI Engineer, ML Engineer, Data Scientist,
-    or Data Engineer positions in London. He is especially interested in
-    roles at the intersection of data engineering and applied AI where he
-    can build data pipelines and ship AI-powered applications end to end.
-    He is open to on-site, hybrid, or remote arrangements within London.
+    Vishal is targeting AI Engineer, ML Engineer, Data Scientist, or Data
+    Engineer positions in London. He is especially interested in roles at the
+    intersection of data engineering and applied AI where he can build data
+    pipelines and ship AI-powered applications end to end. He is open to
+    on-site, hybrid, or remote arrangements within London.
 
 - topic: industries
   question: What industries has Vishal worked in?
   answer: >
-    Vishal has worked across multiple industries. He spent 2 years in
-    finance and taxation (PJRJ Associates), then moved into e-commerce
-    (Aryan Care Pvt. Ltd.), followed by manufacturing and clean room
-    engineering (Avant Garde Clean Room & Engg. Solutions), and most
-    recently telecom (Teleperformance Global Business), where he built
-    data pipelines processing millions of CDR, billing, and agent
-    performance records. His education spans data science and AI, giving
-    him cross-domain versatility.
+    Vishal has worked across multiple industries. He spent his early career in
+    finance and taxation (PJRJ Associates), then moved into e-commerce (Aryan
+    Care Pvt. Ltd.), followed by manufacturing and clean room engineering
+    (Avant Garde Clean Room & Engg. Solutions), and most recently telecom
+    (Teleperformance Global Business), where he built data pipelines processing
+    millions of CDR, billing, and agent performance records. His education
+    spans data science and AI, giving him cross-domain versatility.
 
 - topic: impact
   question: How has Vishal demonstrated impact in previous roles?
@@ -191,8 +258,16 @@
   answer: >
     Yes. Vishal has practical Generative AI skills including building
     RAG (Retrieval-Augmented Generation) systems, prompt engineering,
-    working with LLMs (GPT-4, Gemini), vector databases (ChromaDB,
-    FAISS), and frameworks like LangChain. His professional profile assistant
-    project is a full-stack RAG application with tool calling, SSE
-    streaming, and semantic search, demonstrating end-to-end GenAI
-    engineering skills.
+    working with LLMs (GPT-4, GPT-5 mini, Gemini), vector databases
+    (ChromaDB, FAISS), and frameworks like LangChain. His professional
+    profile assistant project is a full-stack RAG application with tool
+    calling, SSE streaming, and semantic search, demonstrating end-to-end
+    GenAI engineering skills.
+
+- topic: contact
+  question: How can I get in touch with Vishal?
+  answer: >
+    The fastest way is email at vishalkhan251@gmail.com. He is also on LinkedIn
+    at linkedin.com/in/vishalkhandatascience and GitHub at
+    github.com/DataScienceVishal. His full CV can be downloaded directly from
+    this site. He is based in London and happy to arrange a call.

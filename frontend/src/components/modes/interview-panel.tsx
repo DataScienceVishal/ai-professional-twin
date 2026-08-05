@@ -10,7 +10,7 @@ const CATEGORIES = [
     name: 'RAG & Retrieval',
     questions: [
       'Explain the RAG architecture in this project',
-      'How does hybrid search work here?',
+      'Why did you choose dense vector search over BM25?',
       'What chunking strategy did you use and why?',
     ],
   },

@@ -26,10 +26,10 @@ class GitHubAPIService:
                 )
 
             if response.status_code != 200:
-                await logger.awarn(
+                await logger.awarning(
                     "GitHub API error",
                     status=response.status_code,
-                    body=response.json(),
+                    body=response.text[:500],
                 )
                 return []
 
