@@ -89,6 +89,43 @@ def test_chat_streams_sse_response() -> None:
     assert any(e["type"] == "sources" for e in events)
 
 
+def test_sources_without_a_url_are_still_emitted() -> None:
+    """Recruiter answers are grounded in career_qa/linkedin, which carry no
+    per-entry link. Filtering on `url` stripped citations from exactly the
+    answers a recruiter reads."""
+    retrieve = AsyncMock(
+        return_value=("ctx", [SourceInfo(source="career_qa", detail="sponsorship", url="")])
+    )
+    client = TestClient(_build_app(retrieve=retrieve))
+
+    response = client.post("/chat", json=PAYLOAD, headers={"Accept": "text/event-stream"})
+
+    sources = next(e for e in _events(response) if e["type"] == "sources")["sources"]
+    assert [s["source"] for s in sources] == ["career_qa"]
+
+
+def test_linkable_sources_are_listed_first() -> None:
+    """Externally verifiable sources carry more weight than a chip pointing at
+    an internal YAML file, so they lead. Ordering is stable within each group."""
+    retrieve = AsyncMock(
+        return_value=(
+            "ctx",
+            [
+                SourceInfo(source="career_qa", detail="hiring", url=""),
+                SourceInfo(source="github", detail="repo-a", url="https://example.com/a"),
+                SourceInfo(source="skills", detail="python", url=""),
+                SourceInfo(source="projects", detail="repo-b", url="https://example.com/b"),
+            ],
+        )
+    )
+    client = TestClient(_build_app(retrieve=retrieve))
+
+    response = client.post("/chat", json=PAYLOAD, headers={"Accept": "text/event-stream"})
+
+    sources = next(e for e in _events(response) if e["type"] == "sources")["sources"]
+    assert [s["source"] for s in sources] == ["github", "projects", "career_qa", "skills"]
+
+
 def test_chat_passes_prior_user_turns_as_history() -> None:
     retrieve = AsyncMock(return_value=("", []))
     client = TestClient(_build_app(retrieve=retrieve))
