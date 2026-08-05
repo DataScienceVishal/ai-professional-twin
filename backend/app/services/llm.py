@@ -8,7 +8,7 @@ from app.tools import ToolRegistry
 
 if TYPE_CHECKING:
     from openai import AsyncStream
-    from openai.types.chat import ChatCompletion, ChatCompletionChunk, ChatCompletionMessageParam
+    from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
 
 MAX_TOOL_CALLS = 3
 TOOL_RESULT_SUMMARY_LIMIT = 200
@@ -88,21 +88,6 @@ class LLMService:
         if tools:
             kwargs["tools"] = tools
         return kwargs
-
-    async def chat(
-        self,
-        system_prompt: str,
-        messages: list[dict[str, str]],
-    ) -> str:
-        all_messages = cast(
-            "list[ChatCompletionMessageParam]",
-            [{"role": "system", "content": system_prompt}, *messages],
-        )
-        raw = await self.client.chat.completions.create(
-            **self.build_completion_kwargs(list(all_messages), stream=False)
-        )
-        response = cast("ChatCompletion", raw)
-        return response.choices[0].message.content or ""
 
     async def stream(
         self,

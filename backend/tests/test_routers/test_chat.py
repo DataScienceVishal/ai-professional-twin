@@ -146,6 +146,39 @@ def test_chat_passes_prior_user_turns_as_history() -> None:
     )
 
 
+def test_chat_accepts_a_follow_up_after_a_long_answer() -> None:
+    """Regression: the second turn of any conversation used to 422.
+
+    The client replays the whole thread, so an Interview-mode answer comes back
+    as an `assistant` message far longer than anything a visitor would type.
+    """
+    long_answer = "### Architecture\n\n" + "The retrieval pipeline. " * 200
+    client = TestClient(_build_app())
+
+    response = client.post(
+        "/chat",
+        json={
+            "messages": [
+                {"role": "user", "content": "How does the retrieval pipeline work?"},
+                {"role": "assistant", "content": long_answer},
+                {"role": "user", "content": "How is it evaluated?"},
+            ],
+            "mode": "interview",
+        },
+    )
+
+    assert response.status_code == 200
+    assert [e["type"] for e in _events(response)] == ["chunk", "sources", "done"]
+
+
+def test_chat_still_rejects_an_oversized_user_turn() -> None:
+    client = TestClient(_build_app())
+
+    response = client.post("/chat", json={"messages": [{"role": "user", "content": "x" * 2001}]})
+
+    assert response.status_code == 422
+
+
 def test_chat_returns_503_when_dependencies_are_missing() -> None:
     """Requests can now arrive before init; that must degrade, not 500."""
     response = TestClient(create_app()).post("/chat", json=PAYLOAD)
