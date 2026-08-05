@@ -103,6 +103,14 @@ SOURCE_BOOST = 0.12
 # which makes the prompt look grounded even for off-topic questions.
 MAX_DISTANCE = 0.75
 
+# Per-source overrides of MAX_DISTANCE; any source not listed uses the global
+# value. GitHub chunks are mostly README prose - long, generic and full of
+# stock engineering vocabulary - so they clear a loose threshold on questions
+# they have nothing to say about. An unrelated toy repo cited as evidence reads
+# as weak retrieval, so GitHub has to be a genuinely close match to survive
+# where a curated, hand-written source would not need to be.
+SOURCE_MAX_DISTANCE: dict[str, float] = {"github": 0.55}
+
 # Multiplier applied to top_k when querying, so boosting and threshold filtering
 # have a meaningful candidate pool to work from.
 OVERFETCH_FACTOR = 4
@@ -161,14 +169,34 @@ def build_retrieval_query(query: str, history: list[str] | None = None) -> str:
     return " ".join([*recent, query])
 
 
+def source_max_distance(source: str, max_distance: float = MAX_DISTANCE) -> float:
+    """Distance cutoff for one source: its override, or the global value.
+
+    An override never loosens the caller's threshold, only tightens it, so
+    passing a stricter max_distance still applies to every source.
+    """
+    override = SOURCE_MAX_DISTANCE.get(source)
+    if override is None:
+        return max_distance
+    return min(override, max_distance)
+
+
 def rank_results(
     results: list[SearchResult],
     preferred_sources: frozenset[str],
     top_k: int,
     max_distance: float = MAX_DISTANCE,
 ) -> list[SearchResult]:
-    """Drop weak matches, then boost preferred sources and take the best top_k."""
-    relevant = [r for r in results if r.distance <= max_distance]
+    """Drop weak matches, then boost preferred sources and take the best top_k.
+
+    The threshold is applied before boosting on purpose: a preferred source is
+    allowed to win a near-tie, not to drag an irrelevant chunk into the prompt.
+    """
+    relevant = [
+        r
+        for r in results
+        if r.distance <= source_max_distance(r.metadata.get("source", ""), max_distance)
+    ]
     if not relevant:
         # Everything scored poorly. Rather than return nothing (which makes the
         # assistant claim it knows nothing at all), fall back to the single best

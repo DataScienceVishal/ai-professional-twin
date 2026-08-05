@@ -10,9 +10,15 @@ from app.config import Settings
 from app.ingest import (
     GITHUB_SOURCES,
     LOCAL_KNOWLEDGE_SOURCES,
+    SKIP_ARCHIVED,
+    SKIP_EXCLUDED,
+    SKIP_FORK,
+    SKIP_NO_CONTENT,
     IngestionState,
     content_hash,
+    drop_contentless_repos,
     fetch_readmes,
+    filter_repos,
     run_ingestion,
     sync_documents,
 )
@@ -39,9 +45,12 @@ class FakeGitHub:
         self,
         repos: list[dict[str, Any]] | None = None,
         readme_error: bool = False,
+        without_readme: set[str] | None = None,
     ) -> None:
         self.repos = repos or []
         self.readme_error = readme_error
+        self.without_readme = without_readme or set()
+        self.readme_calls: list[str] = []
         self.concurrent = 0
         self.max_concurrent = 0
 
@@ -49,15 +58,35 @@ class FakeGitHub:
         return self.repos
 
     async def fetch_readme(self, repo_name: str) -> str:
+        self.readme_calls.append(repo_name)
         self.concurrent += 1
         self.max_concurrent = max(self.max_concurrent, self.concurrent)
         try:
             await asyncio.sleep(0)
             if self.readme_error:
                 raise RuntimeError("boom")
+            if repo_name in self.without_readme:
+                return ""
             return f"# {repo_name}"
         finally:
             self.concurrent -= 1
+
+
+def _repo(name: str, **overrides: Any) -> dict[str, Any]:
+    """A repo shaped like GitHubAPIService.fetch_repos output."""
+    repo: dict[str, Any] = {
+        "name": name,
+        "description": f"About {name}",
+        "html_url": f"https://github.com/DataScienceVishal/{name}",
+        "language": "Python",
+        "stargazers_count": 0,
+        "topics": [],
+        "updated_at": "2026-07-01T00:00:00Z",
+        "fork": False,
+        "archived": False,
+    }
+    repo.update(overrides)
+    return repo
 
 
 @pytest.fixture
@@ -186,6 +215,100 @@ async def test_fetch_readmes_survives_individual_failures() -> None:
     assert readmes == {}
 
 
+def test_filter_repos_keeps_an_ordinary_repo() -> None:
+    kept, skipped = filter_repos([_repo("ai-professional-twin")], Settings())
+
+    assert [r["name"] for r in kept] == ["ai-professional-twin"]
+    assert skipped == {}
+
+
+def test_filter_repos_excludes_a_denylisted_repo() -> None:
+    kept, skipped = filter_repos(
+        [_repo("my-ai-resume"), _repo("ai-professional-twin")],
+        Settings(),
+    )
+
+    assert [r["name"] for r in kept] == ["ai-professional-twin"]
+    assert skipped[SKIP_EXCLUDED] == 1
+
+
+def test_denylist_matches_case_insensitively() -> None:
+    """GitHub repo names are case-preserving; the denylist must not be fooled."""
+    kept, skipped = filter_repos(
+        [_repo("My-AI-Resume")],
+        Settings(github_exclude_repos="my-ai-resume"),
+    )
+
+    assert kept == []
+    assert skipped[SKIP_EXCLUDED] == 1
+
+
+def test_denylist_matches_the_whole_name_not_a_substring() -> None:
+    kept, _ = filter_repos(
+        [_repo("my-ai-resume-v2")],
+        Settings(github_exclude_repos="my-ai-resume"),
+    )
+
+    assert [r["name"] for r in kept] == ["my-ai-resume-v2"]
+
+
+def test_filter_repos_skips_forks() -> None:
+    kept, skipped = filter_repos([_repo("someone-elses-lib", fork=True)], Settings())
+
+    assert kept == []
+    assert skipped[SKIP_FORK] == 1
+
+
+def test_filter_repos_skips_archived_repos() -> None:
+    kept, skipped = filter_repos([_repo("old-thing", archived=True)], Settings())
+
+    assert kept == []
+    assert skipped[SKIP_ARCHIVED] == 1
+
+
+def test_fork_and_archive_gates_can_be_switched_off() -> None:
+    kept, skipped = filter_repos(
+        [_repo("a-fork", fork=True), _repo("an-archive", archived=True)],
+        Settings(github_skip_forks=False, github_skip_archived=False),
+    )
+
+    assert [r["name"] for r in kept] == ["a-fork", "an-archive"]
+    assert skipped == {}
+
+
+def test_drop_contentless_repos_skips_repos_with_nothing_to_embed() -> None:
+    kept, skipped = drop_contentless_repos([_repo("bare", description="")], readmes={})
+
+    assert kept == []
+    assert skipped[SKIP_NO_CONTENT] == 1
+
+
+def test_drop_contentless_repos_keeps_a_description_only_repo() -> None:
+    kept, skipped = drop_contentless_repos([_repo("described")], readmes={})
+
+    assert [r["name"] for r in kept] == ["described"]
+    assert skipped == {}
+
+
+def test_drop_contentless_repos_keeps_a_readme_only_repo() -> None:
+    kept, _ = drop_contentless_repos(
+        [_repo("documented", description="")],
+        readmes={"documented": "# documented\nA real project."},
+    )
+
+    assert [r["name"] for r in kept] == ["documented"]
+
+
+def test_drop_contentless_repos_ignores_whitespace_only_content() -> None:
+    kept, skipped = drop_contentless_repos(
+        [_repo("blank", description="   ")],
+        readmes={"blank": "\n \n"},
+    )
+
+    assert kept == []
+    assert skipped[SKIP_NO_CONTENT] == 1
+
+
 def _knowledge_dir(tmp_path: Path) -> Path:
     (tmp_path / "skills.yaml").write_text(
         yaml.safe_dump([{"category": "Python", "skills": ["FastAPI"], "proficiency": "Expert"}])
@@ -298,3 +421,99 @@ async def test_run_ingestion_ingests_github_repos(store: ChromaStore, tmp_path: 
     assert state.github_skipped is False
     sources = {entry.source for entry in store.manifest().values()}
     assert "github" in sources
+
+
+def _github_ids(store: ChromaStore) -> set[str]:
+    return {doc_id for doc_id, entry in store.manifest().items() if entry.source == "github"}
+
+
+@pytest.mark.asyncio
+async def test_run_ingestion_filters_low_signal_repos(store: ChromaStore, tmp_path: Path) -> None:
+    """Only the repo worth citing should end up in the store."""
+    github = FakeGitHub(
+        repos=[
+            _repo("ai-professional-twin"),
+            _repo("My-AI-Resume"),
+            _repo("someone-elses-lib", fork=True),
+            _repo("old-thing", archived=True),
+            _repo("DataScienceVishal", description=""),
+        ],
+        without_readme={"DataScienceVishal"},
+    )
+    state = IngestionState()
+
+    await run_ingestion(
+        store=store,
+        embedding_service=FakeEmbeddings(),
+        github_service=github,
+        settings=Settings(ingest_github=True, github_token="tok"),
+        knowledge_dir=_knowledge_dir(tmp_path),
+        state=state,
+    )
+
+    assert state.completed is True
+    assert state.github_skipped is False
+    assert _github_ids(store) == {"github-repo-ai-professional-twin"}
+    # Repos rejected on the cheap checks cost no README round trip.
+    assert "My-AI-Resume" not in github.readme_calls
+    assert "someone-elses-lib" not in github.readme_calls
+
+
+@pytest.mark.asyncio
+async def test_run_ingestion_prunes_a_newly_denylisted_repo(
+    store: ChromaStore, tmp_path: Path
+) -> None:
+    """A repo already in the store must disappear once it is denylisted."""
+    embeddings = FakeEmbeddings()
+    knowledge_dir = _knowledge_dir(tmp_path)
+    repos = [_repo("ai-professional-twin"), _repo("my-ai-resume")]
+
+    await run_ingestion(
+        store=store,
+        embedding_service=embeddings,
+        github_service=FakeGitHub(repos=repos),
+        settings=Settings(ingest_github=True, github_token="tok", github_exclude_repos=""),
+        knowledge_dir=knowledge_dir,
+        state=IngestionState(),
+    )
+    assert "github-repo-my-ai-resume" in _github_ids(store)
+
+    await run_ingestion(
+        store=store,
+        embedding_service=embeddings,
+        github_service=FakeGitHub(repos=repos),
+        settings=Settings(ingest_github=True, github_token="tok"),
+        knowledge_dir=knowledge_dir,
+        state=IngestionState(),
+    )
+
+    assert _github_ids(store) == {"github-repo-ai-professional-twin"}
+
+
+@pytest.mark.asyncio
+async def test_run_ingestion_keeps_github_docs_when_the_api_returns_nothing(
+    store: ChromaStore, tmp_path: Path
+) -> None:
+    """An empty fetch is an outage, not a signal to prune the whole source."""
+    embeddings = FakeEmbeddings()
+    knowledge_dir = _knowledge_dir(tmp_path)
+
+    await run_ingestion(
+        store=store,
+        embedding_service=embeddings,
+        github_service=FakeGitHub(repos=[_repo("ai-professional-twin")]),
+        settings=Settings(ingest_github=True, github_token="tok"),
+        knowledge_dir=knowledge_dir,
+        state=IngestionState(),
+    )
+
+    await run_ingestion(
+        store=store,
+        embedding_service=embeddings,
+        github_service=FakeGitHub(repos=[]),
+        settings=Settings(ingest_github=True, github_token="tok"),
+        knowledge_dir=knowledge_dir,
+        state=IngestionState(),
+    )
+
+    assert _github_ids(store) == {"github-repo-ai-professional-twin"}

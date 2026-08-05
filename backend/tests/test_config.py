@@ -35,5 +35,22 @@ def test_cors_origins_split_from_csv() -> None:
     assert settings.cors_origins == ["http://a.com", "http://b.com"]
 
 
+def test_retired_v1_repo_is_denylisted_by_default() -> None:
+    """my-ai-resume is deliberately shut down; it must never be cited."""
+    assert Settings().github_exclude_repos == ["my-ai-resume"]
+
+
+def test_github_exclude_repos_split_from_csv() -> None:
+    settings = Settings(github_exclude_repos="my-ai-resume, DataScienceVishal ,")
+    assert settings.github_exclude_repos == ["my-ai-resume", "DataScienceVishal"]
+
+
+def test_github_quality_gates_default_on() -> None:
+    settings = Settings()
+    assert settings.github_skip_forks is True
+    assert settings.github_skip_archived is True
+    assert settings.github_require_content is True
+
+
 def test_get_settings_is_cached() -> None:
     assert get_settings() is get_settings()

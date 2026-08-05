@@ -3,12 +3,14 @@ from typing import Any
 from app.rag.retriever import (
     INTENT_SOURCE_BOOSTS,
     MAX_DISTANCE,
+    SOURCE_MAX_DISTANCE,
     QueryClassifier,
     QueryIntent,
     Retriever,
     build_retrieval_query,
     format_context,
     rank_results,
+    source_max_distance,
 )
 from app.rag.store import SearchResult
 
@@ -107,6 +109,58 @@ def test_rank_results_falls_back_when_everything_is_weak() -> None:
     ]
     ranked = rank_results(results, preferred_sources=frozenset(), top_k=5)
     assert [r.id for r in ranked] == ["least_bad"]
+
+
+def test_github_has_a_stricter_threshold_than_the_global_one() -> None:
+    assert SOURCE_MAX_DISTANCE["github"] < MAX_DISTANCE
+
+
+def test_source_max_distance_falls_back_to_the_global_value() -> None:
+    assert source_max_distance("projects") == MAX_DISTANCE
+    assert source_max_distance("github") == SOURCE_MAX_DISTANCE["github"]
+
+
+def test_source_override_never_loosens_an_explicit_threshold() -> None:
+    """A caller asking for a tighter bar must not have it widened by an override."""
+    assert source_max_distance("github", max_distance=0.2) == 0.2
+
+
+def test_github_is_dropped_at_a_distance_a_curated_source_keeps() -> None:
+    """The reported bug: README prose clearing the loose bar on unrelated queries."""
+    distance = (SOURCE_MAX_DISTANCE["github"] + MAX_DISTANCE) / 2
+    results = [
+        _result("readme_noise", "github", distance),
+        _result("curated", "projects", distance),
+    ]
+
+    ranked = rank_results(results, preferred_sources=frozenset({"projects", "github"}), top_k=5)
+
+    assert [r.id for r in ranked] == ["curated"]
+
+
+def test_a_close_github_match_still_survives() -> None:
+    results = [_result("on_topic", "github", SOURCE_MAX_DISTANCE["github"] - 0.05)]
+    ranked = rank_results(results, preferred_sources=frozenset(), top_k=5)
+    assert [r.id for r in ranked] == ["on_topic"]
+
+
+def test_the_source_threshold_beats_the_intent_boost() -> None:
+    """Boosting reorders near-ties; it must not resurrect a filtered-out chunk."""
+    results = [
+        _result("far_github", "github", MAX_DISTANCE - 0.01),
+        _result("near_resume", "resume", MAX_DISTANCE - 0.02),
+    ]
+
+    ranked = rank_results(results, preferred_sources=frozenset({"github"}), top_k=5)
+
+    assert [r.id for r in ranked] == ["near_resume"]
+
+
+def test_a_lone_weak_github_chunk_still_falls_back() -> None:
+    """The single-best-match fallback must survive the stricter GitHub bar."""
+    results = [_result("only", "github", MAX_DISTANCE - 0.01)]
+    ranked = rank_results(results, preferred_sources=frozenset(), top_k=5)
+    assert [r.id for r in ranked] == ["only"]
 
 
 def test_rank_results_respects_top_k() -> None:

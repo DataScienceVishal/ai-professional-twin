@@ -13,6 +13,7 @@ content hash changes, and GitHub is optional.
 import asyncio
 import hashlib
 import json
+from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -34,6 +35,13 @@ LOCAL_KNOWLEDGE_SOURCES = frozenset(
     {"projects", "skills", "career_qa", "certificates", "linkedin", "academics", "resume"}
 )
 GITHUB_SOURCES = frozenset({"github"})
+
+# Reasons a repo is dropped before embedding. Reported as log keys, so they are
+# stable strings rather than free text.
+SKIP_EXCLUDED = "excluded"
+SKIP_FORK = "fork"
+SKIP_ARCHIVED = "archived"
+SKIP_NO_CONTENT = "no_content"
 
 
 @dataclass
@@ -111,6 +119,58 @@ async def sync_documents(
     )
 
 
+def filter_repos(
+    repos: list[dict[str, Any]],
+    settings: Settings,
+) -> tuple[list[dict[str, Any]], Counter[str]]:
+    """Drop repos that should never be cited, before any README is fetched.
+
+    Ingesting every public repo makes GitHub the loudest source in the store and
+    puts unrelated toy projects on the citation chips of serious answers. These
+    are the cheap checks — they need no extra API call, so a dropped repo also
+    costs nothing to skip.
+    """
+    excluded = {name.strip().lower() for name in settings.github_exclude_repos if name.strip()}
+    kept: list[dict[str, Any]] = []
+    skipped: Counter[str] = Counter()
+
+    for repo in repos:
+        if str(repo.get("name", "")).strip().lower() in excluded:
+            skipped[SKIP_EXCLUDED] += 1
+        elif settings.github_skip_forks and repo.get("fork", False):
+            skipped[SKIP_FORK] += 1
+        elif settings.github_skip_archived and repo.get("archived", False):
+            skipped[SKIP_ARCHIVED] += 1
+        else:
+            kept.append(repo)
+
+    return kept, skipped
+
+
+def drop_contentless_repos(
+    repos: list[dict[str, Any]],
+    readmes: dict[str, str],
+) -> tuple[list[dict[str, Any]], Counter[str]]:
+    """Drop repos with neither a description nor a README.
+
+    All that is left to embed is the repo name, which retrieves on little more
+    than a keyword coincidence. Runs after the README fetch, since that is the
+    only way to know whether one exists.
+    """
+    kept: list[dict[str, Any]] = []
+    skipped: Counter[str] = Counter()
+
+    for repo in repos:
+        description = str(repo.get("description") or "").strip()
+        readme = readmes.get(str(repo.get("name", "")), "").strip()
+        if description or readme:
+            kept.append(repo)
+        else:
+            skipped[SKIP_NO_CONTENT] += 1
+
+    return kept, skipped
+
+
 async def fetch_readmes(
     github_service: GitHubAPIService,
     repos: list[dict[str, Any]],
@@ -145,11 +205,29 @@ async def ingest_github(
     github_service: GitHubAPIService,
     settings: Settings,
 ) -> SyncResult:
-    repos = await github_service.fetch_repos(per_page=settings.github_repo_limit)
-    if not repos:
+    fetched = await github_service.fetch_repos(per_page=settings.github_repo_limit)
+    if not fetched:
         # fetch_repos already logged the reason (rate limit, auth, network).
+        # Returning early also stops an outage from pruning the whole source.
         return SyncResult()
+
+    # Filtering deliberately runs on a *successful* fetch only, and an empty
+    # result from here is honoured: it prunes repos that were ingested before
+    # they were denylisted.
+    repos, skipped = filter_repos(fetched, settings)
     readmes = await fetch_readmes(github_service, repos, settings.github_concurrency)
+    if settings.github_require_content:
+        repos, contentless = drop_contentless_repos(repos, readmes)
+        skipped += contentless
+    if skipped:
+        await logger.ainfo(
+            "Skipped GitHub repos",
+            fetched=len(fetched),
+            skipped=sum(skipped.values()),
+            kept=len(repos),
+            reasons=dict(sorted(skipped.items())),
+        )
+
     docs = chunk_github_repos(repos, readmes)
     result = await sync_documents(store, embedding_service, docs, GITHUB_SOURCES)
     await logger.ainfo(
