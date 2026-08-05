@@ -55,7 +55,13 @@ class Settings(BaseSettings):
     # case-insensitively on the exact repo name). my-ai-resume is the retired V1
     # of this project: still a public repo, but citing it as evidence for the
     # current one is actively misleading.
-    github_exclude_repos: Annotated[list[str], NoDecode] = ["my-ai-resume"]
+    # DataScienceVishal is the GitHub profile repo (username/username). It holds
+    # a profile README, so the content gate keeps it, but it is not a project and
+    # citing it as evidence for one is noise.
+    github_exclude_repos: Annotated[list[str], NoDecode] = [
+        "my-ai-resume",
+        "DataScienceVishal",
+    ]
     # Quality gates applied before a repo is embedded. Each one is a judgement
     # call, so each is switchable: forks are not his own work, archived repos are
     # dead, and a repo with neither a description nor a README has nothing worth
