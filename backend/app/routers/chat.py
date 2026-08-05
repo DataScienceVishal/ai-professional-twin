@@ -7,6 +7,13 @@ import structlog
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from sse_starlette.sse import EventSourceResponse
 
+from app.analytics import (
+    OUTCOME_ERROR,
+    OUTCOME_OK,
+    OUTCOME_REFUSED,
+    QueryAnalytics,
+    QueryRecord,
+)
 from app.models.chat import ChatRequest
 from app.prompts.system import build_system_prompt
 from app.rag.retriever import Retriever
@@ -41,6 +48,7 @@ def init_chat_dependencies(
     llm_service: LLMService,
     tool_registry: ToolRegistry | None = None,
     budget: DailyChatBudget | None = None,
+    analytics: QueryAnalytics | None = None,
 ) -> None:
     """Attach chat dependencies to app.state.
 
@@ -52,6 +60,7 @@ def init_chat_dependencies(
     app.state.llm_service = llm_service
     app.state.tool_registry = tool_registry
     app.state.chat_budget = budget
+    app.state.query_analytics = analytics
 
 
 def get_retriever(request: Request) -> Retriever:
@@ -78,6 +87,12 @@ def get_chat_budget(request: Request) -> DailyChatBudget | None:
     return budget
 
 
+def get_query_analytics(request: Request) -> QueryAnalytics | None:
+    """None when nothing wired it up, in which case chat simply logs and moves on."""
+    analytics: QueryAnalytics | None = getattr(request.app.state, "query_analytics", None)
+    return analytics
+
+
 def _sse(payload: dict[str, Any]) -> dict[str, str]:
     return {"data": json.dumps(payload)}
 
@@ -96,6 +111,7 @@ async def chat(
     llm: LLMService = Depends(get_llm_service),
     tool_registry: ToolRegistry | None = Depends(get_tool_registry),
     budget: DailyChatBudget | None = Depends(get_chat_budget),
+    analytics: QueryAnalytics | None = Depends(get_query_analytics),
 ) -> EventSourceResponse:
     last_message = payload.messages[-1].content
     mode = payload.mode.value
@@ -106,9 +122,13 @@ async def chat(
             CHAT_QUERY_EVENT,
             query=last_message,
             mode=mode,
-            outcome="budget_exhausted",
+            outcome=OUTCOME_REFUSED,
             budget_remaining=0,
         )
+        if analytics is not None:
+            await analytics.record(
+                QueryRecord(query=last_message, mode=mode, outcome=OUTCOME_REFUSED)
+            )
         return EventSourceResponse(_refusal_stream(BUDGET_EXHAUSTED_MESSAGE))
 
     async def event_stream() -> AsyncGenerator[dict[str, str]]:
@@ -117,7 +137,7 @@ async def chat(
         usage: dict[str, Any] = {}
         retrieved_chunks = 0
         has_context = False
-        outcome = "ok"
+        outcome = OUTCOME_OK
 
         try:
             rag_context, sources = await retriever.retrieve(last_message, history=history)
@@ -160,7 +180,7 @@ async def chat(
             # Azure can fail mid-stream (rate limit, content filter, auth). Log
             # the detail server-side and hand the client a safe message rather
             # than dropping the connection with nothing rendered.
-            outcome = "error"
+            outcome = OUTCOME_ERROR
             await logger.aerror(
                 "chat_stream_failed",
                 exc_info=exc,
@@ -170,6 +190,7 @@ async def chat(
             )
             yield _sse({"type": "error", "message": STREAM_ERROR_MESSAGE})
 
+        latency_ms = round((time.perf_counter() - started) * 1000, 1)
         await logger.ainfo(
             CHAT_QUERY_EVENT,
             query=last_message,
@@ -182,9 +203,27 @@ async def chat(
             completion_tokens=usage.get("completion_tokens"),
             total_tokens=usage.get("total_tokens"),
             outcome=outcome,
-            latency_ms=round((time.perf_counter() - started) * 1000, 1),
+            latency_ms=latency_ms,
             budget_remaining=budget.remaining if budget is not None else None,
         )
+        # Same fields, but persisted so they can actually be aggregated later.
+        # QueryAnalytics.record swallows its own IO errors, so this cannot turn
+        # a served answer into a failed request.
+        if analytics is not None:
+            await analytics.record(
+                QueryRecord(
+                    query=last_message,
+                    mode=mode,
+                    outcome=outcome,
+                    retrieved_chunks=retrieved_chunks,
+                    has_context=has_context,
+                    tools_used=tools_used,
+                    latency_ms=latency_ms,
+                    prompt_tokens=usage.get("prompt_tokens"),
+                    completion_tokens=usage.get("completion_tokens"),
+                    total_tokens=usage.get("total_tokens"),
+                )
+            )
         yield _sse({"type": "done"})
 
     return EventSourceResponse(event_stream())

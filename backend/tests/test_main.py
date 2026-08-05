@@ -75,6 +75,22 @@ def test_startup_survives_an_ingestion_crash(local_env: None) -> None:
     assert isinstance(mock_callback.call_args.args[0].exception(), RuntimeError)
 
 
+def test_startup_creates_the_analytics_directory_and_wires_the_writer(
+    local_env: None, tmp_path: Path
+) -> None:
+    """The query log lives on the same volume as the vector store, and the
+    directory is made at boot so the first chat request cannot fail on it."""
+
+    async def noop_ingestion(**kwargs: Any) -> None:
+        return None
+
+    with patch("app.main.run_ingestion", noop_ingestion):
+        app = create_app()
+        with TestClient(app):
+            assert (tmp_path / "analytics").is_dir()
+            assert app.state.query_analytics is not None
+
+
 def test_startup_without_credentials_stays_up_and_reports_itself(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

@@ -1,7 +1,8 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Annotated
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode
 
 
@@ -14,6 +15,18 @@ class Settings(BaseSettings):
     public_base_url: str = "http://localhost:8000"
     chroma_persist_dir: str = "./chromadb_data"
     log_level: str = "info"
+
+    # Question analytics. The JSONL log has to survive restarts to be worth
+    # anything, so it belongs on the same mounted volume as the vector store.
+    # Left empty it is derived as a sibling of chroma_persist_dir, which puts it
+    # at /data/analytics/queries.jsonl in production without hardcoding /data.
+    analytics_log_path: str = ""
+    # Size at which the log rotates to a single .1 backup. The volume is small
+    # and the file only grows, so worst case on disk is roughly twice this.
+    analytics_max_bytes: int = 5_000_000
+    # Bearer token for GET /analytics. Empty disables the endpoint entirely (it
+    # 404s, so its existence is not advertised). Never logged or echoed back.
+    analytics_token: str = ""
 
     llm_model: str = "gpt-5-mini"
     embedding_model: str = "text-embedding-3-small"
@@ -83,6 +96,20 @@ class Settings(BaseSettings):
     @classmethod
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")
+
+    @model_validator(mode="after")
+    def _derive_analytics_log_path(self) -> "Settings":
+        """Default the query log to a sibling of the vector store directory.
+
+        One Railway volume is mounted at /data and CHROMA_PERSIST_DIR is
+        /data/chromadb, so this lands at /data/analytics/queries.jsonl with no
+        second path to configure - while staying overridable for anyone who
+        mounts things elsewhere.
+        """
+        if not self.analytics_log_path:
+            parent = Path(self.chroma_persist_dir).parent
+            self.analytics_log_path = str(parent / "analytics" / "queries.jsonl")
+        return self
 
 
 @lru_cache(maxsize=1)

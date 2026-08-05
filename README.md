@@ -171,7 +171,7 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 | Logging | `structlog` | One structured `chat_query` event per request |
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS 4 | `react-markdown` + `rehype-highlight`, `framer-motion` |
 | Diagrams | `mermaid` | Rendered client-side in Interview mode |
-| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | 178 tests total |
+| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | 370 tests total |
 | Quality | ruff, mypy (strict), oxlint, `tsc` | All enforced in CI |
 | Hosting | Railway (backend, Docker), Vercel (frontend) | Same-origin via rewrite |
 
@@ -225,6 +225,9 @@ Backend variables are read by [`backend/app/config.py`](backend/app/config.py) f
 | `GITHUB_REPO_LIMIT` | `100` | Maximum repositories fetched per ingestion pass |
 | `GITHUB_CONCURRENCY` | `5` | Parallel README fetches |
 | `CHROMA_PERSIST_DIR` | `./chromadb_data` | Vector store path. The Docker image sets `/data/chromadb` |
+| `ANALYTICS_LOG_PATH` | *(derived)* | Query log file. Empty derives a sibling of `CHROMA_PERSIST_DIR`, i.e. `/data/analytics/queries.jsonl` in production |
+| `ANALYTICS_MAX_BYTES` | `5000000` | Size at which the query log rotates to a single `.1` backup |
+| `ANALYTICS_TOKEN` | *(empty)* | Bearer token for `GET /analytics`. Empty disables the endpoint (404) |
 | `CORS_ORIGINS` | `http://localhost:5173` | Comma-separated frontend origins |
 | `PUBLIC_BASE_URL` | `http://localhost:8000` | Public origin of *this* API, used to build resume links |
 | `RATE_LIMIT` | `60/minute` | Default per-IP limit for read-only endpoints |
@@ -236,33 +239,45 @@ Frontend: only `VITE_API_URL` exists, it is optional, and it defaults to the sam
 
 In production, `CHROMA_PERSIST_DIR` must point at a mounted volume. Without one, the vector store is wiped on every restart and the content-hash manifest cannot prevent a full re-embed on each cold boot.
 
+**Question analytics.** Every chat request is appended as one JSON line to `ANALYTICS_LOG_PATH` on the same volume, and `GET /analytics` returns an aggregated summary — totals, a breakdown by mode, the top questions by frequency, the questions where retrieval found nothing, error and refusal counts, and token totals. It never returns raw rows.
+
+Only the question text, mode, timestamp and the retrieval/outcome fields are stored. No IP address or anything else identifying: the question is the signal, the person asking it is not.
+
+The endpoint is off by default. Set `ANALYTICS_TOKEN` to a long random value to enable it, then:
+
+```bash
+curl -H "Authorization: Bearer $ANALYTICS_TOKEN" https://your-api.up.railway.app/analytics
+```
+
+With no token configured it returns 404 rather than 403, so its existence is not advertised; with a wrong token, 401.
+
 </details>
 
 ## Testing and quality
 
 Both suites run on every push and pull request to `main` via [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
-**Backend** — 146 tests
+**Backend** — 257 tests
 
 ```bash
 cd backend
 uv run ruff check .          # lint
 uv run ruff format --check . # formatting
 uv run mypy app/             # strict type checking (configured in pyproject.toml)
-uv run pytest -q             # 146 passed
+uv run pytest -q             # 257 passed
 ```
 
-**Frontend** — 32 tests
+**Frontend** — 113 tests
 
 ```bash
 cd frontend
 npm run lint       # oxlint
 npm run typecheck  # tsc -b
-npm run test       # vitest run - 32 passed
+npm run test       # vitest run - 113 passed
 npm run build      # tsc -b && vite build
 ```
 
-**178 tests total.** The pytest suite mirrors the `app/` tree — chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, and the suggestion-chip logic.
+**370 tests total.** The pytest suite mirrors the `app/` tree — chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the projects and skills showcase, and the suggestion-chip logic.
 
 ## Project structure
 
@@ -274,6 +289,7 @@ npm run build      # tsc -b && vite build
 │   │   ├── config.py        # pydantic-settings; every env var lives here
 │   │   ├── ingest.py        # content-hash sync of sources into the vector store
 │   │   ├── rate_limit.py    # per-IP limiter + global daily completion budget
+│   │   ├── analytics.py     # JSONL query log, rotation, and its aggregator
 │   │   ├── models/          # pydantic request and response models
 │   │   ├── prompts/         # base identity, per-mode templates, response rules
 │   │   ├── rag/             # chunker, embeddings, Chroma store, retriever

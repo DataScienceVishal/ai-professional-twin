@@ -1,5 +1,6 @@
 import json
 from collections.abc import AsyncGenerator
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -7,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
+from app.analytics import OUTCOME_REFUSED, QueryAnalytics
 from app.main import create_app
 from app.rag.retriever import SourceInfo
 from app.rate_limit import DailyChatBudget
@@ -35,6 +37,7 @@ def _build_app(
     retrieve: Any = None,
     tool_registry: ToolRegistry | None = None,
     budget: DailyChatBudget | None = None,
+    analytics: QueryAnalytics | None = None,
 ) -> FastAPI:
     app = create_app()
 
@@ -52,6 +55,7 @@ def _build_app(
         llm_service=llm,
         tool_registry=tool_registry,
         budget=budget or DailyChatBudget(max_per_day=100),
+        analytics=analytics,
     )
     return app
 
@@ -363,3 +367,87 @@ def test_analytics_event_records_tools_and_token_usage() -> None:
         "sources",
         "done",
     ]
+
+
+def _persisted(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def test_chat_persists_one_analytics_line_per_request(tmp_path: Path) -> None:
+    """Railway logs scroll away; the JSONL file is what survives to be counted."""
+    path = tmp_path / "analytics" / "queries.jsonl"
+    retrieve = AsyncMock(
+        return_value=(
+            "[Source: resume]\nData Engineer",
+            [SourceInfo(source="resume", detail="page 1", url="")],
+        )
+    )
+    client = TestClient(
+        _build_app(retrieve=retrieve, analytics=QueryAnalytics(path=path, max_bytes=1_000_000))
+    )
+
+    client.post(
+        "/chat",
+        json={
+            "messages": [{"role": "user", "content": "Does he have a visa?"}],
+            "mode": "recruiter",
+        },
+    )
+    client.post("/chat", json=PAYLOAD)
+
+    rows = _persisted(path)
+    assert len(rows) == 2
+    assert rows[0]["query"] == "Does he have a visa?"
+    assert rows[0]["mode"] == "recruiter"
+    assert rows[0]["retrieved_chunks"] == 1
+    assert rows[0]["has_context"] is True
+    assert rows[0]["outcome"] == "ok"
+    assert rows[1]["query"] == "Who is Vishal?"
+
+
+def test_persisted_analytics_never_include_the_caller(tmp_path: Path) -> None:
+    """Privacy: the question is the signal, not who asked it."""
+    path = tmp_path / "queries.jsonl"
+    client = TestClient(_build_app(analytics=QueryAnalytics(path=path, max_bytes=1_000_000)))
+
+    client.post("/chat", json=PAYLOAD, headers={"User-Agent": "recruiter-browser/1.0"})
+
+    row = _persisted(path)[0]
+    assert not {"ip", "client_ip", "client_host", "user_agent", "session_id"} & set(row)
+    assert "recruiter-browser" not in json.dumps(row)
+
+
+def test_a_budget_refusal_is_persisted_too(tmp_path: Path) -> None:
+    path = tmp_path / "queries.jsonl"
+    client = TestClient(
+        _build_app(
+            budget=DailyChatBudget(max_per_day=0),
+            analytics=QueryAnalytics(path=path, max_bytes=1_000_000),
+        )
+    )
+
+    client.post("/chat", json=PAYLOAD)
+
+    assert _persisted(path)[0]["outcome"] == OUTCOME_REFUSED
+
+
+def test_an_analytics_write_failure_does_not_break_the_chat_request(tmp_path: Path) -> None:
+    """A full or read-only volume must cost the visitor nothing."""
+    blocker = tmp_path / "blocker"
+    blocker.write_text("not a directory")
+    client = TestClient(
+        _build_app(analytics=QueryAnalytics(path=blocker / "queries.jsonl", max_bytes=1_000_000))
+    )
+
+    response = client.post("/chat", json=PAYLOAD)
+
+    assert response.status_code == 200
+    assert [e["type"] for e in _events(response)] == ["chunk", "sources", "done"]
+
+
+def test_chat_works_when_no_analytics_sink_is_wired_up() -> None:
+    response = TestClient(_build_app(analytics=None)).post("/chat", json=PAYLOAD)
+
+    assert [e["type"] for e in _events(response)] == ["chunk", "sources", "done"]
