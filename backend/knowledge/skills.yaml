@@ -76,7 +76,9 @@
   proficiency: intermediate
 
 - category: Visualization & BI
-  skills: [Power BI, Tableau, Excel (advanced formulas, macros, VBA)]
+  # Quoted: a flow sequence splits on every comma, so an unquoted
+  # "Excel (advanced formulas, macros, VBA)" becomes three broken entries.
+  skills: ["Power BI", "Tableau", "Excel (advanced formulas, macros, VBA)"]
   proficiency: advanced
 
 - category: Backend & API

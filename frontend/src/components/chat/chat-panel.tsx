@@ -3,6 +3,8 @@ import { Message } from './message'
 import { InputBar } from './input-bar'
 import { SuggestionChips } from './suggestion-chips'
 import { ContactCta } from '../layout/contact-cta'
+import { ProjectGrid } from '../projects/project-grid'
+import { SkillSummary } from '../skills/skill-summary'
 import type { Message as MessageType, ChatMode } from '../../lib/types'
 
 interface ChatPanelProps {
@@ -18,7 +20,17 @@ export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatP
   const isAtBottom = useRef(true)
 
   useEffect(() => {
-    if (isAtBottom.current && scrollRef.current) {
+    if (!scrollRef.current) return
+    // The empty state is taller than the viewport (it carries the project and
+    // skill showcase), so "follow the conversation" must not fire when there
+    // is no conversation - that would land the user at the bottom of the
+    // project list on first paint, and again after Clear Chat.
+    if (messages.length === 0) {
+      isAtBottom.current = true
+      scrollRef.current.scrollTop = 0
+      return
+    }
+    if (isAtBottom.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages])
@@ -37,6 +49,9 @@ export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatP
         className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 space-y-4"
       >
         {messages.length === 0 && (
+          /* `min-h-full` + `justify-center` still centres the hero when the
+             showcase below is absent (API down); once the showcase loads the
+             block simply grows past the viewport and the hero sits at top. */
           <div className="flex flex-col items-center justify-center min-h-full text-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center">
               <svg className="w-6 h-6 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -52,6 +67,20 @@ export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatP
             </p>
             {/* Desktop users already have the CTA in the sidebar. */}
             <ContactCta className="lg:hidden w-full max-w-xs text-left mt-2" />
+
+            {/*
+              A recruiter who does not want to talk to a chatbot still needs to
+              see the work. Both sections render nothing when their request
+              fails; `empty:hidden` then drops this wrapper's spacing too, so
+              the empty state degrades to exactly what it was before.
+            */}
+            <div
+              data-testid="showcase"
+              className="mt-6 flex w-full min-w-0 flex-col gap-6 text-left empty:hidden"
+            >
+              <ProjectGrid />
+              <SkillSummary />
+            </div>
           </div>
         )}
         {messages.map((msg, i) => (
