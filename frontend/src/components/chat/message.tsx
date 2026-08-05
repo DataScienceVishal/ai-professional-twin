@@ -79,6 +79,28 @@ function CodeBlock({ children }: { children: ReactNode }) {
   return <pre className="max-w-full overflow-x-auto">{children}</pre>
 }
 
+/**
+ * Stands in for a diagram while its source is still streaming. Sized to roughly
+ * a small flowchart so the surrounding text does not jump when the real SVG
+ * replaces it.
+ */
+function DiagramPending() {
+  return (
+    <div
+      role="status"
+      aria-label="Building diagram"
+      className="my-3 flex h-32 max-w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-bg-card/40 text-xs text-text-secondary"
+    >
+      <svg className="h-3.5 w-3.5 motion-safe:animate-pulse" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1" y="1" width="6" height="4" rx="1" />
+        <rect x="9" y="6" width="6" height="4" rx="1" />
+        <rect x="1" y="11" width="6" height="4" rx="1" />
+      </svg>
+      Building diagram…
+    </div>
+  )
+}
+
 export function Message({ message, isStreaming = false }: MessageProps) {
   const isUser = message.role === 'user'
   // The turn is in flight and nothing has streamed yet: show the pending state
@@ -113,8 +135,14 @@ export function Message({ message, isStreaming = false }: MessageProps) {
               rehypePlugins={[rehypeHighlight]}
               components={{
                 pre({ children }) {
-                  if (isStreaming) return <CodeBlock>{children}</CodeBlock>
                   const mermaidCode = extractMermaid(children)
+                  // A half-written diagram cannot parse, so it is not rendered
+                  // until the stream finishes. Showing its raw source in the
+                  // meantime reads as broken output rather than as progress,
+                  // so hold a placeholder instead and swap in the diagram.
+                  if (isStreaming) {
+                    return mermaidCode ? <DiagramPending /> : <CodeBlock>{children}</CodeBlock>
+                  }
                   if (mermaidCode) return <MermaidBlock code={mermaidCode} />
                   return <CodeBlock>{children}</CodeBlock>
                 },

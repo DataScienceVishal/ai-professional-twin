@@ -68,3 +68,32 @@ describe('Message mobile overflow guards', () => {
     expect(bubble?.className).toContain('min-w-0')
   })
 })
+
+describe('diagram rendering during streaming', () => {
+  const mermaidMsg = {
+    role: 'assistant' as const,
+    content: '```mermaid\ngraph TD\n  A["User"] --> B["API"]\n```',
+  }
+
+  it('shows a placeholder instead of raw diagram source while streaming', () => {
+    render(<Message message={mermaidMsg} isStreaming />)
+    expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
+    expect(screen.queryByText(/graph TD/)).toBeNull()
+  })
+
+  it('still renders ordinary code blocks as code while streaming', () => {
+    render(
+      <Message
+        message={{ role: 'assistant', content: '```python\nprint("hi")\n```' }}
+        isStreaming
+      />,
+    )
+    expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
+    expect(screen.getByText(/print/)).toBeInTheDocument()
+  })
+
+  it('drops the placeholder once streaming finishes', () => {
+    render(<Message message={mermaidMsg} />)
+    expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
+  })
+})
