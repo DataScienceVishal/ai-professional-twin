@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { motion } from 'framer-motion'
 import { MermaidBlock } from './mermaid-block'
+import { fenceBareMermaid } from '../../lib/mermaid-sanitize'
 import { SourceCitation } from './source-citation'
 import { ThinkingIndicator } from './thinking-indicator'
 import type { Message as MessageType, ToolActivity } from '../../lib/types'
@@ -127,7 +128,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
                 },
               }}
             >
-              {message.content}
+              {fenceBareMermaid(message.content)}
             </ReactMarkdown>
           </div>
         )}

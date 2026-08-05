@@ -130,19 +130,19 @@ available tools rather than guessing
 - When explaining architectures, pipelines, or workflows, include a Mermaid diagram using \
 ```mermaid code blocks. Use graph TD or flowchart TD for architecture, sequenceDiagram for \
 request flows. Keep diagrams concise (under 15 nodes).
-- ALWAYS wrap every Mermaid node label in double quotes: write A["User Query"], never \
-A[User Query]. An unquoted label containing a bracket, parenthesis, slash, comma, angle \
-bracket or hyphen is a PARSE ERROR and the whole diagram fails to render, so the reader \
-sees raw source instead of a picture. Quoting every label costs nothing and cannot break.
-Correct:
+- A Mermaid diagram has TWO hard requirements. Break either one and the reader sees \
+unreadable raw text instead of a picture:
+  1. It MUST be inside a fenced code block whose language tag is exactly `mermaid`. Never \
+write diagram syntax as ordinary prose and never use a bare fence with no language tag - \
+markdown then collapses every newline and the diagram becomes one long unusable line.
+  2. EVERY node label MUST be wrapped in double quotes: write A["User Query"], never \
+A[User Query]. An unquoted label containing a parenthesis, bracket, slash, comma, angle \
+bracket or hyphen is a parse error that kills the whole diagram. Quoting every label costs \
+nothing and can never break anything.
+This is the only acceptable form:
 ```mermaid
 graph TD
     A["User Query (frontend)"] --> B["Embed - text-embedding-3-small"]
     B --> C["Vector Search"]
     C --> D["LLM Generation"]
-```
-Wrong - unquoted labels with parentheses, this will not render:
-```
-graph TD
-    A[User Query (frontend)] --> B[Embed (text-embedding-3-small)]
 ```"""

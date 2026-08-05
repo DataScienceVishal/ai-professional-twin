@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { sanitizeMermaid } from './mermaid-sanitize'
+import { fenceBareMermaid, sanitizeMermaid } from './mermaid-sanitize'
 
 describe('sanitizeMermaid', () => {
   it('quotes a label containing parentheses', () => {
@@ -66,5 +66,62 @@ describe('sanitizeMermaid', () => {
   it('does not touch edge labels written with pipes', () => {
     const src = 'A -->|sends (json)| B'
     expect(sanitizeMermaid(src)).toBe(src)
+  })
+})
+
+describe('fenceBareMermaid', () => {
+  it('fences a diagram the model forgot to fence', () => {
+    // The exact failure seen live: a diagram opened as bare prose under a
+    // heading, which markdown then collapsed into one unreadable line.
+    const input = ['## Architecture', 'graph TD', '  A["User"] --> B["API"]', '', 'Some prose.'].join('\n')
+    expect(fenceBareMermaid(input)).toBe(
+      ['## Architecture', '```mermaid', 'graph TD', '  A["User"] --> B["API"]', '```', '', 'Some prose.'].join('\n'),
+    )
+  })
+
+  it('leaves an already-fenced diagram completely alone', () => {
+    const input = ['```mermaid', 'graph TD', '  A --> B', '```'].join('\n')
+    expect(fenceBareMermaid(input)).toBe(input)
+  })
+
+  it('does not double-fence when a fenced block follows a bare one', () => {
+    const input = ['graph TD', '  A --> B', '', '```mermaid', 'flowchart LR', '  C --> D', '```'].join('\n')
+    const out = fenceBareMermaid(input)
+    expect(out.match(/```mermaid/g)).toHaveLength(2)
+    expect(out.match(/```/g)).toHaveLength(4)
+  })
+
+  it('ignores diagram keywords inside a normal code block', () => {
+    const input = ['```', 'graph TD', '  A --> B', '```'].join('\n')
+    expect(fenceBareMermaid(input)).toBe(input)
+  })
+
+  it('stops at the blank line, not at the end of the message', () => {
+    const input = ['flowchart LR', '  A --> B', '', 'Trailing paragraph that must stay prose.'].join('\n')
+    const out = fenceBareMermaid(input)
+    expect(out).toContain('```mermaid\nflowchart LR\n  A --> B\n```')
+    expect(out).toContain('Trailing paragraph that must stay prose.')
+    expect(out).not.toContain('```mermaid\nTrailing')
+  })
+
+  it.each(['sequenceDiagram', 'classDiagram', 'erDiagram', 'stateDiagram-v2'])(
+    'recognises %s',
+    (opener) => {
+      expect(fenceBareMermaid(`${opener}\n  A --> B`)).toContain('```mermaid')
+    },
+  )
+
+  it('leaves ordinary prose untouched', () => {
+    const input = 'He built a graph database and a flowchart tool.\n\nNo diagrams here.'
+    expect(fenceBareMermaid(input)).toBe(input)
+  })
+
+  it('leaves an empty message untouched', () => {
+    expect(fenceBareMermaid('')).toBe('')
+  })
+
+  it('is idempotent', () => {
+    const once = fenceBareMermaid('graph TD\n  A["x (y)"] --> B')
+    expect(fenceBareMermaid(once)).toBe(once)
   })
 })
