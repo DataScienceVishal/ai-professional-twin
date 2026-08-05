@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useChat } from './use-chat'
-import { htmlResponse, mockFetch, sseResponse } from '../test/sse'
+import { errorResponse, htmlResponse, mockFetch, sseResponse } from '../test/sse'
 
 beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -101,6 +101,68 @@ describe('useChat', () => {
       '[chat] streaming failed:',
       expect.any(Error),
     )
+  })
+
+  it('does not blame the network when the backend rejected the request', async () => {
+    // A 422 means the request arrived and was understood well enough to be
+    // refused, so "could not reach the backend" is both wrong and useless -
+    // retrying sends the identical payload and fails identically.
+    mockFetch(
+      errorResponse(422, {
+        detail: [{ type: 'string_too_long', msg: 'String should have at most 2000 characters' }],
+      }),
+    )
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('a follow-up question')
+    })
+
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    const assistant = result.current.messages[1]
+    expect(assistant.isError).toBe(true)
+    expect(assistant.content).not.toMatch(/could not reach/i)
+    expect(assistant.content).toMatch(/too long/i)
+    // The raw pydantic error is developer noise, not something a visitor reads.
+    expect(assistant.content).not.toMatch(/string_too_long/)
+  })
+
+  it("shows the backend's own explanation for a 503 or a 429", async () => {
+    mockFetch(
+      errorResponse(503, {
+        detail: 'The assistant is still starting up and indexing its knowledge base.',
+      }),
+    )
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('hello')
+    })
+
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    expect(result.current.messages[1].content).toMatch(/still starting up/)
+  })
+
+  it('does not replay an error bubble back to the model as context', async () => {
+    // The failed turn leaves an apology in the transcript; it is a UI notice,
+    // not something the assistant said.
+    mockFetch(errorResponse(503, { detail: 'Still starting up.' }))
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('first')
+    })
+
+    const fetchMock = mockFetch(sseResponse(['data: {"type":"done"}\n\n']))
+    await act(async () => {
+      await result.current.sendMessage('second')
+    })
+
+    const options = (fetchMock as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0][1] as RequestInit
+    expect(JSON.parse(options.body as string).messages).toEqual([
+      { role: 'user', content: 'first' },
+      { role: 'user', content: 'second' },
+    ])
   })
 
   it('ignores empty input', async () => {

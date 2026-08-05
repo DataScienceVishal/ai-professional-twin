@@ -44,6 +44,18 @@ describe('Message pending state', () => {
   })
 })
 
+describe('Message failure state', () => {
+  it('announces a failed turn instead of leaving it looking like an answer', () => {
+    const notice = 'The assistant could not accept that message - it may be too long.'
+
+    render(<Message message={assistant({ content: notice, isError: true })} />)
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent(notice)
+    expect(alert.className).toContain('border-red-200')
+  })
+})
+
 describe('Message mobile overflow guards', () => {
   it('puts code blocks in their own horizontal scroller', () => {
     const code = '```python\n' + `x = "${'a'.repeat(200)}"\n` + '```'

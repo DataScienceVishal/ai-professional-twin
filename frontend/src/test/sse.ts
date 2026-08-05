@@ -47,6 +47,22 @@ export function htmlResponse(): Response {
   })
 }
 
+/**
+ * Response for a non-OK status with a JSON error body, as FastAPI sends.
+ * `statusText` defaults to empty because HTTP/2 - what Vercel serves - drops
+ * the reason phrase, so production only ever has the numeric status to go on.
+ */
+export function errorResponse(status: number, body: unknown, statusText = ''): Response {
+  return {
+    ok: false,
+    status,
+    statusText,
+    headers: new Headers({ 'content-type': 'application/json' }),
+    json: async () => body,
+    body: null,
+  } as unknown as Response
+}
+
 /** Install a `fetch` mock that always resolves to `response`. */
 export function mockFetch(response: Response) {
   const fetchMock = vi.fn(async () => response)
