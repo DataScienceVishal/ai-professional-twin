@@ -1,11 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { streamChat } from '../lib/api'
+import { ChatRequestError, streamChat } from '../lib/api'
 import type { ChatMode, Message, SourceInfo, ToolActivity } from '../lib/types'
 
 const GENERIC_ERROR =
   'Sorry, I could not reach the assistant backend. Please try again in a moment.'
+const REJECTED_ERROR =
+  'The assistant could not accept that message - it may be too long. ' +
+  'Try a shorter question, or clear the conversation and start again.'
+const SERVER_ERROR = 'The assistant backend ran into a problem. Please try again in a moment.'
 
 function describeError(error: unknown): string {
+  // A status code means the backend answered, so "could not reach it" would be
+  // a lie - and it reads as a network blip, which invites a retry that sends
+  // the identical payload and fails identically.
+  if (error instanceof ChatRequestError) {
+    if (error.detail) return error.detail
+    return error.status >= 400 && error.status < 500 ? REJECTED_ERROR : SERVER_ERROR
+  }
   if (error instanceof Error) {
     if (error.name === 'AbortError') return 'Request cancelled.'
     return error.message ? `${GENERIC_ERROR} (${error.message})` : GENERIC_ERROR
@@ -66,10 +77,12 @@ export function useChat() {
       }
 
       try {
-        const chatMessages = updatedMessages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        }))
+        const chatMessages = updatedMessages
+          // An error bubble is a notice this hook wrote, not something the
+          // assistant said; replaying it would feed our own apology back to
+          // the model as conversation history.
+          .filter((m) => !m.isError)
+          .map((m) => ({ role: m.role, content: m.content }))
 
         let fullContent = ''
         let sources: SourceInfo[] = []

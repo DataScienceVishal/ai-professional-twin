@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { API_BASE, getResumeDownloadUrl, streamChat } from './api'
-import { htmlResponse, mockFetch, sseResponse } from '../test/sse'
+import { API_BASE, ChatRequestError, getResumeDownloadUrl, streamChat } from './api'
+import { errorResponse, htmlResponse, mockFetch, sseResponse } from '../test/sse'
 import type { SSEEvent } from './types'
+
+async function drain() {
+  for await (const event of streamChat([{ role: 'user', content: 'hi' }], 'default')) {
+    void event
+  }
+}
 
 async function collect(
   chunks: Parameters<typeof sseResponse>[0],
@@ -13,6 +19,17 @@ async function collect(
     events.push(event)
   }
   return events
+}
+
+/** Run a request expected to fail and hand back the rejection. */
+async function rejection(response: Response): Promise<ChatRequestError> {
+  mockFetch(response)
+  try {
+    await drain()
+  } catch (error) {
+    return error as ChatRequestError
+  }
+  throw new Error('expected streamChat to reject')
 }
 
 afterEach(() => {
@@ -136,11 +153,47 @@ describe('streamChat', () => {
     mockFetch(
       sseResponse([], { ok: false, status: 502, statusText: 'Bad Gateway' }),
     )
-    const iterate = async () => {
-      for await (const event of streamChat([{ role: 'user', content: 'hi' }], 'default')) {
-        void event
-      }
-    }
-    await expect(iterate()).rejects.toThrow('Chat request failed: 502 Bad Gateway')
+    await expect(drain()).rejects.toThrow('Chat request failed: 502 Bad Gateway')
+  })
+
+  it('tags the rejection with the HTTP status', async () => {
+    const error = await rejection(errorResponse(429, { detail: 'Slow down' }))
+
+    expect(error).toBeInstanceOf(ChatRequestError)
+    expect(error.status).toBe(429)
+  })
+
+  it("keeps the backend's own explanation when it sends one", async () => {
+    const detail = 'The assistant is still starting up and indexing its knowledge base.'
+
+    const error = await rejection(errorResponse(503, { detail }))
+
+    expect(error.detail).toBe(detail)
+  })
+
+  it('drops a pydantic validation detail rather than showing it to a visitor', async () => {
+    const error = await rejection(
+      errorResponse(422, {
+        detail: [
+          {
+            type: 'string_too_long',
+            loc: ['body', 'messages', 1, 'content'],
+            msg: 'String should have at most 2000 characters',
+          },
+        ],
+      }),
+    )
+
+    expect(error.status).toBe(422)
+    expect(error.detail).toBeNull()
+  })
+
+  it('survives an error body that is not JSON at all', async () => {
+    const error = await rejection(
+      sseResponse(['<html>gateway error</html>'], { ok: false, status: 502 }),
+    )
+
+    expect(error.status).toBe(502)
+    expect(error.detail).toBeNull()
   })
 })

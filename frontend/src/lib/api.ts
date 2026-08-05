@@ -44,6 +44,43 @@ function assertEventStream(response: Response, url: string): void {
   )
 }
 
+/**
+ * The request reached the backend and came back refused. Kept distinct from a
+ * transport failure so the UI can say what actually happened instead of
+ * blaming the network for a response it did receive.
+ */
+export class ChatRequestError extends Error {
+  status: number
+  /** The backend's own human-readable explanation, when it sent one. */
+  detail: string | null
+
+  constructor(status: number, statusText: string, detail: string | null) {
+    // HTTP/2 drops the reason phrase, so in production this is just the number.
+    super(`Chat request failed: ${status} ${statusText}`.trim())
+    this.name = 'ChatRequestError'
+    this.status = status
+    this.detail = detail
+  }
+}
+
+/**
+ * FastAPI puts a plain string in `detail` for the errors it raises itself -
+ * the 503 while the knowledge base is still indexing, the 429 from the rate
+ * limiter - and those are already written for a reader. Request-validation
+ * failures put a list of pydantic error objects there instead, which is
+ * developer noise, so only a string is ever passed on.
+ */
+async function readDetail(response: Response): Promise<string | null> {
+  try {
+    const body = (await response.json()) as { detail?: unknown }
+    if (typeof body.detail !== 'string') return null
+    return body.detail.trim() || null
+  } catch {
+    // A gateway HTML page, an empty body: nothing useful to show.
+    return null
+  }
+}
+
 /** Parse one SSE `data:` payload; returns null for malformed JSON. */
 function parseEvent(data: string): SSEEvent | null {
   try {
@@ -78,7 +115,7 @@ export async function* streamChat(
   })
 
   if (!response.ok) {
-    throw new Error(`Chat request failed: ${response.status} ${response.statusText}`.trim())
+    throw new ChatRequestError(response.status, response.statusText, await readDetail(response))
   }
 
   assertEventStream(response, url)
