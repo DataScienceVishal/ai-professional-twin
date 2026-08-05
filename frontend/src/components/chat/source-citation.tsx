@@ -45,7 +45,11 @@ export function SourceCitation({ source }: SourceCitationProps) {
         href={source.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 rounded-md bg-accent-cyan/8 border border-accent-cyan/20 px-2.5 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/15 hover:border-accent-cyan/40 transition-colors"
+        // A message can carry six of these, so a full 44px target would turn
+        // the citation footer into the bulk of the bubble. 36px on touch
+        // screens clears WCAG 2.5.8 with room to spare and still reads as a
+        // chip; `lg` and up is mouse-driven and stays compact.
+        className="inline-flex min-h-9 items-center gap-1 rounded-md bg-accent-cyan/8 border border-accent-cyan/20 px-2.5 py-1 text-xs text-accent-cyan hover:bg-accent-cyan/15 hover:border-accent-cyan/40 transition-colors lg:min-h-0"
       >
         <svg className="w-3 h-3 shrink-0" viewBox="0 0 16 16" fill="currentColor">
           <path d="M3.75 2h3.5a.75.75 0 010 1.5h-3.5a1.25 1.25 0 00-1.25 1.25v7.5c0 .69.56 1.25 1.25 1.25h7.5c.69 0 1.25-.56 1.25-1.25v-3.5a.75.75 0 011.5 0v3.5A2.75 2.75 0 0111.25 15h-7.5A2.75 2.75 0 011 12.25v-7.5A2.75 2.75 0 013.75 2z" />
@@ -57,7 +61,7 @@ export function SourceCitation({ source }: SourceCitationProps) {
   }
 
   return (
-    <span className="inline-flex items-center rounded-md bg-bg-card border border-border px-2.5 py-1 text-xs text-text-secondary">
+    <span className="inline-flex min-h-9 items-center rounded-md bg-bg-card border border-border px-2.5 py-1 text-xs text-text-secondary lg:min-h-0">
       {displayText}
     </span>
   )

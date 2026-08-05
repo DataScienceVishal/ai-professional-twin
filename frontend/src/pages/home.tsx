@@ -10,7 +10,10 @@ export default function Home() {
     useChat()
 
   return (
-    <div className="flex h-dvh bg-bg-primary text-text-primary">
+    // `h-dvh` tracks the shrinking/growing mobile browser chrome so the input
+    // bar stays on screen; `overflow-hidden` keeps the shell itself from ever
+    // scrolling - the message list is the only scroller.
+    <div className="flex h-dvh overflow-hidden bg-bg-primary text-text-primary">
       <Sidebar mode={mode} onModeChange={setMode} onClear={clearMessages} />
 
       <div className="flex flex-col flex-1 min-w-0">

@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     # Ask the provider for token counts on streamed responses so spend shows up
     # in the logs. Disable if a deployment rejects stream_options.
     llm_stream_usage: bool = True
+    # Reasoning effort for GPT-5 / o-series deployments. Reasoning tokens are
+    # billed as output and are spent before the first visible token, so this
+    # drives both cost and time-to-first-token. Answering from retrieved context
+    # needs little deliberation. One of minimal/low/medium/high, or "" to omit
+    # the parameter. Ignored for non-reasoning models.
+    llm_reasoning_effort: str = "low"
 
     # Loose default for the cheap read-only endpoints.
     rate_limit: str = "60/minute"

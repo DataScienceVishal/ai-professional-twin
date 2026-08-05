@@ -5,6 +5,7 @@ import rehypeHighlight from 'rehype-highlight'
 import { motion } from 'framer-motion'
 import { MermaidBlock } from './mermaid-block'
 import { SourceCitation } from './source-citation'
+import { ThinkingIndicator } from './thinking-indicator'
 import type { Message as MessageType, ToolActivity } from '../../lib/types'
 
 interface MessageProps {
@@ -31,7 +32,7 @@ function ToolBadge({ activity }: { activity: ToolActivity }) {
     <span
       className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
         isLoading
-          ? 'bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan animate-pulse'
+          ? 'bg-accent-cyan/10 border border-accent-cyan/20 text-accent-cyan motion-safe:animate-pulse'
           : 'bg-accent-cyan/10 border border-accent-cyan/15 text-accent-cyan'
       }`}
     >
@@ -68,8 +69,20 @@ function extractText(node: ReactNode): string {
   return ''
 }
 
+/**
+ * Code blocks are the widest thing a message can contain. Without an explicit
+ * scroll container the `<code>` child renders at its full unwrapped width and
+ * drags the whole message list sideways on a phone.
+ */
+function CodeBlock({ children }: { children: ReactNode }) {
+  return <pre className="max-w-full overflow-x-auto">{children}</pre>
+}
+
 export function Message({ message, isStreaming = false }: MessageProps) {
   const isUser = message.role === 'user'
+  // The turn is in flight and nothing has streamed yet: show the pending state
+  // instead of an empty bubble. The first `chunk` event removes it.
+  const isPending = !isUser && isStreaming && message.content.length === 0
 
   return (
     <motion.div
@@ -80,7 +93,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
     >
       <div
         role={message.isError ? 'alert' : undefined}
-        className={`max-w-[80%] rounded-xl px-4 py-3 ${
+        className={`min-w-0 max-w-[92%] break-words rounded-xl px-4 py-3 sm:max-w-[85%] lg:max-w-[80%] ${
           isUser
             ? 'bg-accent-cyan/10 border border-accent-cyan/20 text-text-primary'
             : message.isError
@@ -90,6 +103,8 @@ export function Message({ message, isStreaming = false }: MessageProps) {
       >
         {isUser ? (
           <p className="text-sm">{message.content}</p>
+        ) : isPending ? (
+          <ThinkingIndicator toolsUsed={message.toolsUsed} />
         ) : (
           <div className="prose prose-sm max-w-none">
             <ReactMarkdown
@@ -97,10 +112,18 @@ export function Message({ message, isStreaming = false }: MessageProps) {
               rehypePlugins={[rehypeHighlight]}
               components={{
                 pre({ children }) {
-                  if (isStreaming) return <pre>{children}</pre>
+                  if (isStreaming) return <CodeBlock>{children}</CodeBlock>
                   const mermaidCode = extractMermaid(children)
                   if (mermaidCode) return <MermaidBlock code={mermaidCode} />
-                  return <pre>{children}</pre>
+                  return <CodeBlock>{children}</CodeBlock>
+                },
+                // Comparison tables are wide; scroll them instead of the page.
+                table({ children }) {
+                  return (
+                    <div className="max-w-full overflow-x-auto">
+                      <table>{children}</table>
+                    </div>
+                  )
                 },
               }}
             >

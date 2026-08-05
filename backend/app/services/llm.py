@@ -18,6 +18,12 @@ TOOL_RESULT_SUMMARY_LIMIT = 200
 # `max_completion_tokens` rather than `max_tokens`.
 GPT5_FAMILY_PREFIXES = ("gpt-5", "o1", "o3", "o4")
 
+# Reasoning tokens are billed as output and are spent before the first visible
+# token, so effort drives both cost and time-to-first-token. Answering from
+# retrieved context needs very little deliberation, so this deployment runs low.
+# Set to "" to omit the parameter and let the service default apply.
+VALID_REASONING_EFFORTS = ("minimal", "low", "medium", "high")
+
 
 def is_gpt5_family(model: str) -> bool:
     return model.lower().startswith(GPT5_FAMILY_PREFIXES)
@@ -35,6 +41,7 @@ class LLMService:
         max_output_tokens: int = 0,
         send_temperature: bool | None = None,
         stream_usage: bool = False,
+        reasoning_effort: str = "",
     ) -> None:
         self.client: AsyncOpenAI
         if azure_endpoint:
@@ -52,6 +59,12 @@ class LLMService:
         self.is_gpt5 = is_gpt5_family(model)
         # An explicit setting always wins over the model-name heuristic.
         self.send_temperature = (not self.is_gpt5) if send_temperature is None else send_temperature
+        # Only reasoning models accept the parameter; a GPT-4 deployment would
+        # reject it. An unrecognised value is dropped rather than sent, so a
+        # typo in an env var degrades to the service default instead of 400ing
+        # every request in production.
+        effort = reasoning_effort.strip().lower()
+        self.reasoning_effort = effort if effort in VALID_REASONING_EFFORTS else ""
 
     def build_completion_kwargs(
         self,
@@ -66,6 +79,8 @@ class LLMService:
         if self.max_output_tokens > 0:
             key = "max_completion_tokens" if self.is_gpt5 else "max_tokens"
             kwargs[key] = self.max_output_tokens
+        if self.is_gpt5 and self.reasoning_effort:
+            kwargs["reasoning_effort"] = self.reasoning_effort
         if stream:
             kwargs["stream"] = True
             if self.stream_usage:

@@ -16,6 +16,14 @@ def test_build_recruiter_prompt_contains_mode_instructions() -> None:
     assert "Next step:" in prompt
 
 
+def test_recruiter_prompt_forbids_a_heading_above_the_summary_line() -> None:
+    """Regression: answers rendered a "Summary" heading immediately above
+    "**Summary:**", printing the word twice in a row."""
+    prompt = build_system_prompt(mode=ChatMode.RECRUITER, rag_context="")
+    assert "Do NOT put a markdown heading above the summary line" in prompt
+    assert "Never repeat a label as both a heading and a bold line" in prompt
+
+
 def test_build_interview_prompt_contains_mode_instructions() -> None:
     prompt = build_system_prompt(mode=ChatMode.INTERVIEW, rag_context="")
     assert "technical interviewer" in prompt
