@@ -8,6 +8,20 @@ const REJECTED_ERROR =
   'The assistant could not accept that message - it may be too long. ' +
   'Try a shorter question, or clear the conversation and start again.'
 const SERVER_ERROR = 'The assistant backend ran into a problem. Please try again in a moment.'
+const UNAVAILABLE_ERROR =
+  'The assistant is unavailable right now - nothing is wrong with your question. ' +
+  'Please try again shortly.'
+
+/**
+ * Statuses that genuinely mean this request's own content was refused: 413 from
+ * a proxy, 422 from pydantic. The rest of the 4xx range is infrastructure -
+ * notably the 404 an edge serves when no app is bound to the hostname, whose
+ * body carries `message` rather than FastAPI's `detail` and so arrives here
+ * with nothing to show. Calling that "too long" sent visitors to shorten their
+ * question and clear the chat all through an outage, neither of which could
+ * have helped.
+ */
+const CONTENT_REJECTED_STATUSES = new Set([413, 422])
 
 function describeError(error: unknown): string {
   // A status code means the backend answered, so "could not reach it" would be
@@ -15,7 +29,9 @@ function describeError(error: unknown): string {
   // the identical payload and fails identically.
   if (error instanceof ChatRequestError) {
     if (error.detail) return error.detail
-    return error.status >= 400 && error.status < 500 ? REJECTED_ERROR : SERVER_ERROR
+    if (CONTENT_REJECTED_STATUSES.has(error.status)) return REJECTED_ERROR
+    if (error.status >= 500) return SERVER_ERROR
+    return UNAVAILABLE_ERROR
   }
   if (error instanceof Error) {
     if (error.name === 'AbortError') return 'Request cancelled.'

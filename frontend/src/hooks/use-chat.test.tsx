@@ -127,6 +127,26 @@ describe('useChat', () => {
     expect(assistant.content).not.toMatch(/string_too_long/)
   })
 
+  it('does not blame the message when the backend itself is missing', async () => {
+    // Railway's edge answers 404 with `message`, not FastAPI's `detail`, when
+    // nothing is bound to the hostname. Bucketing every detail-less 4xx as a
+    // content refusal told visitors, during a real outage, that their question
+    // was too long - sending them to shorten it and clear the chat, neither of
+    // which can help when no request is reaching the app at all.
+    mockFetch(errorResponse(404, { status: 'error', code: 404, message: 'Application not found' }))
+
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('Does he have experience with SQL?')
+    })
+
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    const assistant = result.current.messages[1]
+    expect(assistant.isError).toBe(true)
+    expect(assistant.content).not.toMatch(/too long/i)
+    expect(assistant.content).toMatch(/unavailable/i)
+  })
+
   it("shows the backend's own explanation for a 503 or a 429", async () => {
     mockFetch(
       errorResponse(503, {
