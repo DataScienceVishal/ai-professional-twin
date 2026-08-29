@@ -49,7 +49,7 @@ only** — no scheme (the `https://` is already there), no trailing slash, no
 `/api` segment. For example:
 
 ```json
-"destination": "https://ai-professional-twin-production.up.railway.app/:path*"
+"destination": "https://ai-twin-api.bravecoast-78fd612a.francecentral.azurecontainerapps.io/:path*"
 ```
 
 Two things matter about this rewrite:

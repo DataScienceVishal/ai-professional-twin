@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://ai-professional-twin-production.up.railway.app/:path*"
+      "destination": "https://ai-twin-api.bravecoast-78fd612a.francecentral.azurecontainerapps.io/:path*"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
