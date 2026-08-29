@@ -1,0 +1,18 @@
+# Secrets must never reach the image. Railway built from git, where .env is
+# already ignored; `az containerapp up --source` uploads the working directory
+# instead, so the exclusion has to be repeated here or the key ends up in a
+# registry layer.
+.env
+.env.*
+!.env.example
+
+# Build and test artefacts: none are needed at runtime (the image installs with
+# `uv sync --no-dev`) and they only inflate the upload.
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+chromadb_data/
+tests/
