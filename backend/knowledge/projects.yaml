@@ -15,7 +15,7 @@
     React 19 + Vite + Tailwind frontend renders markdown, Mermaid diagrams and
     three tailored modes (General, Recruiter, Interview). Rebuilt from an
     earlier vanilla-JavaScript prototype, which is now retired.
-  tech_stack: [Python, FastAPI, ChromaDB, Azure OpenAI, RAG, React 19, TypeScript, Vite, Tailwind CSS, Docker, Railway, Vercel]
+  tech_stack: [Python, FastAPI, ChromaDB, Azure OpenAI, RAG, React 19, TypeScript, Vite, Tailwind CSS, Docker, Azure Container Apps, Vercel]
   github_url: https://github.com/DataScienceVishal/ai-professional-twin
   category: Software Engineering
   highlights:
@@ -27,7 +27,8 @@
       unchanged documents are never re-embedded and cold starts stay fast
     - Cost and abuse controls - per-IP rate limiting and a global daily budget
     - Prompt-injection hardening on untrusted ingested content
-    - 178 automated tests in CI with ruff, mypy --strict, oxlint and vitest
+    - CI runs ruff, mypy in strict mode, oxlint and the pytest and vitest
+      suites on every push and pull request to main
 
 - name: Image Classification with CNN (CIFAR-10)
   slug: image-classification-cnn-cifar10

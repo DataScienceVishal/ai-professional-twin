@@ -264,9 +264,12 @@
     tool and function calling, vector databases (ChromaDB, FAISS), and
     frameworks like LangChain. This assistant is his own work: a full-stack
     RAG application with tool calling, SSE streaming, semantic search with
-    source citations, and prompt-injection hardening, deployed on Railway
-    and Vercel with 178 automated tests in CI. It demonstrates end-to-end
-    GenAI engineering rather than notebook experiments.
+    source citations, and prompt-injection hardening. It demonstrates
+    end-to-end GenAI engineering rather than notebook experiments. Its
+    FastAPI backend runs on Azure Container Apps and its React frontend on
+    Vercel. CI runs the backend and frontend test suites on every push and
+    pull request to main. The backend tests mock Azure OpenAI, so CI runs
+    without an API key.
 
 - topic: contact
   question: How can I get in touch with Vishal?
