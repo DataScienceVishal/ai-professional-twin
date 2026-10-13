@@ -31,7 +31,7 @@ No signup. Pick a mode, ask a question, watch the answer stream in with its sour
 
 ## What it does
 
-- **Answers questions about one person, from evidence.** Every response is generated from a curated knowledge base — YAML files covering projects, skills, education, certifications and career Q&A, plus the resume PDF and live data pulled from public GitHub repositories. **87 documents are indexed** in the running deployment.
+- **Answers questions about one person, from evidence.** Every response is generated from a curated knowledge base: YAML files covering projects, skills, education, certifications and career Q&A, plus the resume PDF and live data pulled from public GitHub repositories. **89 documents were indexed** in the running deployment when `/ready` was read on 2026-10-12. Each ingested GitHub repository is one document, so the count changes when one is added or removed.
 - **Shows its working.** Each answer ends with the source chunks it was built from, so you can see whether a claim came from the resume, the academic record, or a repository README.
 - **Three modes for three audiences.** *General* is conversational, *Recruiter* returns a one-line summary plus quantified bullets under 150 words, and *Interview* goes deep on architecture and trade-offs — and renders Mermaid diagrams inline when it explains a system.
 - **Calls tools when static text is not enough.** Eight function-calling tools let the model fetch live repository stats, search repos, compute years of experience, count projects by category, and hand back a resume download link.
@@ -55,7 +55,7 @@ The UI shuffles a rotating set of these as suggestion chips; the full list lives
 flowchart LR
     B["Browser<br/>React 19 SPA"]
     V["Vercel<br/>static assets + /api rewrite"]
-    F["Railway<br/>FastAPI app"]
+    F["Azure Container Apps<br/>FastAPI app"]
     R["Retriever<br/>intent, boost, threshold"]
     C[("ChromaDB<br/>cosine, persistent volume")]
     E["Azure OpenAI<br/>text-embedding-3-small"]
@@ -75,7 +75,7 @@ flowchart LR
     F -->|"SSE stream"| B
 ```
 
-The browser only ever talks to its own origin. Vercel rewrites `/api/:path*` to the Railway host with the `/api` prefix stripped, so the FastAPI routes stay unprefixed (`/chat`, `/projects`, `/skills`, `/health`, `/ready`, `/resume/download`) and **there is no CORS in production**. [`frontend/vite.config.ts`](frontend/vite.config.ts) mirrors the same rewrite for local development, so dev and prod behave identically and no build-time env var is needed.
+The browser only ever talks to its own origin. Vercel rewrites `/api/:path*` to the Azure Container Apps host with the `/api` prefix stripped, so the FastAPI routes stay unprefixed (`/chat`, `/projects`, `/skills`, `/health`, `/ready`, `/resume/download`) and **there is no CORS in production**. [`frontend/vite.config.ts`](frontend/vite.config.ts) mirrors the same rewrite for local development, so dev and prod behave identically and no build-time env var is needed.
 
 | Endpoint | Method | Purpose |
 | --- | --- | --- |
@@ -171,9 +171,9 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 | Logging | `structlog` | One structured `chat_query` event per request |
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS 4 | `react-markdown` + `rehype-highlight`, `framer-motion` |
 | Diagrams | `mermaid` | Rendered client-side in Interview mode |
-| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | 370 tests total |
+| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | 390 tests total |
 | Quality | ruff, mypy (strict), oxlint, `tsc` | All enforced in CI |
-| Hosting | Railway (backend, Docker), Vercel (frontend) | Same-origin via rewrite |
+| Hosting | Azure Container Apps (backend, Docker), Vercel (frontend) | Same-origin via rewrite. GitHub Actions publishes the backend image to GHCR; rollout is a manual `az containerapp update` |
 
 ## Local development
 
@@ -246,7 +246,7 @@ Only the question text, mode, timestamp and the retrieval/outcome fields are sto
 The endpoint is off by default. Set `ANALYTICS_TOKEN` to a long random value to enable it, then:
 
 ```bash
-curl -H "Authorization: Bearer $ANALYTICS_TOKEN" https://your-api.up.railway.app/analytics
+curl -H "Authorization: Bearer $ANALYTICS_TOKEN" https://ai-twin-api.bravecoast-78fd612a.francecentral.azurecontainerapps.io/analytics
 ```
 
 With no token configured it returns 404 rather than 403, so its existence is not advertised; with a wrong token, 401.
@@ -257,27 +257,27 @@ With no token configured it returns 404 rather than 403, so its existence is not
 
 Both suites run on every push and pull request to `main` via [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
-**Backend** — 257 tests
+**Backend** (276 tests)
 
 ```bash
 cd backend
 uv run ruff check .          # lint
 uv run ruff format --check . # formatting
 uv run mypy app/             # strict type checking (configured in pyproject.toml)
-uv run pytest -q             # 257 passed
+uv run pytest -q             # 276 passed
 ```
 
-**Frontend** — 113 tests
+**Frontend** (114 tests)
 
 ```bash
 cd frontend
 npm run lint       # oxlint
 npm run typecheck  # tsc -b
-npm run test       # vitest run - 113 passed
+npm run test       # vitest run - 114 passed
 npm run build      # tsc -b && vite build
 ```
 
-**370 tests total.** The pytest suite mirrors the `app/` tree — chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the projects and skills showcase, and the suggestion-chip logic.
+**390 tests total.** The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the projects and skills showcase, and the suggestion-chip logic.
 
 ## Project structure
 
@@ -299,14 +299,14 @@ npm run build      # tsc -b && vite build
 │   ├── knowledge/           # YAML knowledge base + resume PDF
 │   ├── tests/               # pytest suite, mirrors app/
 │   ├── Dockerfile           # multi-stage uv build
-│   └── railway.toml         # health check + volume notes
+│   └── railway.toml         # Railway config, not used by the live site
 ├── frontend/
 │   ├── src/
 │   │   ├── components/      # chat, layout, modes, projects, ui
 │   │   ├── hooks/           # use-chat (SSE state machine), use-projects
 │   │   ├── lib/             # api client, constants, shared types
 │   │   └── pages/
-│   ├── vercel.json          # /api rewrite to Railway, then SPA fallback
+│   ├── vercel.json          # /api rewrite to Azure Container Apps, then SPA fallback
 │   └── vite.config.ts       # dev proxy mirroring the Vercel rewrite
 └── .github/workflows/ci.yml
 ```
