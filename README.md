@@ -171,7 +171,7 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 | Logging | `structlog` | One structured `chat_query` event per request |
 | Frontend | React 19, Vite, TypeScript, Tailwind CSS 4 | `react-markdown` + `rehype-highlight`, `framer-motion` |
 | Diagrams | `mermaid` | Rendered client-side in Interview mode |
-| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | 390 tests total |
+| Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | Azure OpenAI is mocked, so CI needs no Azure key |
 | Quality | ruff, mypy (strict), oxlint, `tsc` | All enforced in CI |
 | Hosting | Azure Container Apps (backend, Docker), Vercel (frontend) | Same-origin via rewrite. GitHub Actions publishes the backend image to GHCR; rollout is a manual `az containerapp update` |
 
@@ -257,27 +257,27 @@ With no token configured it returns 404 rather than 403, so its existence is not
 
 Both suites run on every push and pull request to `main` via [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
-**Backend** (276 tests)
+**Backend**
 
 ```bash
 cd backend
 uv run ruff check .          # lint
 uv run ruff format --check . # formatting
 uv run mypy app/             # strict type checking (configured in pyproject.toml)
-uv run pytest -q             # 276 passed
+uv run pytest -q             # CI runs it with --cov=app
 ```
 
-**Frontend** (114 tests)
+**Frontend**
 
 ```bash
 cd frontend
 npm run lint       # oxlint
 npm run typecheck  # tsc -b
-npm run test       # vitest run - 114 passed
+npm run test       # vitest run
 npm run build      # tsc -b && vite build
 ```
 
-**390 tests total.** The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the projects and skills showcase, and the suggestion-chip logic.
+The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the project grid and skill summary shown before the first message, and the suggestion-chip logic.
 
 ## Project structure
 
