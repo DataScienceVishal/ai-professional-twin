@@ -1,4 +1,3 @@
-import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -53,8 +52,9 @@ def test_chunk_career_qa() -> None:
     assert "Strong AI skills" in docs[0].text
 
 
-def test_chunk_yaml_file_projects() -> None:
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+def test_chunk_yaml_file_projects(tmp_path: Path) -> None:
+    path = tmp_path / "projects.yaml"
+    with path.open("w") as f:
         yaml.dump(
             [
                 {
@@ -69,8 +69,7 @@ def test_chunk_yaml_file_projects() -> None:
             ],
             f,
         )
-        f.flush()
-        docs = chunk_yaml_file(Path(f.name), "projects")
+    docs = chunk_yaml_file(path, "projects")
     assert len(docs) == 1
     assert docs[0].metadata["source"] == "projects"
 
