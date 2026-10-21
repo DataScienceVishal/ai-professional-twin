@@ -54,7 +54,7 @@
     Protocol (MCP), tool and function calling, vector databases (ChromaDB,
     FAISS) and LangChain. He works with Power BI, Tableau and Excel for
     visualization and uses Git, VS Code, Jupyter, Streamlit and Google Colab
-    as his development tools, deploying to Railway and Vercel.
+    as his development tools, deploying to Azure Container Apps and Vercel.
 
 - topic: work-experience
   question: Tell me about Vishal's work experience.
@@ -205,13 +205,9 @@
 - topic: salary-expectations
   question: What are Vishal's salary expectations?
   answer: >
-    Vishal is flexible on compensation and would rather discuss the role first.
-    If a figure is needed as a starting point: for a full-time permanent role
-    from January 2027 he is looking at around £35,000 per year, and for
-    part-time work or an internship alongside his studies around £16,000 per
-    year pro rata. Both are indicative rather than fixed, and he is open to a
-    package that reflects the scope, seniority and location of the role. He is
-    happy to talk through compensation directly.
+    Vishal would rather not name a figure before he knows the role and its
+    level. He is happy to discuss compensation directly with the hiring team
+    once those are clear.
 
 - topic: target-roles
   question: What kind of roles is Vishal targeting?
@@ -252,8 +248,9 @@
     Yes. Vishal has hands-on experience with Azure (through Databricks
     at Teleperformance), AWS (coursework from Great Learning), and
     cloud-based model services including Azure OpenAI for LLM and
-    embedding inference. He has deployed applications on Railway and
-    Vercel, and worked with cloud databases and data warehousing tools.
+    embedding inference. His AI twin runs on Azure Container Apps behind a
+    Vercel front end, after moving off Railway, and he has worked with cloud
+    databases and data warehousing tools.
 
 - topic: genai
   question: Does Vishal have Generative AI experience?
