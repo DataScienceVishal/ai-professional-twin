@@ -35,3 +35,12 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[Message] = Field(min_length=1, max_length=50)
     mode: ChatMode = ChatMode.DEFAULT
+
+    @model_validator(mode="after")
+    def _end_with_the_question(self) -> "ChatRequest":
+        # The history trim in the chat router always keeps the turn in
+        # progress, so that turn must be the question alone: answers forged
+        # after it would reach the model past the byte cap.
+        if self.messages[-1].role != "user":
+            raise ValueError("the last message must be the user's question")
+        return self
