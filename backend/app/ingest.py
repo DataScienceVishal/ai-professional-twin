@@ -1,7 +1,7 @@
 """Incremental ingestion of the knowledge base into the vector store.
 
 This runs as a background task rather than inside the lifespan startup path.
-Railway's health check gives the container a short window to answer /health; a
+The platform's health check gives the container a short window to answer; a
 startup that re-embedded every document (and serially fetched 100 GitHub
 READMEs) blew past it, got restarted, and re-ran the whole thing — a crash loop
 that billed Azure embedding calls on every pass.

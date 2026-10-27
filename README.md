@@ -305,8 +305,7 @@ The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chro
 │   │   └── tools/           # function-calling tools and their JSON schemas
 │   ├── knowledge/           # YAML knowledge base + resume PDF
 │   ├── tests/               # pytest suite, mirrors app/
-│   ├── Dockerfile           # multi-stage uv build
-│   └── railway.toml         # Railway config, not used by the live site
+│   └── Dockerfile           # multi-stage uv build
 ├── frontend/
 │   ├── public/              # share card, favicon, font licence
 │   ├── scripts/og-card/     # the share card's source and its provenance stamp

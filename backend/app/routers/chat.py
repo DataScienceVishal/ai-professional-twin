@@ -25,8 +25,8 @@ from app.tools.schemas import TOOL_DEFINITIONS
 router = APIRouter()
 logger = structlog.get_logger()
 
-# One greppable event name per chat request, so Railway logs can be filtered
-# down to "what are recruiters actually asking".
+# One greppable event name per chat request, so the container logs can be
+# filtered down to "what are recruiters actually asking".
 CHAT_QUERY_EVENT = "chat_query"
 
 NOT_READY_MESSAGE = (

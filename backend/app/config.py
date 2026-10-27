@@ -119,10 +119,10 @@ class Settings(BaseSettings):
     def _derive_analytics_log_path(self) -> "Settings":
         """Default the query log to a sibling of the vector store directory.
 
-        One Railway volume is mounted at /data and CHROMA_PERSIST_DIR is
-        /data/chromadb, so this lands at /data/analytics/queries.jsonl with no
-        second path to configure - while staying overridable for anyone who
-        mounts things elsewhere.
+        The Docker image sets CHROMA_PERSIST_DIR to /data/chromadb, so this
+        lands at /data/analytics/queries.jsonl and one volume mounted at /data
+        can hold both, with no second path to configure. It stays overridable
+        for anyone who mounts things elsewhere.
         """
         if not self.analytics_log_path:
             parent = Path(self.chroma_persist_dir).parent

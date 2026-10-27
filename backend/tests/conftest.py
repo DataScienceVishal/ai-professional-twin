@@ -20,7 +20,7 @@ def _configure_logging() -> None:
     Without this the app runs against structlog's default bound logger, which
     has a *different* set of async methods than the stdlib one used in
     production - so a typo like `awarn` (stdlib has `awarning`) passes the
-    tests and then raises AttributeError on Railway.
+    tests and then raises AttributeError once deployed.
     """
     setup_logging("info")
 

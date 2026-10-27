@@ -10,7 +10,8 @@ router = APIRouter()
 
 @router.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness only. Railway polls this, so it must stay cheap and dependency-free."""
+    """Liveness only, meant for the platform's health check, so it must stay
+    cheap and dependency-free."""
     return {
         "status": "healthy",
         "version": __version__,

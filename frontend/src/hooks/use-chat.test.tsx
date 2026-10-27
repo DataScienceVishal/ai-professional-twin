@@ -159,8 +159,8 @@ describe('useChat', () => {
   })
 
   it('does not blame the message when the backend itself is missing', async () => {
-    // Railway's edge answers 404 with `message`, not FastAPI's `detail`, when
-    // nothing is bound to the hostname. Bucketing every detail-less 4xx as a
+    // The old host answered 404 with `message`, not FastAPI's `detail`, when
+    // nothing was bound to the hostname. Bucketing every detail-less 4xx as a
     // content refusal told visitors, during a real outage, that their question
     // was too long - sending them to shorten it and clear the chat, neither of
     // which can help when no request is reaching the app at all.
