@@ -13,7 +13,7 @@ React 19 + Vite + Tailwind 4 UI for the professional profile assistant.
 | `npm run test:watch`| Vitest in watch mode                          |
 | `npm run build`     | Type check + production build to `dist/`      |
 
-## API routing — READ THIS BEFORE DEPLOYING
+## API routing: read this before deploying
 
 The frontend always calls the **same-origin** path `/api/...`. Nothing else is
 configured at build time: there is no CORS setup and no required env var.
@@ -21,8 +21,8 @@ configured at build time: there is no CORS setup and no required env var.
 The backend routes are **not** prefixed:
 
 ```
-/chat            /projects        /skills
-/health          /resume/download
+/chat            /projects        /skills          /timeline
+/health          /ready           /resume/download
 ```
 
 So both proxies must **strip the `/api` prefix** when forwarding:
@@ -30,27 +30,23 @@ So both proxies must **strip the `/api` prefix** when forwarding:
 | Environment | Browser requests | Proxy                             | Backend receives      |
 | ----------- | ---------------- | --------------------------------- | --------------------- |
 | Local dev   | `/api/chat`      | `vite.config.ts` `server.proxy`   | `localhost:8000/chat` |
-| Production  | `/api/chat`      | `vercel.json` rewrite             | `<railway>/chat`      |
+| Production  | `/api/chat`      | `vercel.json` rewrite             | `<backend host>/chat` |
 
-### ⚠️ `vercel.json` needs your Railway URL
+### The rewrite in `vercel.json`
 
 JSON cannot hold comments, so the note lives here. `frontend/vercel.json`
-contains a literal placeholder you must replace before the deploy will work:
+sends every `/api` request to the backend on Azure Container Apps:
 
 ```json
 {
   "source": "/api/:path*",
-  "destination": "https://RAILWAY_BACKEND_URL_PLACEHOLDER/:path*"
+  "destination": "https://ai-twin-api.bravecoast-78fd612a.francecentral.azurecontainerapps.io/:path*"
 }
 ```
 
-Replace `RAILWAY_BACKEND_URL_PLACEHOLDER` with the Railway host, **hostname
-only** — no scheme (the `https://` is already there), no trailing slash, no
-`/api` segment. For example:
-
-```json
-"destination": "https://ai-twin-api.bravecoast-78fd612a.francecentral.azurecontainerapps.io/:path*"
-```
+If the backend moves, change the host there. Give the hostname only: the
+`https://` is already there, and there is no trailing slash and no `/api`
+segment.
 
 Two things matter about this rewrite:
 
