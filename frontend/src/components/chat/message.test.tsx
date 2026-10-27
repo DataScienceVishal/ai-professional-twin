@@ -52,7 +52,8 @@ describe('Message failure state', () => {
 
     const alert = screen.getByRole('alert')
     expect(alert).toHaveTextContent(notice)
-    expect(alert.className).toContain('border-red-200')
+    expect(alert.className).toContain('border-dashed')
+    expect(alert).toHaveTextContent('Could not answer')
   })
 })
 
@@ -73,11 +74,11 @@ describe('Message mobile overflow guards', () => {
     expect(wrapper?.className).toContain('overflow-x-auto')
   })
 
-  it('lets long unbroken strings break inside the bubble', () => {
-    const { container } = render(<Message message={assistant({ content: 'x'.repeat(300) })} />)
-    const bubble = container.querySelector('.rounded-xl')
-    expect(bubble?.className).toContain('break-words')
-    expect(bubble?.className).toContain('min-w-0')
+  it('lets long unbroken strings break inside the answer', () => {
+    render(<Message message={assistant({ content: 'x'.repeat(300) })} />)
+    const answer = screen.getByTestId('answer')
+    expect(answer.className).toContain('break-words')
+    expect(answer.className).toContain('min-w-0')
   })
 })
 
@@ -107,5 +108,26 @@ describe('diagram rendering during streaming', () => {
   it('drops the placeholder once streaming finishes', () => {
     render(<Message message={mermaidMsg} />)
     expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
+  })
+})
+
+describe('Message on the sheet', () => {
+  it('lists tool activity as plain log lines', () => {
+    render(<Message message={assistant({ content: 'Done.', toolsUsed: [{ tool: 'search_repos', summary: '3 repos' }] })} />)
+    expect(screen.getByRole('list', { name: 'Tools used' })).toHaveTextContent('Searched GitHub')
+  })
+
+  it('stops marking a tool as running once the answer has stopped streaming', () => {
+    const { container } = render(
+      <Message message={assistant({ content: 'Partial.', toolsUsed: [{ tool: 'search_repos' }] })} isStreaming={false} />,
+    )
+    expect(screen.getByRole('list', { name: 'Tools used' })).toHaveTextContent(/^Searched GitHub$/)
+    expect(container.querySelector('.bg-route')).toBeNull()
+  })
+
+  it('labels the sources under the answer', () => {
+    render(<Message message={assistant({ content: 'Done.', sources: [{ source: 'resume', detail: '', url: '' }] })} />)
+    expect(screen.getByText('Sources')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'CV' })).toBeInTheDocument()
   })
 })
