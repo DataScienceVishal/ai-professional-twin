@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { SourceCitation } from './source-citation'
+import { renderWithSheet } from '../../test/sheet'
 import type { SourceInfo } from '../../lib/types'
 
 function source(partial: Partial<SourceInfo>): SourceInfo {
@@ -54,5 +55,53 @@ describe('SourceCitation', () => {
   it('shows only the label when there is no detail', () => {
     render(<SourceCitation source={source({ source: 'resume' })} />)
     expect(screen.getByText('CV')).toBeInTheDocument()
+  })
+})
+
+describe('SourceCitation on the sheet', () => {
+  it('opens and closes the source when pressed', () => {
+    renderWithSheet(<SourceCitation source={source({ detail: 'availability' })} />)
+    const button = screen.getByRole('button', { name: 'Career Q&A · Availability' })
+
+    expect(button).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(button)
+    expect(button).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('puts a known category after the project name, whatever order the backend sent', () => {
+    renderWithSheet(
+      <SourceCitation source={source({ source: 'projects', detail: 'Machine Learning - Telecom Churn Prediction' })} />,
+      { trailing: { projects: ['Machine Learning'] } },
+    )
+    expect(screen.getByText('Project · Telecom Churn Prediction · Machine Learning')).toBeInTheDocument()
+  })
+
+  it('puts a skill level after the category', () => {
+    render(<SourceCitation source={source({ source: 'skills', detail: 'advanced - Generative AI' })} />)
+    expect(screen.getByText('Skills · Generative AI · Advanced')).toBeInTheDocument()
+  })
+
+  it('puts the level last when a skills category is also a project category, in either order', () => {
+    renderWithSheet(
+      <>
+        <SourceCitation source={source({ source: 'skills', detail: 'Machine Learning - advanced' })} />
+        <SourceCitation source={source({ source: 'skills', detail: 'advanced - Machine Learning' })} />
+      </>,
+      { trailing: { projects: ['Machine Learning'] } },
+    )
+    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual([
+      'Skills · Machine Learning · Advanced',
+      'Skills · Machine Learning · Advanced',
+    ])
+  })
+
+  it('puts a known degree after the institution', () => {
+    renderWithSheet(
+      <SourceCitation source={source({ source: 'academics', detail: 'MSc Data Science - Liverpool John Moores University (LJMU)' })} />,
+      { trailing: { academics: ['MSc Data Science'] } },
+    )
+    expect(screen.getByText('Academics · Liverpool John Moores University (LJMU) · MSc Data Science')).toBeInTheDocument()
   })
 })
