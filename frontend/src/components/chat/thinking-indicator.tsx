@@ -3,7 +3,7 @@ import type { ToolActivity } from '../../lib/types'
 
 /**
  * The backend runs a reasoning model, so several seconds pass between the
- * request going out and the first token arriving. An empty bubble reads as a
+ * request going out and the first token arriving. An empty note reads as a
  * broken page, so narrate the wait instead: these phases advance on a timer
  * and are overridden the moment real tool activity is reported.
  *
@@ -16,7 +16,7 @@ const PHASES: { readonly afterMs: number; readonly label: string }[] = [
 ]
 
 /**
- * Present-tense counterparts to the past-tense badge labels in `message.tsx`.
+ * Present-tense counterparts to the past-tense `TOOL_LABELS` in `message.tsx`.
  * Keyed by the `tool` field of a `tool_start` event.
  */
 const TOOL_PHASES: Record<string, string> = {
@@ -47,8 +47,8 @@ interface ThinkingIndicatorProps {
 
 /**
  * Pending state for an assistant turn that has not streamed any content yet.
- * Rendered inside the assistant bubble and removed as soon as the first
- * `chunk` event lands.
+ * Rendered inside the answer and removed as soon as the first `chunk`
+ * event lands.
  */
 export function ThinkingIndicator({ toolsUsed }: ThinkingIndicatorProps) {
   const [phaseIndex, setPhaseIndex] = useState(0)
@@ -65,14 +65,14 @@ export function ThinkingIndicator({ toolsUsed }: ThinkingIndicatorProps) {
       role="status"
       aria-live="polite"
       data-testid="thinking-indicator"
-      className="flex items-center gap-2 text-sm text-text-secondary"
+      className="flex items-center gap-2 text-sm text-muted"
     >
       {/* Decorative: the label already carries the meaning for screen readers.
           `motion-safe:` keeps it still for prefers-reduced-motion. */}
       <span className="flex shrink-0 gap-1" aria-hidden="true">
-        <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan motion-safe:animate-bounce" />
-        <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan motion-safe:animate-bounce [animation-delay:0.15s]" />
-        <span className="h-1.5 w-1.5 rounded-full bg-accent-cyan motion-safe:animate-bounce [animation-delay:0.3s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce [animation-delay:0.15s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce [animation-delay:0.3s]" />
       </span>
       <span>{thinkingLabel(phaseIndex, toolsUsed)}&hellip;</span>
     </div>

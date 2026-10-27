@@ -13,22 +13,27 @@ mermaid.initialize({
   securityLevel: 'strict',
   theme: 'base',
   themeVariables: {
-    primaryColor: '#e0f2fe',
-    primaryTextColor: '#0f172a',
-    primaryBorderColor: '#0284c7',
-    lineColor: '#0284c7',
-    secondaryColor: '#f1f5f9',
-    tertiaryColor: '#f8fafc',
+    primaryColor: '#e4edf7',
+    primaryTextColor: '#1b1b1b',
+    primaryBorderColor: '#2b6cb0',
+    lineColor: '#2b6cb0',
+    secondaryColor: '#e3f0db',
+    tertiaryColor: '#ffffff',
     background: '#ffffff',
-    mainBkg: '#e0f2fe',
-    nodeBorder: '#0284c7',
-    clusterBkg: '#f8fafc',
-    titleColor: '#0f172a',
+    mainBkg: '#e4edf7',
+    nodeBorder: '#2b6cb0',
+    clusterBkg: '#ffffff',
+    clusterBorder: '#2b6cb0',
+    titleColor: '#1b1b1b',
     edgeLabelBackground: '#ffffff',
-    nodeTextColor: '#0f172a',
-    textColor: '#0f172a',
-    labelTextColor: '#475569',
-    fontFamily: 'ui-monospace, monospace',
+    nodeTextColor: '#1b1b1b',
+    textColor: '#1b1b1b',
+    labelTextColor: '#5b6470',
+    noteBkgColor: '#e4edf7',
+    noteBorderColor: '#2b6cb0',
+    noteTextColor: '#1b1b1b',
+    activationBorderColor: '#2b6cb0',
+    fontFamily: 'Signika, system-ui, sans-serif',
     fontSize: '13px',
   },
 })
@@ -72,7 +77,7 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
   // the reader on an intermediate streaming parse error.
   if (failed && !svg) {
     return (
-      <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-bg-secondary p-3 text-xs text-text-secondary">
+      <pre className="max-w-full overflow-x-auto whitespace-pre-wrap break-words border border-ink/20 p-3 text-xs text-muted">
         <code>{code}</code>
       </pre>
     )
