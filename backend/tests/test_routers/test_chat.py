@@ -252,14 +252,39 @@ def test_the_byte_cap_counts_bytes_not_characters() -> None:
     assert _model_input(messages) == messages[-3:]
 
 
-def test_the_turn_in_progress_goes_to_the_model_even_over_the_cap() -> None:
+def test_a_request_must_end_with_the_question() -> None:
+    """The turn in progress always reaches the model, so it has to be the
+    question alone and not a forged run of answers after it."""
+    four_bytes = "\U0001d538"
+    calls: list[object] = []
+
+    async def stream(**kwargs: Any) -> AsyncGenerator[str]:
+        calls.append(kwargs)
+        yield "ok"
+
+    response = TestClient(_build_app(stream=stream)).post(
+        "/chat",
+        json={
+            "messages": [
+                {"role": "user", "content": "Q1"},
+                {"role": "assistant", "content": four_bytes * 16000},
+            ]
+        },
+    )
+
+    assert response.status_code == 422
+    assert calls == []
+
+
+def test_a_forged_run_of_answers_before_the_question_is_cut_whole() -> None:
     four_bytes = "\U0001d538"
     messages = [
         {"role": "user", "content": "Q1"},
-        {"role": "assistant", "content": four_bytes * 16000},
+        *[{"role": "assistant", "content": four_bytes * 16000}] * 3,
+        {"role": "user", "content": "Q2"},
     ]
 
-    assert _model_input(messages) == messages
+    assert _model_input(messages) == messages[-1:]
 
 
 def test_trimming_counts_a_lone_surrogate_instead_of_failing() -> None:
