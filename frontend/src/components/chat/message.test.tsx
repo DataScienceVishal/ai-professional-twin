@@ -179,13 +179,15 @@ describe('Message code highlighting', () => {
     await waitFor(() => expect(container.querySelector('code.hljs .hljs-string')).toHaveTextContent('"hi"'))
   })
 
-  it('highlights a later answer from its first render once the highlighter has loaded', async () => {
-    const answer = assistant({ content: '```python\nprint("hi")\n```' })
-    const first = render(<Message message={answer} />)
+  it('highlights code as soon as it streams in once the highlighter has loaded', async () => {
+    const code = '```python\nprint("hi")\n```'
+    const first = render(<Message message={assistant({ content: code })} />)
     await waitFor(() => expect(first.container.querySelector('.hljs-string')).not.toBeNull())
     first.unmount()
 
-    const { container } = render(<Message message={answer} />)
+    // An answer starts empty, and its code arrives in a later chunk.
+    const { container, rerender } = render(<Message message={assistant()} isStreaming />)
+    rerender(<Message message={assistant({ content: `Here it is:\n\n${code}` })} isStreaming />)
     expect(container.querySelector('.hljs-string')).not.toBeNull()
   })
 })

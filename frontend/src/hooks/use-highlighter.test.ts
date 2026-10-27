@@ -8,9 +8,10 @@ describe('needsHighlighter', () => {
     ['a fence with a space before the language', '``` sql\nSELECT 1\n```', true],
     ['a code block after a diagram', '```mermaid\ngraph TD\n  A --> B\n```\n\n```bash\nnpm test\n```', true],
     ['a diagram alone, which is drawn instead', '```mermaid\ngraph TD\n  A --> B\n```', false],
+    ['a fence whose language is still streaming in', 'Here is the flow:\n\n```mer', false],
     ['a fence that names no language', '```\nplain text\n```', false],
     ['inline code', 'Run `npm test` first.', false],
-    ['prose', 'He is available from January 2027.', false],
+    ['prose', 'A plain answer with no code in it.', false],
   ])('%s', (_case, markdown, expected) => {
     expect(needsHighlighter(markdown)).toBe(expected)
   })
