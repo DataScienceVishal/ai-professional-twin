@@ -1,9 +1,15 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import { MotionConfig } from 'framer-motion'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { Message } from './message'
 import { CONTACT_MAILTO } from '../../lib/constants'
 import type { Message as MessageType } from '../../lib/types'
+
+// jsdom cannot lay out SVG, so a real Mermaid render always fails here. This
+// stand-in draws instead, so these tests never load the real Mermaid.
+vi.mock('mermaid', () => ({
+  default: { initialize: () => {}, render: async () => ({ svg: '<svg data-drawn="yes"></svg>' }) },
+}))
 
 function assistant(partial: Partial<MessageType> = {}): MessageType {
   return { role: 'assistant', content: '', sources: [], toolsUsed: [], ...partial }
