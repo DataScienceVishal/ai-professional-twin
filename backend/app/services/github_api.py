@@ -43,8 +43,13 @@ class GitHubAPIService:
                     "html_url": repo["html_url"],
                     "language": repo.get("language") or "",
                     "stargazers_count": repo.get("stargazers_count", 0),
+                    "forks_count": repo.get("forks_count", 0),
                     "topics": repo.get("topics") or [],
+                    "created_at": repo.get("created_at", ""),
                     "updated_at": repo.get("updated_at", ""),
+                    # `or` again: get_recent_activity compares this as a string,
+                    # and None would break that comparison.
+                    "pushed_at": repo.get("pushed_at") or "",
                     # Ingestion quality gates. Both are always present on the
                     # list-repos payload; defaulted anyway so a trimmed fixture
                     # or a future API change cannot drop a real repo.

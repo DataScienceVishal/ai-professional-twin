@@ -23,22 +23,27 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "search_repos",
             "description": (
-                "Search across the professional's GitHub repositories by keyword, "
-                "topic, or technology. Optionally filter results by programming "
-                "language."
+                "Search the professional's GitHub repositories by name, description "
+                "and topics, optionally limited to one primary language. Returns the "
+                "number of matches and up to 10 of them, each with name, description, "
+                "primary language, URL and stars."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Search keywords, e.g. project name, topic, or technology.",
+                        "description": (
+                            "One word or phrase, found as written (ignoring case) in a "
+                            "repository's name, description or a topic, e.g. 'rag' or "
+                            "'fastapi'. An empty string matches every repository."
+                        ),
                     },
                     "language": {
                         "type": "string",
                         "description": (
-                            "Optional programming language to filter results by, "
-                            "e.g. 'Python' or 'TypeScript'."
+                            "Optional primary language to keep, matched exactly but "
+                            "ignoring case, e.g. 'Python' or 'TypeScript'."
                         ),
                     },
                 },
@@ -51,8 +56,9 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "get_repo_stats",
             "description": (
-                "Get detailed statistics for a specific repository, such as stars, "
-                "forks, commit count, and languages used."
+                "Look up one of the professional's GitHub repositories by name. Returns "
+                "its name, description, primary language, stars, forks, topics, URL "
+                "and last updated time."
             ),
             "parameters": {
                 "type": "object",
@@ -71,9 +77,9 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "get_recent_activity",
             "description": (
-                "Get a summary of the professional's recent development activity, "
-                "such as commits, pull requests, and new repositories, within a "
-                "given number of days."
+                "List the professional's GitHub repositories pushed to in the last "
+                "`days` days, newest push first. Returns up to 10, each with name, "
+                "primary language, created date, last push time and URL."
             ),
             "parameters": {
                 "type": "object",

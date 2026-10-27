@@ -80,8 +80,11 @@ def _repo(name: str, **overrides: Any) -> dict[str, Any]:
         "html_url": f"https://github.com/DataScienceVishal/{name}",
         "language": "Python",
         "stargazers_count": 0,
+        "forks_count": 0,
         "topics": [],
+        "created_at": "2026-06-01T00:00:00Z",
         "updated_at": "2026-07-01T00:00:00Z",
+        "pushed_at": "2026-07-01T00:00:00Z",
         "fork": False,
         "archived": False,
     }
