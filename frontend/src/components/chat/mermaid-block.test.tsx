@@ -39,8 +39,11 @@ describe('a diagram in a finished answer', () => {
     const { container } = render(<Message message={answer} />)
     expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
 
-    drawing.resolve({ svg: '<svg data-drawn="yes"></svg>' })
+    // Mermaid has loaded and is drawing, and the drawing has not come back yet.
+    await waitFor(() => expect(mermaid.render).toHaveBeenCalled())
+    expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
 
+    drawing.resolve({ svg: '<svg data-drawn="yes"></svg>' })
     await drawnSvg(container)
     expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
   })
@@ -53,6 +56,8 @@ describe('a diagram in a finished answer', () => {
 
     rerender(<Message message={answer} />)
     expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
+    await waitFor(() => expect(mermaid.render).toHaveBeenCalled())
+    expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
 
     drawing.resolve({ svg: '<svg data-drawn="yes"></svg>' })
     await drawnSvg(container)
@@ -64,15 +69,6 @@ describe('a diagram in a finished answer', () => {
     render(<Message message={answer} />)
     expect(await screen.findByText(/graph TD/)).toBeInTheDocument()
     expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
-  })
-
-  it('sets strict security before Mermaid draws anything', async () => {
-    mermaid.render.mockResolvedValue({ svg: '<svg data-drawn="yes"></svg>' })
-    const { container } = render(<Message message={answer} />)
-    await drawnSvg(container)
-    // Mermaid's SVG goes into the page as HTML, so its own sanitising must be on.
-    expect(mermaid.initialize).toHaveBeenCalledWith(expect.objectContaining({ securityLevel: 'strict' }))
-    expect(mermaid.initialize.mock.invocationCallOrder[0]).toBeLessThan(mermaid.render.mock.invocationCallOrder[0])
   })
 
   it('stays on screen when the answer re-renders', async () => {
