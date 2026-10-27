@@ -19,3 +19,21 @@ class SkillCategory(BaseModel):
     category: str
     skills: list[str]
     proficiency: str
+
+
+class TimelineEducation(BaseModel):
+    institution: str
+    degree: str
+    dates: str
+    status: str = ""
+
+
+class TimelineWork(BaseModel):
+    company: str
+    role: str
+    dates: str
+
+
+class Timeline(BaseModel):
+    education: list[TimelineEducation]
+    work: list[TimelineWork]
