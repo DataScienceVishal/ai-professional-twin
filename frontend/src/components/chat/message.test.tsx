@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MotionConfig } from 'framer-motion'
 import { describe, expect, it } from 'vitest'
 import { Message } from './message'
@@ -180,9 +180,10 @@ describe('diagram rendering during streaming', () => {
     expect(screen.getByText(/print/)).toBeInTheDocument()
   })
 
-  it('drops the placeholder once streaming finishes', () => {
+  it('drops the placeholder once Mermaid has finished with the diagram', async () => {
+    // The placeholder also covers the wait while Mermaid loads and draws.
     render(<Message message={mermaidMsg} />)
-    expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
+    await waitFor(() => expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull())
   })
 })
 

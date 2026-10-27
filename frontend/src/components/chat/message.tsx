@@ -3,7 +3,7 @@ import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { motion, useReducedMotionConfig } from 'framer-motion'
-import { MermaidBlock } from './mermaid-block'
+import { DiagramPending, MermaidBlock } from './mermaid-block'
 import { CONTACT_MAILTO } from '../../lib/constants'
 import { fenceBareMermaid } from '../../lib/mermaid-sanitize'
 import { SourceCitation } from './source-citation'
@@ -72,28 +72,6 @@ function extractText(node: ReactNode): string {
  */
 function CodeBlock({ children }: { children: ReactNode }) {
   return <pre className="scroll-frame max-w-full overflow-x-auto">{children}</pre>
-}
-
-/**
- * Stands in for a diagram while its source is still streaming. Sized to roughly
- * a small flowchart so the surrounding text does not jump when the real SVG
- * replaces it.
- */
-function DiagramPending() {
-  return (
-    <div
-      role="status"
-      aria-label="Building diagram"
-      className="my-3 flex h-32 max-w-full items-center justify-center gap-2 border border-dashed border-ink/30 text-xs text-muted"
-    >
-      <svg className="h-3.5 w-3.5 motion-safe:animate-pulse" viewBox="0 0 16 16" fill="currentColor">
-        <rect x="1" y="1" width="6" height="4" rx="1" />
-        <rect x="9" y="6" width="6" height="4" rx="1" />
-        <rect x="1" y="11" width="6" height="4" rx="1" />
-      </svg>
-      Building diagram…
-    </div>
-  )
 }
 
 /**
