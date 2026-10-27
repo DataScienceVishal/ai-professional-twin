@@ -70,13 +70,16 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
   }, [focused, conversing, railShown])
 
   // The thinking line falls silent once text starts to arrive, so nothing would
-  // tell a screen reader that the answer has finished. A failed turn has its own alert.
+  // tell a screen reader that the answer has finished. A failed turn has its own
+  // alert, and a stopped one was stopped by the visitor, so neither is "ready".
   useEffect(() => {
     if (isStreaming || messages.length === 0) {
       setAnnouncement('')
     } else if (wasStreaming.current) {
       const last = messages[messages.length - 1]
-      if (last.role === 'assistant' && last.content && !last.isError) setAnnouncement('Answer ready')
+      if (last.role === 'assistant' && last.content.trim() && !last.isError && !last.stopped) {
+        setAnnouncement('Answer ready')
+      }
     }
     wasStreaming.current = isStreaming
   }, [isStreaming, messages])
@@ -153,6 +156,7 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
                 tabIndex={0}
                 role="group"
                 aria-label="His record"
+                data-scroll-fade="y"
                 className="scroll-frame sticky top-8 max-h-[calc(100cqh_-_4rem)] overflow-y-auto"
               >
                 {rail}

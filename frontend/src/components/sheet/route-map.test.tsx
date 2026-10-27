@@ -235,6 +235,23 @@ describe('RecordStrip', () => {
     expect(caption).not.toHaveClass('sheet-label')
   })
 
+  it('lets a slash-joined title wrap after its slashes, so a narrow list never breaks inside a word', () => {
+    const slashed = buildRecord(
+      {
+        education: [{ institution: 'Somewhere', degree: 'Data/Science', dates: 'sometime', status: '' }],
+        work: [{ company: 'PJRJ Associates', role: 'Finance/Accounts/Taxation', dates: 'Jul 2018 - Sep 2020' }],
+      },
+      NOW,
+      2027,
+    )
+    render(<RecordStrip record={slashed} now={NOW} />)
+    const title = screen.getByText('Finance/Accounts/Taxation, PJRJ Associates')
+    expect(title.querySelectorAll('wbr')).toHaveLength(2)
+    expect(title.querySelector('wbr')?.previousSibling?.textContent).toBe('/')
+    expect(screen.getByText('Data/Science, Somewhere').querySelectorAll('wbr')).toHaveLength(1)
+    expect(screen.getByText('Undated · sometime')).toBeInTheDocument()
+  })
+
   it('lists an entry it could not date instead of dropping it', () => {
     render(<RecordStrip record={record} now={NOW} />)
     expect(screen.getByText('Undated · sometime')).toBeInTheDocument()
@@ -265,19 +282,42 @@ describe('RecordStrip', () => {
 
   it('frames the no-date note instead of striping its side', () => {
     renderWithSheet(<RecordStrip record={record} now={NOW} />, {
-      focused: { source: 'career_qa', detail: 'availability', url: '' },
+      focused: { source: 'career_qa', detail: 'sponsorship', url: '' },
     })
-    const note = screen.getByText('Career Q&A · Availability is not tied to a date on the record.')
+    const note = screen.getByText('Career Q&A · Sponsorship is not tied to a date on the record.')
     expect(note.className).not.toMatch(/border-l-\[3px\]|border-survey/)
     expect(note).not.toHaveAttribute('data-track')
   })
 
   it('names an open source that has no date instead of lighting nothing', () => {
     renderWithSheet(<RecordStrip record={record} now={NOW} />, {
-      focused: { source: 'career_qa', detail: 'availability', url: '' },
+      focused: { source: 'career_qa', detail: 'sponsorship', url: '' },
     })
-    const note = screen.getByText('Career Q&A · Availability is not tied to a date on the record.')
+    const note = screen.getByText('Career Q&A · Sponsorship is not tied to a date on the record.')
     expect(note).toHaveAttribute('data-lit', 'true')
+  })
+
+  it("gives the full-time start as the recorded answer's source dates it, rather than calling it undated", () => {
+    renderWithSheet(<RecordStrip record={record} now={NOW} />, { focused: FULL_TIME_SOURCE })
+    const note = screen.getByText('Career Q&A · Availability dates the full-time start: Jan 2027.')
+    expect(note).toHaveAttribute('data-lit', 'true')
+    expect(screen.queryByText(/not tied to a date/)).toBeNull()
+  })
+
+  it('labels each year down its time axis, outside the graphics layer', () => {
+    render(<RecordStrip record={record} now={NOW} />)
+    for (let year = record.from; year < record.to; year++) {
+      const label = screen.getByText(String(year))
+      expect(label).toHaveClass('tabular-nums', 'text-xs')
+      // A receding layer fades only the graphics, so the years keep full contrast.
+      expect(label.closest('[data-graphic]')).toBeNull()
+      // The list beside the strip already gives every date as text.
+      expect(label.closest('[aria-hidden="true"]')).not.toBeNull()
+    }
+    // The axis runs from 2023 to 2028, so each year takes a fifth of the strip from the top.
+    expect(screen.getByText('2023').style.top).toBe('0%')
+    expect(screen.getByText('2026').style.top).toBe('60%')
+    expect(screen.queryByText(String(record.to))).toBeNull()
   })
 
   it('lists two undated entries that share a title without a key clash', () => {

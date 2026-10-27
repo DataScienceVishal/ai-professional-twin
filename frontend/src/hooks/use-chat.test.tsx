@@ -12,6 +12,37 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+function abortError(): Error {
+  return Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' })
+}
+
+/**
+ * Install a fetch whose stream sends `events`, then stays open until the
+ * request is aborted, when the read rejects as a browser's does.
+ */
+function mockOpenStream(events: string[] = []) {
+  const encoder = new TextEncoder()
+  const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+    const signal = init?.signal
+    const queue = [...events]
+    const read = () => {
+      if (signal?.aborted) return Promise.reject(abortError())
+      const next = queue.shift()
+      if (next !== undefined) return Promise.resolve({ done: false, value: encoder.encode(next) })
+      return new Promise<never>((_, reject) => signal?.addEventListener('abort', () => reject(abortError())))
+    }
+    return {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: new Headers({ 'content-type': 'text/event-stream' }),
+      body: { getReader: () => ({ read, releaseLock: () => {} }) },
+    } as unknown as Response
+  })
+  vi.stubGlobal('fetch', fetchMock)
+  return fetchMock
+}
+
 describe('useChat', () => {
   it('accumulates streamed chunks into the assistant message', async () => {
     mockFetch(
@@ -260,37 +291,7 @@ describe('useChat', () => {
   })
 
   it('exposes stopStreaming which aborts the active request', async () => {
-    let release: (() => void) | undefined
-    const gate = new Promise<void>((resolve) => {
-      release = resolve
-    })
-
-    const encoder = new TextEncoder()
-    let served = false
-    const response = {
-      ok: true,
-      status: 200,
-      statusText: 'OK',
-      headers: new Headers({ 'content-type': 'text/event-stream' }),
-      body: {
-        getReader: () => ({
-          read: async () => {
-            if (!served) {
-              served = true
-              return {
-                done: false,
-                value: encoder.encode('data: {"type":"chunk","content":"start"}\n\n'),
-              }
-            }
-            await gate
-            return { done: true, value: undefined }
-          },
-          releaseLock: () => {},
-        }),
-      },
-    } as unknown as Response
-
-    const fetchMock = mockFetch(response)
+    const fetchMock = mockOpenStream(['data: {"type":"chunk","content":"start"}\n\n'])
     const { result } = renderHook(() => useChat())
 
     let pending: Promise<void> | undefined
@@ -302,15 +303,62 @@ describe('useChat', () => {
 
     act(() => result.current.stopStreaming())
     expect(result.current.isStreaming).toBe(false)
+    expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true)
 
-    const options = (fetchMock as unknown as { mock: { calls: unknown[][] } }).mock
-      .calls[0][1] as RequestInit
-    expect((options.signal as AbortSignal).aborted).toBe(true)
-
-    release?.()
     await act(async () => {
       await pending
     })
+  })
+
+  it('marks the answer in flight as stopped and keeps the text that arrived', async () => {
+    mockOpenStream(['data: {"type":"chunk","content":"Partial"}\n\n'])
+    const { result } = renderHook(() => useChat())
+
+    let pending: Promise<void> | undefined
+    act(() => {
+      pending = result.current.sendMessage('long running')
+    })
+    await waitFor(() => expect(result.current.messages[1]?.content).toBe('Partial'))
+
+    act(() => result.current.stopStreaming())
+    await act(async () => {
+      await pending
+    })
+
+    expect(result.current.isStreaming).toBe(false)
+    expect(result.current.messages[1]).toMatchObject({ role: 'assistant', content: 'Partial', stopped: true })
+    expect(result.current.messages[1].isError).toBeFalsy()
+  })
+
+  it('marks a turn stopped before its first token', async () => {
+    mockOpenStream()
+    const { result } = renderHook(() => useChat())
+
+    let pending: Promise<void> | undefined
+    act(() => {
+      pending = result.current.sendMessage('long running')
+    })
+    await waitFor(() => expect(result.current.isStreaming).toBe(true))
+
+    act(() => result.current.stopStreaming())
+    await act(async () => {
+      await pending
+    })
+
+    expect(result.current.messages[1]).toMatchObject({ role: 'assistant', content: '', stopped: true })
+  })
+
+  it('leaves a settled answer unmarked when Stop comes after it', async () => {
+    mockFetch(sseResponse(['data: {"type":"chunk","content":"Done."}\n\n', 'data: {"type":"done"}\n\n']))
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('hello')
+    })
+
+    act(() => result.current.stopStreaming())
+
+    expect(result.current.messages[1]).toMatchObject({ content: 'Done.', isError: false })
+    expect(result.current.messages[1].stopped).toBeUndefined()
   })
 
   it('aborts the in-flight request when the component unmounts', async () => {

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { FULL_TIME_FROM, FULL_TIME_LABEL, FULL_TIME_SOURCE } from '../../lib/constants'
 import { sourceLabel } from '../../lib/source-label'
 import {
@@ -34,6 +35,11 @@ function centre(track: Track): number {
 
 function position(record: SheetRecord, year: number): number {
   return ((year - record.from) / (record.to - record.from)) * 100
+}
+
+/** Every year with a column on the map or a row on the strip. */
+function axisYears(record: SheetRecord): number[] {
+  return Array.from({ length: record.to - record.from }, (_, i) => record.from + i)
 }
 
 /** The magenta route over a paper casing 3px wider on each side, as survey maps draw roads. */
@@ -143,7 +149,7 @@ export function RouteMap({ record, now, className = '' }: MapProps) {
   // "You are here" is the visitor's date, so it shows even before any entry has started.
   const hereTrack: Track = here?.track ?? 'education'
   const line = route.map((p) => `${position(record, p.year)},${centre(p.track)}`).join(' ')
-  const years = Array.from({ length: record.to - record.from }, (_, i) => record.from + i)
+  const years = axisYears(record)
   const today = position(record, toYear(now))
   const planned = position(record, FULL_TIME_FROM)
   // Once full-time has started, the planned line would run backwards in time.
@@ -237,6 +243,17 @@ export function RouteMap({ record, now, className = '' }: MapProps) {
   )
 }
 
+/** The date in the full-time marker's label, so the strip's note and the map name the same month. */
+const FULL_TIME_DATE = FULL_TIME_LABEL.replace(/^Full-time from /, '')
+
+/**
+ * The strip's list is narrow, so a slash-joined title such as "Finance/Accounts/Taxation"
+ * may wrap after a slash. Without that, Chrome breaks it inside a word or before its comma.
+ */
+function wrapAfterSlashes(title: string): ReactNode[] {
+  return title.split('/').flatMap((part, i) => (i === 0 ? [part] : ['/', <wbr key={i} />, part]))
+}
+
 /**
  * A vertical strip with the record as text beside it. It lights whatever the
  * open source points at, and names an open source that has no date.
@@ -248,41 +265,59 @@ export function RecordStrip({ record, now, className = '' }: MapProps) {
   const line = routePoints(record, now)
     .map((p) => `${column(p.track)},${position(record, p.year)}`)
     .join(' ')
+  const years = axisYears(record)
 
   return (
     <div className={`flex gap-4 ${className}`}>
-      <div aria-hidden="true" data-graphic className="relative min-h-72 w-14 shrink-0 self-stretch">
-        <div className="absolute inset-y-0 left-1/4 w-px bg-grid" />
-        <div className="absolute inset-y-0 left-3/4 w-px bg-grid" />
-        {record.entries.map((entry) => (
-          <div
-            key={entry.id}
-            data-dim
-            data-lit={lit.has(entry.id) || undefined}
-            className={`absolute -translate-x-1/2 ${
-              entry.track === 'education' ? 'left-1/4 bg-edu-bar' : 'left-3/4 bg-work-bar'
-            }`}
-            style={{
-              top: `${position(record, entry.start)}%`,
-              // Wider than the strip's 9px casing, so a bar the route runs along still shows on both sides.
-              width: '16px',
-              height: entry.point ? '6px' : `${position(record, entry.end) - position(record, entry.start)}%`,
-            }}
-          />
+      <div aria-hidden="true" className="relative min-h-72 w-[5.25rem] shrink-0 self-stretch">
+        {/* The years stay outside the graphics layer, so a receding layer never fades them. */}
+        {years.map((year) => (
+          <span
+            key={year}
+            className="absolute left-0 pt-0.5 text-xs leading-none tabular-nums tracking-wider text-muted"
+            style={{ top: `${position(record, year)}%` }}
+          >
+            {year}
+          </span>
         ))}
-        <svg
-          className="route-reveal absolute inset-0 h-full w-full overflow-visible"
-          data-axis="y"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          <RouteLine points={line} width={3} />
-        </svg>
+        <div data-graphic className="absolute inset-y-0 right-0 w-14">
+          {years.map((year) => (
+            <div key={year} className="absolute inset-x-0 h-px bg-grid" style={{ top: `${position(record, year)}%` }} />
+          ))}
+          <div className="absolute inset-y-0 left-1/4 w-px bg-grid" />
+          <div className="absolute inset-y-0 left-3/4 w-px bg-grid" />
+          {record.entries.map((entry) => (
+            <div
+              key={entry.id}
+              data-dim
+              data-lit={lit.has(entry.id) || undefined}
+              className={`absolute -translate-x-1/2 ${
+                entry.track === 'education' ? 'left-1/4 bg-edu-bar' : 'left-3/4 bg-work-bar'
+              }`}
+              style={{
+                top: `${position(record, entry.start)}%`,
+                // Wider than the strip's 9px casing, so a bar the route runs along still shows on both sides.
+                width: '16px',
+                height: entry.point ? '6px' : `${position(record, entry.end) - position(record, entry.start)}%`,
+              }}
+            />
+          ))}
+          <svg
+            className="route-reveal absolute inset-0 h-full w-full overflow-visible"
+            data-axis="y"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+          >
+            <RouteLine points={line} width={3} />
+          </svg>
+        </div>
       </div>
       <div className="min-w-0 flex-1 space-y-3">
         {focused && lit.size === 0 && (
           <p data-lit className="py-1 pl-2 pr-2 text-sm break-words">
-            {`${sourceLabel(focused, trailing)} is not tied to a date on the record.`}
+            {sameSource(focused, FULL_TIME_SOURCE)
+              ? `${sourceLabel(focused, trailing)} dates the full-time start: ${FULL_TIME_DATE}.`
+              : `${sourceLabel(focused, trailing)} is not tied to a date on the record.`}
           </p>
         )}
         {/* Safari drops list semantics when list-style is none. This list is the map's only text equivalent. */}
@@ -294,13 +329,13 @@ export function RecordStrip({ record, now, className = '' }: MapProps) {
               data-track={entry.track}
               className={`py-1 pl-2 pr-2 ${lit.has(entry.id) ? 'font-semibold' : ''}`}
             >
-              <span className="block break-words">{entry.title}</span>
+              <span className="block break-words">{wrapAfterSlashes(entry.title)}</span>
               <span className="block text-xs text-muted">{`${TRACK_NAMES[entry.track]} · ${entry.dates}`}</span>
             </li>
           ))}
           {record.unplotted.map((item, index) => (
             <li key={`undated-${index}`} className="py-1 pl-2 pr-2">
-              <span className="block break-words">{item.title}</span>
+              <span className="block break-words">{wrapAfterSlashes(item.title)}</span>
               <span className="block text-xs text-muted">{`Undated · ${item.dates}`}</span>
             </li>
           ))}

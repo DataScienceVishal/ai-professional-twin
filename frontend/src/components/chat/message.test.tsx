@@ -59,24 +59,50 @@ describe('Message failure state', () => {
   })
 })
 
-describe('Message stopped and limited states', () => {
+describe('Message stopped and empty states', () => {
   it('says an answer was stopped before any text arrived', () => {
+    render(<Message message={assistant({ stopped: true })} />)
+    expect(screen.getByText('Stopped before an answer arrived.')).toBeInTheDocument()
+    expect(screen.queryByText('No answer arrived.')).toBeNull()
+  })
+
+  it('says no answer arrived when a turn ends with no text, no error and no stop', () => {
     render(<Message message={assistant()} />)
+    expect(screen.getByText('No answer arrived.')).toBeInTheDocument()
+    expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
+  })
+
+  it('counts whitespace alone as no text, since it renders nothing', () => {
+    const { rerender } = render(<Message message={assistant({ content: '\n\n ' })} />)
+    expect(screen.getByText('No answer arrived.')).toBeInTheDocument()
+    rerender(<Message message={assistant({ content: '\n\n ', stopped: true })} />)
     expect(screen.getByText('Stopped before an answer arrived.')).toBeInTheDocument()
   })
 
-  it('keeps the thinking line, not the stopped line, while the answer is still on its way', () => {
+  it('keeps the text that arrived before a stop, with no line about it', () => {
+    render(<Message message={assistant({ content: 'Partial answer', stopped: true })} />)
+    expect(screen.getByText('Partial answer')).toBeInTheDocument()
+    expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
+    expect(screen.queryByText('No answer arrived.')).toBeNull()
+  })
+
+  it('keeps the thinking line, and neither closing line, while the answer is still on its way', () => {
     render(<Message message={assistant()} isStreaming />)
     expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
+    expect(screen.queryByText('No answer arrived.')).toBeNull()
     expect(screen.getByRole('status')).toBeInTheDocument()
   })
 
-  it('does not call a failed turn stopped, even one that carries no text', () => {
-    render(<Message message={assistant({ isError: true })} />)
+  it('gives a failed turn neither closing line, even one that carries no text', () => {
+    const { rerender } = render(<Message message={assistant({ isError: true })} />)
+    expect(screen.queryByText('No answer arrived.')).toBeNull()
+    rerender(<Message message={assistant({ isError: true, stopped: true })} />)
     expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
     expect(screen.getByRole('alert')).toHaveTextContent('Could not answer')
   })
+})
 
+describe('Message limited state', () => {
   it('points to email after the safe message when a usage limit refused the turn', () => {
     render(<Message message={assistant({ content: 'Rate limit exceeded. Try again later.', isError: true, limited: true })} />)
     const alert = screen.getByRole('alert')

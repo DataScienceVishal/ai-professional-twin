@@ -40,6 +40,11 @@ describe('LayerKey', () => {
     expect(screen.getByRole('list', { name: 'Suggested questions' })).toHaveClass('lg:scroll-frame')
   })
 
+  it('marks its row for the fade at the edges it scrolls past', () => {
+    render(<LayerKey mode="interview" seed={1} onSelect={() => {}} />)
+    expect(screen.getByRole('list', { name: 'Suggested questions' })).toHaveAttribute('data-scroll-fade', 'x')
+  })
+
   it("shows the layer's questions", () => {
     render(<LayerKey mode="recruiter" seed={1} onSelect={() => {}} />)
     for (const action of RECRUITER_ACTIONS) {

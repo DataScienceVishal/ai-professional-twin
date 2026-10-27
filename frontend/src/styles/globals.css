@@ -80,6 +80,76 @@ body,
   scrollbar-color: var(--color-muted) transparent;
 }
 
+/*
+ * The question row and the rail fade 16px at an edge while more lies past it,
+ * so a line cut at that edge reads as one that scrolls on. Only the scroll
+ * position can tell, so where it cannot drive an animation nothing fades.
+ * Keyboard focus clears the fade, which would otherwise clip focus rings.
+ */
+@property --scroll-fade-start {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --scroll-fade-end {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes scroll-fade-start {
+  from {
+    --scroll-fade-start: 0px;
+  }
+  to {
+    --scroll-fade-start: 1rem;
+  }
+}
+
+@keyframes scroll-fade-end {
+  from {
+    --scroll-fade-end: 1rem;
+  }
+  to {
+    --scroll-fade-end: 0px;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  [data-scroll-fade] {
+    animation: scroll-fade-start linear both, scroll-fade-end linear both;
+    animation-range: 0 1rem, calc(100% - 1rem) 100%;
+  }
+
+  [data-scroll-fade='x'] {
+    animation-timeline: scroll(self inline);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--scroll-fade-start),
+      #000 calc(100% - var(--scroll-fade-end)),
+      transparent
+    );
+  }
+
+  [data-scroll-fade='y'] {
+    animation-timeline: scroll(self block);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--scroll-fade-start),
+      #000 calc(100% - var(--scroll-fade-end)),
+      transparent
+    );
+  }
+
+  [data-scroll-fade]:focus-visible,
+  [data-scroll-fade]:has(:focus-visible) {
+    mask-image: none;
+  }
+}
+
 /* The double frame line a printed survey sheet carries. */
 @utility neatline {
   border: 2px solid var(--color-ink);

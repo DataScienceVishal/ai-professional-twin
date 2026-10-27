@@ -100,14 +100,19 @@ export function Message({ message, isStreaming = false }: MessageProps) {
   // The page's reducedMotion setting stops the rise but still runs the fade,
   // and under reduced motion nothing may animate, so the answer starts in place.
   const reduceMotion = useReducedMotionConfig()
-  const isUser = message.role === 'user'
+  if (message.role === 'user') return <p className="text-base">{message.content}</p>
+
   // The turn is in flight and nothing has streamed yet: show the pending state
   // instead of an empty note. The first `chunk` event removes it.
-  const isPending = !isUser && isStreaming && message.content.length === 0
-  // Stop pressed before the first token leaves nothing to render, which would read as a broken note.
-  const isStopped = !isUser && !isStreaming && message.content.length === 0 && !message.isError
-
-  if (isUser) return <p className="text-base">{message.content}</p>
+  const isPending = isStreaming && message.content.length === 0
+  // A settled turn with no text would read as a broken note, so it says what
+  // happened. Whitespace alone renders nothing, so it counts as no text.
+  const closingLine =
+    isStreaming || message.isError || message.content.trim()
+      ? null
+      : message.stopped
+        ? 'Stopped before an answer arrived.'
+        : 'No answer arrived.'
 
   return (
     <motion.div
@@ -121,8 +126,8 @@ export function Message({ message, isStreaming = false }: MessageProps) {
       }`}
     >
       {message.isError && <p className="sheet-label mb-1">Could not answer</p>}
-      {isStopped ? (
-        <p className="text-sm text-muted">Stopped before an answer arrived.</p>
+      {closingLine ? (
+        <p className="text-sm text-muted">{closingLine}</p>
       ) : isPending ? (
         <ThinkingIndicator toolsUsed={message.toolsUsed} />
       ) : (

@@ -78,6 +78,13 @@ function railFrame(): HTMLElement {
   return frame
 }
 
+const QUESTION: Message = { role: 'user', content: 'When can he start?' }
+
+/** The panel alone, rendered again with each state a turn passes through. */
+function statusView(messages: Message[], isStreaming: boolean) {
+  return <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
+}
+
 describe('ChatPanel', () => {
   it('shows the first sheet until the first question', () => {
     renderPanel([])
@@ -198,6 +205,12 @@ describe('ChatPanel', () => {
     expect(railFrame()).toHaveClass('scroll-frame')
   })
 
+  it('marks the rail frame, and nothing else here, for the fade at its scrolling edges', () => {
+    const { container } = renderPanel(CONVERSATION)
+    expect(railFrame()).toHaveAttribute('data-scroll-fade', 'y')
+    expect(container.querySelectorAll('[data-scroll-fade]')).toHaveLength(1)
+  })
+
   it('hands focus to the ask field when Clear chat is pressed from the keyboard', () => {
     renderWithSheet(
       <>
@@ -214,47 +227,52 @@ describe('ChatPanel', () => {
   })
 
   it('says once, politely, that an answer is ready when its stream ends', () => {
-    const question: Message = { role: 'user', content: 'When can he start?' }
     const answer: Message = { role: 'assistant', content: 'January 2027.', sources: [] }
-    const view = (messages: Message[], isStreaming: boolean) => (
-      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
-    )
-    const { rerender } = render(view([], false))
+    const { rerender } = render(statusView([], false))
     const status = screen.getByTestId('answer-status')
     expect(status).toHaveAttribute('role', 'status')
     expect(status).toBeEmptyDOMElement()
 
-    rerender(view([question, { role: 'assistant', content: '' }], true))
+    rerender(statusView([QUESTION, { role: 'assistant', content: '' }], true))
     expect(screen.getByTestId('answer-status')).toBe(status)
     expect(status).toBeEmptyDOMElement()
-    rerender(view([question, { role: 'assistant', content: 'January' }], true))
+    rerender(statusView([QUESTION, { role: 'assistant', content: 'January' }], true))
     expect(status).toBeEmptyDOMElement()
-    rerender(view([question, answer], false))
+    rerender(statusView([QUESTION, answer], false))
     expect(status).toHaveTextContent('Answer ready')
 
-    rerender(view([question, answer, { role: 'user', content: 'Where is he based?' }, { role: 'assistant', content: '' }], true))
+    rerender(statusView([QUESTION, answer, { role: 'user', content: 'Where is he based?' }, { role: 'assistant', content: '' }], true))
     expect(status).toBeEmptyDOMElement()
   })
 
-  it('says nothing about an answer it did not see stream, or one stopped before any text', () => {
-    const question: Message = { role: 'user', content: 'When can he start?' }
-    const view = (messages: Message[], isStreaming: boolean) => (
-      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
-    )
-    const { rerender } = render(view([question, { role: 'assistant', content: 'January 2027.' }], false))
+  it('says nothing about an answer it did not see stream', () => {
+    render(statusView([QUESTION, { role: 'assistant', content: 'January 2027.' }], false))
     expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
-    rerender(view([question, { role: 'assistant', content: 'January 2027.' }, question, { role: 'assistant', content: '' }], true))
-    rerender(view([question, { role: 'assistant', content: 'January 2027.' }, question, { role: 'assistant', content: '' }], false))
+  })
+
+  it('says nothing when a stream ends with no text, or with only whitespace', () => {
+    const first: Message[] = [QUESTION, { role: 'assistant', content: '' }]
+    const { rerender } = render(statusView(first, true))
+    rerender(statusView(first, false))
+    const status = screen.getByTestId('answer-status')
+    expect(status).toBeEmptyDOMElement()
+
+    const second: Message[] = [...first, QUESTION, { role: 'assistant', content: '\n\n' }]
+    rerender(statusView(second, true))
+    rerender(statusView(second, false))
+    expect(status).toBeEmptyDOMElement()
+  })
+
+  it('never says an answer is ready for a turn the visitor stopped', () => {
+    const { rerender } = render(statusView([QUESTION, { role: 'assistant', content: '' }], true))
+    rerender(statusView([QUESTION, { role: 'assistant', content: 'January' }], true))
+    rerender(statusView([QUESTION, { role: 'assistant', content: 'January', stopped: true }], false))
     expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
   })
 
   it('leaves the failure to its own alert instead of saying an answer is ready', () => {
-    const question: Message = { role: 'user', content: 'When can he start?' }
-    const view = (messages: Message[], isStreaming: boolean) => (
-      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
-    )
-    const { rerender } = render(view([question, { role: 'assistant', content: '' }], true))
-    rerender(view([question, { role: 'assistant', content: 'The assistant backend ran into a problem.', isError: true }], false))
+    const { rerender } = render(statusView([QUESTION, { role: 'assistant', content: '' }], true))
+    rerender(statusView([QUESTION, { role: 'assistant', content: 'The assistant backend ran into a problem.', isError: true }], false))
     expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
     expect(screen.getByRole('alert')).toHaveTextContent('ran into a problem')
   })

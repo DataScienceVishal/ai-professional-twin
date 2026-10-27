@@ -43,6 +43,14 @@ function describeError(error: unknown): string {
   return GENERIC_ERROR
 }
 
+/** Merge `patch` into the newest message, which is the answer in flight. */
+function patchNewest(messages: Message[], patch: Partial<Message>): Message[] {
+  if (messages.length === 0) return messages
+  const next = [...messages]
+  next[next.length - 1] = { ...next[next.length - 1], ...patch }
+  return next
+}
+
 export function useChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
@@ -57,6 +65,8 @@ export function useChat() {
 
   /** Public control so the UI can stop a response mid-stream. */
   const stopStreaming = useCallback(() => {
+    // Only a turn still in flight is marked; a settled answer keeps the state it ended in.
+    if (abortRef.current) setMessages((prev) => patchNewest(prev, { stopped: true }))
     abortInFlight()
     setIsStreaming(false)
   }, [abortInFlight])
@@ -86,14 +96,7 @@ export function useChat() {
       }
       setMessages([...updatedMessages, assistantMessage])
 
-      const patchLast = (patch: Partial<Message>) => {
-        setMessages((prev) => {
-          if (prev.length === 0) return prev
-          const next = [...prev]
-          next[next.length - 1] = { ...next[next.length - 1], ...patch }
-          return next
-        })
-      }
+      const patchLast = (patch: Partial<Message>) => setMessages((prev) => patchNewest(prev, patch))
 
       try {
         const chatMessages = updatedMessages
@@ -147,7 +150,8 @@ export function useChat() {
         }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
-          // Superseded or unmounted - leave the partial message as-is.
+          // Stop, Clear chat, a newer turn or an unmount aborted it on purpose, so
+          // the message stays as it is; stopStreaming has already marked a stop.
           return
         }
         console.error('[chat] streaming failed:', error)
