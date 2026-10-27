@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 
+import structlog
 import yaml
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
@@ -14,6 +15,7 @@ from app.models.knowledge import (
 )
 
 router = APIRouter()
+logger = structlog.get_logger()
 
 KNOWLEDGE_DIR = Path(__file__).parent.parent.parent / "knowledge"
 
@@ -55,26 +57,41 @@ async def get_timeline() -> Timeline:
     """
     academics = _load_yaml("academics.yaml")
     linkedin = _load_yaml("linkedin.yaml")
-    jobs = linkedin.get("experience", []) if isinstance(linkedin, dict) else []
+    jobs = (linkedin.get("experience") if isinstance(linkedin, dict) else None) or []
+    # One malformed entry must not take the whole map down: it is skipped and logged.
     return Timeline(
         education=[
             TimelineEducation(
-                institution=entry["institution"],
-                degree=entry["degree"],
-                dates=str(entry.get("dates", "")),
-                status=str(entry.get("status", "")),
+                institution=str(entry["institution"]),
+                degree=str(entry["degree"]),
+                dates=str(entry.get("dates") or ""),
+                status=str(entry.get("status") or ""),
             )
-            for entry in academics
+            for entry in _complete(academics, "academics.yaml", ("institution", "degree"))
         ],
         work=[
             TimelineWork(
-                company=job["company"],
-                role=job["role"],
-                dates=str(job.get("dates", "")),
+                company=str(job["company"]),
+                role=str(job["role"]),
+                dates=str(job.get("dates") or ""),
             )
-            for job in jobs
+            for job in _complete(jobs, "linkedin.yaml", ("company", "role"))
         ],
     )
+
+
+def _complete(entries: Any, filename: str, required: tuple[str, ...]) -> list[dict[str, Any]]:
+    """The entries that are mappings carrying every required key; the rest are logged."""
+    if not isinstance(entries, list):
+        logger.warning("Timeline file is not a list", file=filename)
+        return []
+    kept = []
+    for index, entry in enumerate(entries):
+        if isinstance(entry, dict) and all(entry.get(key) for key in required):
+            kept.append(entry)
+        else:
+            logger.warning("Skipped a malformed timeline entry", file=filename, index=index)
+    return kept
 
 
 @router.get("/resume/download")
