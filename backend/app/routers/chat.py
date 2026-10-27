@@ -14,7 +14,7 @@ from app.analytics import (
     QueryAnalytics,
     QueryRecord,
 )
-from app.models.chat import ChatRequest
+from app.models.chat import ChatRequest, Message
 from app.prompts.system import build_system_prompt
 from app.rag.retriever import Retriever
 from app.rate_limit import DailyChatBudget, chat_rate_limit, limiter
@@ -36,13 +36,48 @@ NOT_READY_MESSAGE = (
 STREAM_ERROR_MESSAGE = (
     "Sorry, something went wrong while generating that answer. Please try again in a moment."
 )
+# The page follows this refusal with its own email line, keyed by the code
+# below, so the message stops at the retry advice instead of offering contact twice.
 BUDGET_EXHAUSTED_MESSAGE = (
-    "This assistant has reached its daily usage limit. Please try again "
-    "tomorrow, or use the contact link to reach Vishal directly."
+    "This assistant has reached its daily usage limit. Please try again tomorrow."
 )
 # Sent with the budget refusal so the page can offer email without reading the
 # wording: on the wire the refusal is otherwise shaped like any failed answer.
 BUDGET_EXHAUSTED_CODE = "budget_exhausted"
+
+# The model sees at most the last six turns of the conversation the client
+# replays, a turn being one question and the answer to it, and at most
+# MAX_HISTORY_BYTES of their text. Six questions at their 2,000-character limit
+# and five answers at the default 1,024-token output cap (about 4,000 bytes
+# each) come to about 32,000 bytes, so the cap leaves real conversations alone
+# and cuts a forged one of 50 messages, each up to 16,000 characters. It counts
+# UTF-8 bytes because a token is never shorter than a byte, so it bounds tokens
+# too; a count of characters would not.
+MAX_HISTORY_TURNS = 6
+MAX_HISTORY_BYTES = 32_000
+
+
+def trim_history(messages: list[Message]) -> list[Message]:
+    """The part of the replayed conversation that goes to the model, oldest first.
+
+    Whole turns go from the oldest end, and the turn in progress always stays.
+    """
+    turns: list[list[Message]] = []
+    for message in messages:
+        if message.role == "user" or not turns:
+            turns.append([message])
+        else:
+            turns[-1].append(message)
+    kept = turns[-MAX_HISTORY_TURNS:]
+    size = sum(_byte_length(m.content) for turn in kept for m in turn)
+    while len(kept) > 1 and size > MAX_HISTORY_BYTES:
+        size -= sum(_byte_length(m.content) for m in kept.pop(0))
+    return [message for turn in kept for message in turn]
+
+
+def _byte_length(text: str) -> int:
+    # JSON can carry a lone surrogate, which a plain encode() rejects.
+    return len(text.encode("utf-8", "surrogatepass"))
 
 
 def init_chat_dependencies(
@@ -147,7 +182,9 @@ async def chat(
             retrieved_chunks = len(sources)
             has_context = bool(rag_context.strip())
             system_prompt = build_system_prompt(mode=payload.mode, rag_context=rag_context)
-            messages = [{"role": m.role, "content": m.content} for m in payload.messages]
+            messages = [
+                {"role": m.role, "content": m.content} for m in trim_history(payload.messages)
+            ]
 
             if tool_registry is not None and tool_registry.tools:
                 async for event in llm.stream_with_tools(
