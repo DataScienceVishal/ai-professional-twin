@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import field_validator, model_validator
+from pydantic import IPvAnyNetwork, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode
 
 
@@ -59,6 +59,15 @@ class Settings(BaseSettings):
     chat_rate_limit: str = "10/minute"
     # Global ceiling on chat completions per UTC day, across all visitors.
     daily_chat_budget: int = 500
+    # Proxies whose X-Forwarded-For entries the limits believe, as comma-separated
+    # addresses or networks. In production every request reaches the app from the
+    # Container Apps ingress, which appends the address that connected to it.
+    # Empty trusts nobody, so the limits key on the TCP peer.
+    trusted_proxies: Annotated[list[IPvAnyNetwork], NoDecode] = []
+    # Shared with the Vercel project, which sends it as X-Origin-Secret on the
+    # /api rewrite. A request carrying it came through Vercel, so the visitor
+    # address Vercel wrote is believed as well. Never logged or echoed back.
+    origin_secret: str = ""
 
     ingest_github: bool = True
     github_repo_limit: int = 100
@@ -85,7 +94,7 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
-    @field_validator("cors_origins", "github_exclude_repos", mode="before")
+    @field_validator("cors_origins", "github_exclude_repos", "trusted_proxies", mode="before")
     @classmethod
     def _split_csv(cls, value: object) -> object:
         if isinstance(value, str):
@@ -96,6 +105,15 @@ class Settings(BaseSettings):
     @classmethod
     def _strip_trailing_slash(cls, value: str) -> str:
         return value.rstrip("/")
+
+    @field_validator("origin_secret")
+    @classmethod
+    def _check_origin_secret(cls, value: str) -> str:
+        # Fail at boot rather than per request: a value that cannot be encoded
+        # would break every forwarded request, and a short one could be guessed.
+        if value and (not value.isascii() or len(value) < 32):
+            raise ValueError("must be at least 32 ASCII characters (openssl rand -hex 32)")
+        return value
 
     @model_validator(mode="after")
     def _derive_analytics_log_path(self) -> "Settings":

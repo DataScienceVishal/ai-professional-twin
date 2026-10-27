@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from structlog.testing import capture_logs
 
 from app.analytics import OUTCOME_REFUSED, QueryAnalytics
+from app.config import get_settings
 from app.main import create_app
 from app.models.chat import Message
 from app.rag.retriever import SourceInfo
@@ -403,6 +405,46 @@ def test_read_only_endpoints_keep_the_looser_default_limit() -> None:
     statuses = [client.get("/health").status_code for _ in range(12)]
 
     assert statuses == [200] * 12
+
+
+def _behind_the_ingress(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """A client whose TCP peer is a Container Apps ingress address, as in production."""
+    monkeypatch.setenv("TRUSTED_PROXIES", "100.100.0.0/17")
+    get_settings.cache_clear()
+    return TestClient(_build_app(), client=("100.100.0.28", 50000))
+
+
+def test_visitors_behind_the_ingress_each_get_their_own_chat_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Every request reaches the app from the ingress, so keying on the TCP peer
+    lets one visitor's ten questions lock every other visitor out of chat."""
+    client = _behind_the_ingress(monkeypatch)
+    first = {"X-Forwarded-For": "203.0.113.7"}
+    second = {"X-Forwarded-For": "198.51.100.9"}
+
+    statuses = [client.post("/chat", json=PAYLOAD, headers=first).status_code for _ in range(11)]
+
+    assert statuses[10] == 429
+    assert client.post("/chat", json=PAYLOAD, headers=second).status_code == 200
+
+
+def test_a_forged_forwarded_for_does_not_reset_the_chat_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The caller writes the left of the header, but the ingress appends the
+    address it saw, so changing the left on every request gains nothing."""
+    client = _behind_the_ingress(monkeypatch)
+
+    statuses = [
+        client.post(
+            "/chat", json=PAYLOAD, headers={"X-Forwarded-For": f"192.0.2.{n}, 198.51.100.9"}
+        ).status_code
+        for n in range(11)
+    ]
+
+    assert statuses[:10] == [200] * 10
+    assert statuses[10] == 429
 
 
 def _chat_query_logs(logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
