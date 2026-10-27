@@ -24,7 +24,10 @@ function loadHighlighter() {
       loaded = [rehypeHighlight]
       listeners.forEach((listener) => listener())
     },
-    () => {},
+    () => {
+      // Drop the failed import, so the next answer with code tries again.
+      loading = undefined
+    },
   )
 }
 
