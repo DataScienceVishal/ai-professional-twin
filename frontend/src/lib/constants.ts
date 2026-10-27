@@ -101,17 +101,11 @@ export function getShuffledChips(mode: ChatMode, seed: number, count = 5): strin
 
 export const PROFILE = {
   name: 'Vishal Khan',
-  // Removed in Task 11 with sidebar.tsx and contact-cta.tsx.
-  title: 'Data & ML Engineer',
   avatarUrl: 'https://github.com/DataScienceVishal.png',
   githubUrl: 'https://github.com/DataScienceVishal',
   linkedinUrl: 'https://www.linkedin.com/in/vishalkhandatascience/',
   email: 'vishalkhan251@gmail.com',
 }
-
-// Removed in Task 11 with sidebar.tsx and contact-cta.tsx.
-/** Availability line shown next to the contact call-to-action. */
-export const AVAILABILITY = 'Open to full-time AI/ML roles in London from January 2027'
 
 const CONTACT_SUBJECT = 'AI/ML opportunity for Vishal Khan'
 

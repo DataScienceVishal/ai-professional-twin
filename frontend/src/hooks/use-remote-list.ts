@@ -8,14 +8,13 @@ interface RemoteList<T> {
 /**
  * Fetch a read-only list once on mount.
  *
- * The request is aborted on unmount and no state is written afterwards - these
- * lists render inside the chat empty state, which unmounts the moment the
- * first message is sent, so an in-flight request is the normal case.
+ * Home fetches these lists once for the whole page, so they outlive the first
+ * question. The request is aborted, and no state is written, only if the page
+ * unmounts before it settles.
  *
- * Failures (network error, non-OK response, abort) collapse to an empty list.
- * Callers render nothing at all for an empty list rather than an error box:
- * these sections are supplementary to the chat, and a broken panel is worse
- * than no panel.
+ * Failures (network error, non-OK response, abort) collapse to an empty list,
+ * which callers render as nothing rather than an error box: a broken panel
+ * is worse than no panel.
  */
 export function useRemoteList<T>(
   fetcher: (signal?: AbortSignal) => Promise<T[]>,

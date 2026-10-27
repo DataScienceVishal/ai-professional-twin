@@ -16,18 +16,6 @@
   --color-route: #c2185b;
   --color-wash: #f3f5f8;
   --font-sans: 'Signika', system-ui, -apple-system, 'Segoe UI', sans-serif;
-
-  /* Old tokens, removed in Task 11 once nothing uses them. */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-bg-card: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-accent-cyan: #0284c7;
-  --color-accent-teal: #0d9488;
-  --color-accent-purple: #7c3aed;
-  --color-text-primary: #020617;
-  --color-text-secondary: #334155;
-  --color-text-muted: #64748b;
 }
 
 body {
@@ -159,10 +147,11 @@ body,
 /*
  * Layers re-plot one sheet: Recruiter brings the screening facts forward,
  * Interview lets the record's graphics recede so the system questions lead.
- * The record's text stays at full contrast.
+ * The record's text stays at full contrast. The facts come forward by weight,
+ * not size, so the sheet keeps its layout and the 900px fold.
  */
-[data-layer='recruiter'] [data-facts] {
-  font-size: 1.125rem;
+[data-layer='recruiter'] [data-facts] dd {
+  font-weight: 600;
 }
 
 [data-layer='interview'] [data-record] [data-graphic] {

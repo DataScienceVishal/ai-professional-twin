@@ -8,8 +8,8 @@ interface SourceCitationProps {
 
 /**
  * A reference under an answer. Pressing it opens the source on the sheet,
- * which dims everything else. A source with a public URL also gets its own
- * link that opens it in a new tab.
+ * which tints what it points at and fades the map's other graphics. A source
+ * with a public URL also gets its own link that opens it in a new tab.
  */
 export function SourceCitation({ source }: SourceCitationProps) {
   const { trailing, focused, setFocused } = useSheet()

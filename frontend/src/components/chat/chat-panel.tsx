@@ -1,30 +1,50 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { ASK_FIELD_ID } from './input-bar'
 import { Message } from './message'
-import { InputBar } from './input-bar'
-import { SuggestionChips } from './suggestion-chips'
-import { ContactCta } from '../layout/contact-cta'
-import { ProjectGrid } from '../projects/project-grid'
-import { SkillSummary } from '../skills/skill-summary'
-import type { Message as MessageType, ChatMode } from '../../lib/types'
+import { SurveyNote } from '../sheet/survey-note'
+import { sameSource, useSheet } from '../sheet/sheet-context'
+import type { Message as MessageType } from '../../lib/types'
 
 interface ChatPanelProps {
   messages: MessageType[]
   isStreaming: boolean
-  mode: ChatMode
-  onSend: (message: string) => void
-  onStop?: () => void
+  /** What shows before the first question: the title panel, the recorded answer and the record. */
+  firstSheet: ReactNode
+  /** The record strip beside the conversation; absent when the timeline did not load. */
+  rail?: ReactNode
+  onClear: () => void
 }
 
-export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatPanelProps) {
+interface Turn {
+  key: number
+  question: string
+  answer?: MessageType
+}
+
+function pairTurns(messages: MessageType[]): Turn[] {
+  const turns: Turn[] = []
+  messages.forEach((message, i) => {
+    if (message.role !== 'user') return
+    const next = messages[i + 1]
+    turns.push({ key: i, question: message.content, answer: next?.role === 'assistant' ? next : undefined })
+  })
+  return turns
+}
+
+export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const railRef = useRef<HTMLDivElement>(null)
   const isAtBottom = useRef(true)
+  const { focused } = useSheet()
+  const conversing = messages.length > 0
+  const railShown = Boolean(rail)
 
   useEffect(() => {
     if (!scrollRef.current) return
-    // The empty state is taller than the viewport (it carries the project and
-    // skill showcase), so "follow the conversation" must not fire when there
-    // is no conversation - that would land the user at the bottom of the
-    // project list on first paint, and again after Clear Chat.
+    // The first sheet is taller than the viewport, so "follow the
+    // conversation" must not fire when there is no conversation. That would
+    // land the visitor at the bottom of the sources list on first paint, and
+    // again after Clear chat.
     if (messages.length === 0) {
       isAtBottom.current = true
       scrollRef.current.scrollTop = 0
@@ -35,70 +55,96 @@ export function ChatPanel({ messages, isStreaming, mode, onSend, onStop }: ChatP
     }
   }, [messages])
 
+  // When the conversation opens, or the record arrives after it, the rail
+  // rests on its latest entries, where the route ends at today. An open source
+  // turns it to whatever that source lights. Only the frame scrolls:
+  // scrollIntoView would move the sheet as well.
+  useLayoutEffect(() => {
+    const frame = railRef.current
+    if (!frame) return
+    const target = frame.querySelector<HTMLElement>('[data-lit]:not([data-graphic] *)')
+    if (target) frame.scrollTop = target.offsetTop - 8
+    else if (!focused) frame.scrollTop = frame.scrollHeight
+  }, [focused, conversing, railShown])
+
   const handleScroll = () => {
     if (!scrollRef.current) return
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
     isAtBottom.current = scrollHeight - scrollTop - clientHeight < 50
   }
 
-  return (
-    <div className="flex flex-col flex-1 min-h-0 min-w-0">
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 space-y-4"
-      >
-        {messages.length === 0 && (
-          /* `min-h-full` + `justify-center` still centres the hero when the
-             showcase below is absent (API down); once the showcase loads the
-             block simply grows past the viewport and the hero sits at top. */
-          <div className="flex flex-col items-center justify-center min-h-full text-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center">
-              <svg className="w-6 h-6 text-accent-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
-              Vishal Khan's AI Twin
-            </h1>
-            <p className="text-sm text-text-secondary max-w-sm leading-relaxed">
-              Ask me anything about Vishal's experience, projects, skills, and career.
-              Grounded in real data with source citations.
-            </p>
-            {/* Desktop users already have the CTA in the sidebar. */}
-            <ContactCta className="lg:hidden w-full max-w-xs text-left mt-2" />
+  const turns = pairTurns(messages)
 
-            {/*
-              A recruiter who does not want to talk to a chatbot still needs to
-              see the work. Both sections render nothing when their request
-              fails; `empty:hidden` then drops this wrapper's spacing too, so
-              the empty state degrades to exactly what it was before.
-            */}
-            <div
-              data-testid="showcase"
-              className="mt-6 flex w-full min-w-0 flex-col gap-6 text-left empty:hidden"
-            >
-              <ProjectGrid />
-              <SkillSummary />
+  return (
+    <div
+      ref={scrollRef}
+      onScroll={handleScroll}
+      data-focus={focused ? 'on' : undefined}
+      className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto [container-type:size]"
+    >
+      {messages.length === 0 ? (
+        firstSheet
+      ) : (
+        <div className="mx-auto grid w-full max-w-[1400px] gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_17.5rem] lg:gap-10 lg:p-8">
+          {rail && (
+            <aside aria-label="His record" data-record className="min-w-0 lg:hidden">
+              <details className="border-[1.5px] border-ink">
+                <summary className="sheet-label min-h-11 cursor-pointer px-3 py-3.5">His record</summary>
+                <div className="px-3 pb-3">{rail}</div>
+              </details>
+            </aside>
+          )}
+          <div className="min-w-0 space-y-8">
+            <div className="flex items-center justify-between gap-3">
+              <h1 className="sheet-label">Conversation</h1>
+              <button
+                type="button"
+                onClick={(event) => {
+                  onClear()
+                  // Clearing swaps this button for the first sheet, which would drop
+                  // focus to <body>. A keyboard press (detail 0) hands focus to the
+                  // ask field; a tap leaves it, so a phone keeps its keyboard down.
+                  if (event.detail === 0) document.getElementById(ASK_FIELD_ID)?.focus()
+                }}
+                className="min-h-11 px-2 text-sm text-muted underline underline-offset-2 hover:text-ink lg:min-h-6"
+              >
+                Clear chat
+              </button>
             </div>
+            {turns.map((turn, n) => {
+              const last = n === turns.length - 1
+              const lit = Boolean(turn.answer?.sources?.some((source) => sameSource(focused, source)))
+              return (
+                <SurveyNote
+                  key={turn.key}
+                  kicker={`Question ${n + 1}`}
+                  question={turn.question}
+                  writing={isStreaming && last}
+                  busy={isStreaming && last && Boolean(turn.answer?.content)}
+                  lit={lit}
+                >
+                  {turn.answer && <Message message={turn.answer} isStreaming={isStreaming && last} />}
+                </SurveyNote>
+              )
+            })}
           </div>
-        )}
-        {messages.map((msg, i) => (
-          <Message
-            key={i}
-            message={msg}
-            isStreaming={isStreaming && i === messages.length - 1 && msg.role === 'assistant'}
-          />
-        ))}
-        {/* The pending state lives inside the assistant bubble; see
-            `ThinkingIndicator` in `message.tsx`. */}
-      </div>
-      <SuggestionChips
-        mode={mode}
-        onSelect={onSend}
-        messageCount={messages.length}
-      />
-      <InputBar onSend={onSend} onStop={onStop} disabled={isStreaming} />
+          {rail && (
+            <aside aria-label="His record" data-record className="hidden min-w-0 lg:block">
+              {/* The strip can be taller than the scroller, so this frame scrolls on its own.
+                  Safari never focuses a scroll box by itself, so `tabIndex` lets the keyboard in. */}
+              <div
+                ref={railRef}
+                tabIndex={0}
+                role="group"
+                aria-label="His record"
+                className="sticky top-8 max-h-[calc(100cqh_-_4rem)] overflow-y-auto"
+              >
+                {rail}
+              </div>
+            </aside>
+          )}
+        </div>
+      )}
     </div>
   )
 }
