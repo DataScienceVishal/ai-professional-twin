@@ -62,3 +62,43 @@ def test_timeline_is_empty_when_the_files_are_missing(
 
     assert response.status_code == 200
     assert response.json() == {"education": [], "work": []}
+
+
+def test_timeline_skips_a_malformed_entry_and_serves_the_rest(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    (tmp_path / "academics.yaml").write_text(
+        "- institution: Northeastern University London\n"
+        "  degree: MSc AI and Computer Science\n"
+        "  dates: January 2026 - January 2027\n"
+        "- institution: No Degree Recorded\n"
+        "  dates: 2020\n"
+        "- just a stray line\n"
+    )
+    (tmp_path / "linkedin.yaml").write_text(
+        "experience:\n"
+        "  - company: Teleperformance\n"
+        "    role: Data Engineer\n"
+        "    dates: Jun 2024 - Jan 2026\n"
+        "  - role: Missing Company\n"
+    )
+    monkeypatch.setattr(knowledge, "KNOWLEDGE_DIR", tmp_path)
+
+    response = client.get("/timeline")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert [e["institution"] for e in body["education"]] == ["Northeastern University London"]
+    assert [w["company"] for w in body["work"]] == ["Teleperformance"]
+
+
+def test_timeline_serves_no_work_when_experience_is_empty(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    (tmp_path / "linkedin.yaml").write_text("experience: null\n")
+    monkeypatch.setattr(knowledge, "KNOWLEDGE_DIR", tmp_path)
+
+    response = client.get("/timeline")
+
+    assert response.status_code == 200
+    assert response.json() == {"education": [], "work": []}
