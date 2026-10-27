@@ -21,13 +21,14 @@
 - topic: years-of-experience
   question: How many years of experience does Vishal have?
   answer: >
-    Vishal has approximately 6 years of professional experience. That breaks
-    down as roughly 4 years across finance, accounts and commercial analytics
-    (PJRJ Associates, Aryan Care, and Avant Garde, where he progressed from
-    taxation work into Python/SQL analytics and ML forecasting), and
-    approximately 2 years in data engineering as a Data Engineer at
-    Teleperformance Global Business. His AI and machine learning work spans
-    both his commercial analytics period and his two master's degrees.
+    Vishal has approximately 6 years of professional experience, about four of
+    them in data. He started in finance, accounts and taxation at PJRJ
+    Associates and Aryan Care. At Avant Garde Clean Room & Engg. Solutions
+    (Aug 2021 to Dec 2023) he progressed from taxation work into Python/SQL
+    analytics and ML forecasting, and he then spent approximately 2 years in
+    data engineering as a Data Engineer at Teleperformance Global Business
+    (Jun 2024 to Jan 2026). His AI and machine learning work spans both his
+    commercial analytics period and his two master's degrees.
 
 - topic: career-goals
   question: What are Vishal's career goals?
@@ -77,7 +78,7 @@
   answer: >
     Vishal left Avant Garde in December 2023 and joined Teleperformance in
     June 2024. During that period he was completing his MSc in Data Science at
-    Liverpool John Moores University, which ran from March 2023 to March 2024,
+    Liverpool John Moores University, which ran from August 2023 to August 2024,
     and he used the time to focus on his dissertation. His thesis compared
     Reinforcement Learning algorithms (DQN, A2C, PPO) for dynamic pricing in
     e-commerce, which required building a custom Gym-style environment and
@@ -88,8 +89,8 @@
   question: Why do Vishal's study dates overlap with his employment dates?
   answer: >
     The overlaps are intentional, not errors. Vishal completed his Executive PG
-    Program in Data Science at IIIT Bangalore (Jan 2022 - Jan 2023) and his MSc
-    in Data Science at Liverpool John Moores University (Mar 2023 - Mar 2024)
+    Program in Data Science at IIIT Bangalore (Mar 2022 - Apr 2023) and his MSc
+    in Data Science at Liverpool John Moores University (Aug 2023 - Aug 2024)
     part-time and online while working full-time in India. His Bachelor of
     Commerce at the University of Delhi (Nov 2018 - Nov 2021) was also completed
     alongside his early finance roles. Only his current MSc in AI and Computer
@@ -101,8 +102,8 @@
   answer: >
     Vishal holds a Bachelor of Commerce from the University of Delhi (Nov 2018 -
     Nov 2021), completed an Executive PG Program in Data Science at IIIT
-    Bangalore (Jan 2022 - Jan 2023), earned an MSc in Data Science from
-    Liverpool John Moores University, UK (Mar 2023 - Mar 2024), and is currently
+    Bangalore (Mar 2022 - Apr 2023), earned an MSc in Data Science from
+    Liverpool John Moores University, UK (Aug 2023 - Aug 2024), and is currently
     pursuing an MSc in AI and Computer Science at Northeastern University London
     (Jan 2026 - Jan 2027). The IIIT Bangalore and LJMU programmes were completed
     part-time and online alongside full-time work.
@@ -142,7 +143,7 @@
   question: What certifications does Vishal hold?
   answer: >
     Vishal's most substantial credential is his Executive PG Program in Data
-    Science from IIIT Bangalore (Jan 2022 - Jan 2023). Alongside it he holds a
+    Science from IIIT Bangalore (Mar 2022 - Apr 2023). Alongside it he holds a
     Data Science Programming Bootcamp certificate and a Machine/Deep Learning
     certificate (both verifiable on Credential.net), a SQL certification from
     HackerRank, AWS coursework from Great Learning, and a Data Toolkit
