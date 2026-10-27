@@ -145,6 +145,16 @@ describe('Message mobile overflow guards', () => {
     expect(answer.className).toContain('break-words')
     expect(answer.className).toContain('min-w-0')
   })
+
+  it('keeps a code block in place when the answer re-renders', () => {
+    // A finished answer re-renders on every chunk of the next one. A new node
+    // would throw away how far the reader had scrolled the block sideways.
+    const answer = assistant({ content: '```python\nprint("hi")\n```' })
+    const { container, rerender } = render(<Message message={answer} />)
+    const pre = container.querySelector('pre')
+    rerender(<Message message={answer} />)
+    expect(container.querySelector('pre')).toBe(pre)
+  })
 })
 
 describe('diagram rendering during streaming', () => {

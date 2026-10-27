@@ -1,5 +1,5 @@
 import { isValidElement, type ReactNode } from 'react'
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { motion, useReducedMotionConfig } from 'framer-motion'
@@ -96,6 +96,40 @@ function DiagramPending() {
   )
 }
 
+/**
+ * Renderers for the parts of an answer that plain markdown does not cover.
+ * react-markdown uses each function as a component type, so a new function on
+ * every render would remount every code block, table and diagram. A finished
+ * answer re-renders on each chunk of the next one, so both sets are built once.
+ */
+function markdownComponents(isStreaming: boolean): Components {
+  return {
+    pre({ children }) {
+      const mermaidCode = extractMermaid(children)
+      // A half-written diagram cannot parse, so it is not rendered
+      // until the stream finishes. Showing its raw source in the
+      // meantime reads as broken output rather than as progress,
+      // so hold a placeholder instead and swap in the diagram.
+      if (isStreaming) {
+        return mermaidCode ? <DiagramPending /> : <CodeBlock>{children}</CodeBlock>
+      }
+      if (mermaidCode) return <MermaidBlock code={mermaidCode} />
+      return <CodeBlock>{children}</CodeBlock>
+    },
+    // Comparison tables are wide; scroll them instead of the page.
+    table({ children }) {
+      return (
+        <div className="scroll-frame max-w-full overflow-x-auto">
+          <table>{children}</table>
+        </div>
+      )
+    },
+  }
+}
+
+const STREAMING_COMPONENTS = markdownComponents(true)
+const SETTLED_COMPONENTS = markdownComponents(false)
+
 export function Message({ message, isStreaming = false }: MessageProps) {
   // The page's reducedMotion setting stops the rise but still runs the fade,
   // and under reduced motion nothing may animate, so the answer starts in place.
@@ -135,28 +169,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeHighlight]}
-            components={{
-              pre({ children }) {
-                const mermaidCode = extractMermaid(children)
-                // A half-written diagram cannot parse, so it is not rendered
-                // until the stream finishes. Showing its raw source in the
-                // meantime reads as broken output rather than as progress,
-                // so hold a placeholder instead and swap in the diagram.
-                if (isStreaming) {
-                  return mermaidCode ? <DiagramPending /> : <CodeBlock>{children}</CodeBlock>
-                }
-                if (mermaidCode) return <MermaidBlock code={mermaidCode} />
-                return <CodeBlock>{children}</CodeBlock>
-              },
-              // Comparison tables are wide; scroll them instead of the page.
-              table({ children }) {
-                return (
-                  <div className="scroll-frame max-w-full overflow-x-auto">
-                    <table>{children}</table>
-                  </div>
-                )
-              },
-            }}
+            components={isStreaming ? STREAMING_COMPONENTS : SETTLED_COMPONENTS}
           >
             {fenceBareMermaid(message.content)}
           </ReactMarkdown>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import mermaid from 'mermaid'
 import { sanitizeMermaid } from '../../lib/mermaid-sanitize'
 
@@ -72,6 +72,10 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
     }
   }, [code])
 
+  // React rewrites innerHTML whenever this object is new, which would rebuild
+  // the SVG each time the answer re-renders. Keep one object per SVG.
+  const html = useMemo(() => ({ __html: svg }), [svg])
+
   // Only show source once a render has actually failed and we have nothing
   // better to show. Keeping the last good SVG avoids flashing raw source at
   // the reader on an intermediate streaming parse error.
@@ -92,7 +96,7 @@ export function MermaidBlock({ code }: MermaidBlockProps) {
       className="my-3 max-w-full overflow-x-auto [&_svg]:mx-auto [&_svg]:h-auto"
       // Mermaid returns a self-contained SVG string; there is no React tree to
       // build from it, so this is the intended integration point.
-      dangerouslySetInnerHTML={{ __html: svg }}
+      dangerouslySetInnerHTML={html}
     />
   )
 }
