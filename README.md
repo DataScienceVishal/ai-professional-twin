@@ -16,7 +16,7 @@
 
 ### [→ Try it live at ai-professional-twin.vercel.app](https://ai-professional-twin.vercel.app)
 
-No signup. Pick a mode, ask a question, watch the answer stream in with its sources.
+No signup. Pick a layer, ask a question, and watch the answer stream in with its sources.
 
 </div>
 
@@ -25,7 +25,7 @@ No signup. Pick a mode, ask a question, watch the answer stream in with its sour
   GIF of a live answer streaming in, drop it at docs/demo.gif and point the
   line below at it.
 -->
-![AI Digital Twin chat interface](docs/screenshot.png)
+![The first sheet: the title panel, a recorded answer with its source, and his record from 2016 to 2027 drawn as a route](docs/screenshot.png)
 
 ---
 
@@ -33,8 +33,9 @@ No signup. Pick a mode, ask a question, watch the answer stream in with its sour
 
 - **Answers questions about one person, from evidence.** Every response is generated from a curated knowledge base: YAML files covering projects, skills, education, certifications and career Q&A, plus the resume PDF and live data pulled from public GitHub repositories. **89 documents were indexed** in the running deployment when `/ready` was read on 2026-10-12. Each ingested GitHub repository is one document, so the count changes when one is added or removed.
 - **Shows its working.** Each answer ends with the source chunks it was built from, so you can see whether a claim came from the resume, the academic record, or a repository README.
-- **Three modes for three audiences.** *General* is conversational, *Recruiter* returns a one-line summary plus quantified bullets under 150 words, and *Interview* goes deep on architecture and trade-offs — and renders Mermaid diagrams inline when it explains a system.
-- **Calls tools when static text is not enough.** Eight function-calling tools let the model fetch live repository stats, search repos, compute years of experience, count projects by category, and hand back a resume download link.
+- **Lays the record out as one sheet.** The page opens on a title panel with availability, visa status and the current MSc, one real answer the assistant gave on 12 Oct 2026 with its source, and his education and work drawn as a route from 2016 to 2027 from the dated record at `/timeline`. Opening a source on an answer lights the entries it points at.
+- **Three layers for three audiences.** *General* is conversational, *Recruiter* returns a one-line summary plus quantified bullets under 150 words, and *Interview* goes deep on architecture and trade-offs, and renders Mermaid diagrams inline when it explains a system. Each layer also re-plots the sheet: Recruiter brings the screening facts forward, and Interview lets the record's graphics recede so its system questions lead.
+- **Calls tools when static text is not enough.** Eight function-calling tools let the model fetch repository stats from GitHub (cached for the life of each process), search repos, compute years of experience, count projects by category, and hand back a resume download link.
 - **Declines rather than guesses.** The system prompt forbids fabrication, keeps the assistant inside professional scope, and treats retrieved text as data rather than instructions.
 
 ## Ask it things like
@@ -47,7 +48,7 @@ No signup. Pick a mode, ask a question, watch the answer stream in with its sour
 | What databases has he worked with? | How has he demonstrated impact in previous roles? | How do you handle prompt injection? |
 | What is his experience with RAG systems? | What is his data engineering background? | What would you change about this architecture? |
 
-The UI shuffles a rotating set of these as suggestion chips; the full list lives in [`frontend/src/lib/constants.ts`](frontend/src/lib/constants.ts).
+Recruiter and Interview open on their own curated lists. After the first question, and always on General, the row under the sheet shows five of these, reshuffled after every question. The full lists live in [`frontend/src/lib/constants.ts`](frontend/src/lib/constants.ts).
 
 ## Architecture
 
@@ -57,7 +58,7 @@ flowchart LR
     V["Vercel<br/>static assets + /api rewrite"]
     F["Azure Container Apps<br/>FastAPI app"]
     R["Retriever<br/>intent, boost, threshold"]
-    C[("ChromaDB<br/>cosine, persistent volume")]
+    C[("ChromaDB<br/>cosine, on disk")]
     E["Azure OpenAI<br/>text-embedding-3-small"]
     L["Azure OpenAI<br/>gpt-5-mini"]
     T["Tool registry<br/>8 functions"]
@@ -75,18 +76,19 @@ flowchart LR
     F -->|"SSE stream"| B
 ```
 
-The browser only ever talks to its own origin. Vercel rewrites `/api/:path*` to the Azure Container Apps host with the `/api` prefix stripped, so the FastAPI routes stay unprefixed (`/chat`, `/projects`, `/skills`, `/health`, `/ready`, `/resume/download`) and **there is no CORS in production**. [`frontend/vite.config.ts`](frontend/vite.config.ts) mirrors the same rewrite for local development, so dev and prod behave identically and no build-time env var is needed.
+The browser only ever talks to its own origin. Vercel rewrites `/api/:path*` to the Azure Container Apps host with the `/api` prefix stripped, so the FastAPI routes stay unprefixed (`/chat`, `/projects`, `/skills`, `/timeline`, `/health`, `/ready`, `/resume/download`) and **there is no CORS in production**. [`frontend/vite.config.ts`](frontend/vite.config.ts) mirrors the same rewrite for local development, so dev and prod behave identically and no build-time env var is needed.
 
 | Endpoint | Method | Purpose |
 | --- | --- | --- |
 | `/chat` | POST | SSE stream of answer chunks, tool activity and sources |
 | `/projects`, `/projects/{slug}` | GET | Portfolio data straight from `projects.yaml` |
 | `/skills` | GET | Skill categories from `skills.yaml` |
+| `/timeline` | GET | The dated record behind the route map, from `academics.yaml` and `linkedin.yaml`. A malformed entry is logged and skipped |
 | `/resume/download` | GET | Resume PDF |
 | `/health` | GET | Liveness. Dependency-free, answers during cold start |
 | `/ready` | GET | Readiness. 503 until the store has documents; reports the count |
 
-Splitting liveness from readiness matters: the platform health check points at `/health`, because `/ready` returns 503 until ingestion finishes and would restart-loop a cold boot.
+Splitting liveness from readiness matters: point the platform's health check at `/health`, because `/ready` returns 503 until the store holds its first document and would restart-loop a cold boot.
 
 <details>
 <summary><b>How the RAG pipeline works</b> — ingestion, retrieval, generation</summary>
@@ -122,6 +124,7 @@ GitHub ingestion is best-effort: READMEs are fetched concurrently with a semapho
 | Chunks passed to the model | 5 | `Retriever.top_k` |
 | Candidates fetched from Chroma | `top_k × 4` | `OVERFETCH_FACTOR` |
 | Relevance cutoff | 0.75 cosine distance | `MAX_DISTANCE` |
+| Cutoff for GitHub chunks | 0.55 cosine distance | `SOURCE_MAX_DISTANCE` |
 | Preferred-source boost | 0.12 subtracted from distance | `SOURCE_BOOST` |
 | Prior user turns folded into the query | 2 | `HISTORY_TURNS` |
 
@@ -131,9 +134,9 @@ Follow-up questions like *"what tools did he use?"* embed to almost nothing on t
 
 ### Generation
 
-The system prompt is assembled per request from three parts: a base identity with hard scope and anti-fabrication rules, a mode-specific formatting template, and the retrieved context wrapped in `<retrieved_context>` tags with an explicit instruction that everything inside is untrusted data. Response rules require `[Source: X]` citations and a Mermaid diagram whenever an architecture is explained.
+The system prompt is assembled per request from three parts: a base identity with hard scope and anti-fabrication rules, a mode-specific formatting template, and the retrieved context wrapped in `<retrieved_context>` tags with an explicit instruction that everything inside is untrusted data. Interview answers cite `[Source: X]` inline, while General and Recruiter leave citations to the sources listed under each answer. The response rules also ask for a Mermaid diagram whenever an architecture is explained.
 
-Generation streams over SSE. The tool loop runs up to three rounds of tool calls, emitting `tool_start` and `tool_result` events so the UI can show what the model is doing mid-answer, then `sources` and `done`. Token usage is requested via `stream_options` and logged server-side for cost tracking — it is never forwarded to the browser. Failures mid-stream are caught, logged with the exception type, and replaced with a safe user-facing message so the connection never dies with a blank bubble.
+Generation streams over SSE. The model sees at most the last six turns of the conversation the browser replays, and at most 32,000 bytes of their text. The tool loop runs up to three rounds of tool calls, and the call after the last round offers no tools, so it has to answer. Tool calls emit `tool_start` and `tool_result` events so the UI can show what the model is doing mid-answer, and the stream ends with `sources` and `done`. Token usage is requested via `stream_options` and logged server-side for cost tracking, and never forwarded to the browser. Failures mid-stream are caught, logged with the exception type, and replaced with a safe user-facing message so the connection never dies with a blank answer.
 
 </details>
 
@@ -150,7 +153,7 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 
 **Retrieved context is untrusted input.** Part of the knowledge base is ingested automatically from public GitHub READMEs, which is a live prompt-injection surface. Context is delimited in `<retrieved_context>` tags, the prompt states that everything inside is data rather than instructions, and the response rules repeat the constraint and forbid echoing any injected instruction back to the user. Neither is a guarantee, but the alternative — pasting third-party markdown straight into the system prompt — is strictly worse.
 
-**Two independent cost controls.** A per-IP `slowapi` limit (10 requests/minute on `/chat`, 60/minute elsewhere) stops one visitor hammering the endpoint, and a global daily completion budget caps total spend across all visitors. Exhausting the budget returns a polite SSE message pointing at the contact link instead of a 500. The budget counter is in process memory, so with multiple replicas the effective cap is `budget × replicas` — documented in the code, and fine for a single-instance personal site.
+**Cost controls.** A per-IP `slowapi` limit (10 requests/minute on `/chat`, 60/minute elsewhere) stops one visitor hammering the endpoint, and a global daily completion budget caps the number of answers across all visitors. Each answer has a ceiling too: the history trim above bounds what the model reads, and the last call offers no tools. Exhausting the budget returns an SSE refusal with a `budget_exhausted` code, which the page follows with an email link, instead of a 500. The budget counter is in process memory, so with multiple replicas the effective cap is `budget × replicas`. That is documented in the code, and fine for a single-instance personal site.
 
 **Temperature is omitted for GPT-5-family models.** GPT-5 and o-series deployments reject any non-default temperature with an HTTP 400, and take the output cap as `max_completion_tokens` rather than `max_tokens`. The client detects the family from the model name and adjusts both, with `LLM_SEND_TEMPERATURE` available to override the heuristic when a deployment disagrees.
 
@@ -169,7 +172,7 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 | Streaming | `sse-starlette` | Typed SSE events consumed by a hand-rolled reader |
 | Throttling | `slowapi` + in-process daily budget | Per-IP limits and a global spend ceiling |
 | Logging | `structlog` | One structured `chat_query` event per request |
-| Frontend | React 19, Vite, TypeScript, Tailwind CSS 4 | `react-markdown` + `rehype-highlight`, `framer-motion` |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS 4 | `react-markdown` + `rehype-highlight`, `framer-motion`, Signika from `@fontsource` (OFL-1.1, licence shipped in `public/licenses/`) |
 | Diagrams | `mermaid` | Rendered client-side in Interview mode |
 | Tests | pytest + `pytest-asyncio`, Vitest + Testing Library | Azure OpenAI is mocked, so CI needs no Azure key |
 | Quality | ruff, mypy (strict), oxlint, `tsc` | All enforced in CI |
@@ -177,7 +180,7 @@ Generation streams over SSE. The tool loop runs up to three rounds of tool calls
 
 ## Local development
 
-Prerequisites: Python 3.12, [uv](https://docs.astral.sh/uv/), Node 20+.
+Prerequisites: Python 3.12, [uv](https://docs.astral.sh/uv/), Node 22.22.2 or later (CI uses Node 24).
 
 **Backend**
 
@@ -198,7 +201,7 @@ npm run dev
 
 Then open http://localhost:5173. The Vite dev server proxies `/api/*` to `http://localhost:8000` with the prefix stripped, mirroring the Vercel rewrite — **no frontend environment variable is required**. `VITE_API_URL` exists only as an escape hatch for pointing a local UI at a deployed backend.
 
-Without Azure credentials the app still boots and serves `/health`, `/projects` and `/skills`; `/ready` will report the misconfiguration and chat will be disabled.
+Without Azure credentials the app still boots and serves `/health`, `/projects`, `/skills` and `/timeline`; `/ready` will report the misconfiguration and chat will be disabled. The exception is a set `GITHUB_TOKEN`: the app then tries it as the model key, so chat stays enabled and its answers fail.
 
 <details>
 <summary><b>Configuration</b> — environment variables and defaults</summary>
@@ -210,7 +213,7 @@ Backend variables are read by [`backend/app/config.py`](backend/app/config.py) f
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `AZURE_OPENAI_ENDPOINT` | *(empty)* | Azure OpenAI / AI Foundry resource endpoint |
-| `AZURE_OPENAI_API_KEY` | *(empty)* | API key. Without it, chat and embeddings are disabled |
+| `AZURE_OPENAI_API_KEY` | *(empty)* | API key. Without it, chat and embeddings are disabled, unless `GITHUB_TOKEN` is set and tried in its place |
 | `AZURE_OPENAI_API_VERSION` | `2024-10-21` | Azure API version |
 | `LLM_MODEL` | `gpt-5-mini` | Chat deployment name |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Embedding deployment name |
@@ -277,7 +280,7 @@ npm run test       # vitest run
 npm run build      # tsc -b && vite build
 ```
 
-The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the project grid and skill summary shown before the first message, and the suggestion-chip logic.
+The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chroma store and manifest, retriever ranking and intent classification, prompt assembly, every router, the LLM client's parameter handling and tool loop, the rate limiter and daily budget, and each tool. The Vitest suite covers the SSE client (including events split across chunk boundaries and the `content-type` guard), the chat hook's streaming state machine, Mermaid repair, the dated record and the route map and text strip drawn from it, the title panel and contact bar, the layers and their questions, source references that light what they cite, the builds, skills and sources lists, and the page's search and share descriptions.
 
 ## Project structure
 
@@ -301,14 +304,18 @@ The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chro
 │   ├── Dockerfile           # multi-stage uv build
 │   └── railway.toml         # Railway config, not used by the live site
 ├── frontend/
+│   ├── public/              # share card, favicon, font licence
+│   ├── scripts/og-card/     # the share card's source and its provenance stamp
 │   ├── src/
-│   │   ├── components/      # chat, layout, modes, projects, ui
-│   │   ├── hooks/           # use-chat (SSE state machine), use-projects
-│   │   ├── lib/             # api client, constants, shared types
+│   │   ├── components/      # chat, sheet (title panel, route map, layers, lists), ui
+│   │   ├── hooks/           # use-chat (SSE state machine), use-timeline, use-projects, use-skills
+│   │   ├── lib/             # api client, the dated record, source labels, constants, shared types
 │   │   └── pages/
 │   ├── vercel.json          # /api rewrite to Azure Container Apps, then SPA fallback
 │   └── vite.config.ts       # dev proxy mirroring the Vercel rewrite
-└── .github/workflows/ci.yml
+└── .github/workflows/
+    ├── ci.yml               # lint, types, tests and build for both halves
+    └── deploy-backend.yml   # builds the backend image and publishes it to GHCR
 ```
 
 <details>
@@ -321,8 +328,8 @@ The pytest suite mirrors the `app/` tree: chunkers, embedding batching, the Chro
 - **The daily budget is per process.** Multiple replicas each get their own allowance. A shared counter in Redis would make the cap exact.
 - **No automated answer evaluation.** There is no golden-question set scored on groundedness or citation accuracy, so knowledge-base regressions are caught by reading answers rather than by CI.
 - **Conversation memory is a two-turn concatenation.** It works for simple follow-ups and will not survive a long topic-switching conversation.
-- **Time-sensitive knowledge is maintained by hand.** Entries covering availability, visa status and term dates are flagged in the YAML but still need a human to refresh them.
-- **No conversation persistence or analytics on question topics** beyond the structured `chat_query` log line.
+- **Time-sensitive knowledge is maintained by hand.** Entries covering availability, visa status and term dates are flagged in the YAML but still need a human to refresh them. The page's own copy treats January 2027 as the future, so a test in `constants.test.ts` fails from 5 January 2027 until that copy is reviewed.
+- **No conversation persistence.** A reload starts a new conversation, and the question log keeps no answers.
 
 </details>
 
