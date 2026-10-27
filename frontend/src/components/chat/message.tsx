@@ -2,7 +2,7 @@ import { isValidElement, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotionConfig } from 'framer-motion'
 import { MermaidBlock } from './mermaid-block'
 import { fenceBareMermaid } from '../../lib/mermaid-sanitize'
 import { SourceCitation } from './source-citation'
@@ -96,6 +96,9 @@ function DiagramPending() {
 }
 
 export function Message({ message, isStreaming = false }: MessageProps) {
+  // The page's reducedMotion setting stops the rise but still runs the fade,
+  // and under reduced motion nothing may animate, so the answer starts in place.
+  const reduceMotion = useReducedMotionConfig()
   const isUser = message.role === 'user'
   // The turn is in flight and nothing has streamed yet: show the pending state
   // instead of an empty note. The first `chunk` event removes it.
@@ -105,7 +108,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 4 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15 }}
       data-testid="answer"

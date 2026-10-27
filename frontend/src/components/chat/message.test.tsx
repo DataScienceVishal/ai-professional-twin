@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { MotionConfig } from 'framer-motion'
 import { describe, expect, it } from 'vitest'
 import { Message } from './message'
 import type { Message as MessageType } from '../../lib/types'
@@ -129,5 +130,14 @@ describe('Message on the sheet', () => {
     render(<Message message={assistant({ content: 'Done.', sources: [{ source: 'resume', detail: '', url: '' }] })} />)
     expect(screen.getByText('Sources')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'CV' })).toBeInTheDocument()
+  })
+
+  it('enters without motion when the visitor asks for reduced motion', () => {
+    render(
+      <MotionConfig reducedMotion="always">
+        <Message message={assistant({ content: 'Done.' })} />
+      </MotionConfig>,
+    )
+    expect(screen.getByTestId('answer').style.opacity).not.toBe('0')
   })
 })
