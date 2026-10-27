@@ -101,6 +101,7 @@ export function getShuffledChips(mode: ChatMode, seed: number, count = 5): strin
 
 export const PROFILE = {
   name: 'Vishal Khan',
+  // Removed in Task 11 with sidebar.tsx and contact-cta.tsx.
   title: 'Data & ML Engineer',
   avatarUrl: 'https://github.com/DataScienceVishal.png',
   githubUrl: 'https://github.com/DataScienceVishal',
@@ -108,6 +109,7 @@ export const PROFILE = {
   email: 'vishalkhan251@gmail.com',
 }
 
+// Removed in Task 11 with sidebar.tsx and contact-cta.tsx.
 /** Availability line shown next to the contact call-to-action. */
 export const AVAILABILITY = 'Open to full-time AI/ML roles in London from January 2027'
 
@@ -130,3 +132,83 @@ const CONTACT_BODY = [
 export const CONTACT_MAILTO = `mailto:${PROFILE.email}?subject=${encodeURIComponent(
   CONTACT_SUBJECT,
 )}&body=${encodeURIComponent(CONTACT_BODY)}`
+
+/** The role line as approved on 12 Oct 2026. */
+export const ROLE_LINE = 'Seeking AI engineer roles · four years in data'
+
+/** The title panel's facts. Each restates the knowledge-base entry named beside it. */
+export const SHEET_FACTS: readonly { label: string; value: string }[] = [
+  // career_qa.yaml `availability`
+  { label: 'Available', value: 'Full-time from January 2027 · part-time and internships now' },
+  // career_qa.yaml `sponsorship`, which opens "Not to start."
+  { label: 'Visa', value: 'Right to work now · no sponsorship needed to start' },
+  // academics.yaml, the Northeastern entry
+  { label: 'Now', value: 'MSc AI and Computer Science, Northeastern University London, to January 2027' },
+]
+
+/** Full-time availability starts January 2027 (career_qa.yaml `availability`). */
+export const FULL_TIME_FROM = 2027
+export const FULL_TIME_LABEL = 'Full-time from Jan 2027'
+
+export interface Suggestion {
+  label: string
+  message: string
+  group?: string
+}
+
+/** The recruiter quick actions, moved here from the old side panel unchanged. */
+export const RECRUITER_ACTIONS: readonly Suggestion[] = [
+  { label: 'Summarize Vishal in 60 seconds', message: 'Give me a 60-second summary of Vishal Khan as a candidate.' },
+  { label: 'Why hire Vishal?', message: 'Why should we hire Vishal Khan?' },
+  { label: 'Show AI projects', message: "Show me Vishal's AI and LLM projects with details." },
+  {
+    label: 'Data Engineering experience',
+    message: "Tell me about Vishal's data engineering experience at Teleperformance.",
+  },
+  {
+    label: 'Generate interview questions',
+    message: "Generate 5 technical interview questions based on Vishal's background.",
+  },
+]
+
+/** The interview panel's questions, moved here unchanged with their categories and in their old order. */
+export const INTERVIEW_STARTERS: readonly Suggestion[] = [
+  {
+    group: 'RAG & Retrieval',
+    questions: [
+      'Explain the RAG architecture in this project',
+      'Why did you choose dense vector search over BM25?',
+      'What chunking strategy did you use and why?',
+    ],
+  },
+  {
+    group: 'System Design',
+    questions: [
+      'Walk through the FastAPI backend architecture',
+      'How do you handle streaming responses?',
+      'What are the key engineering tradeoffs?',
+    ],
+  },
+  {
+    group: 'ML & AI',
+    questions: [
+      'Explain your reinforcement learning research',
+      'How do embeddings work in this system?',
+      'What prompt engineering techniques do you use?',
+    ],
+  },
+].flatMap(({ group, questions }) =>
+  questions.map((question) => ({ label: question, message: question, group })),
+)
+
+/**
+ * Before the first question the Recruiter and Interview layers show their
+ * curated lists in full. After that, and always on the General layer,
+ * `count` shuffled chips keep the suggestions moving. `seed` is the messages
+ * so far plus one, so seed 1 means no question has been asked yet.
+ */
+export function getLayerSuggestions(mode: ChatMode, seed: number, count = 5): Suggestion[] {
+  if (seed === 1 && mode === 'recruiter') return [...RECRUITER_ACTIONS]
+  if (seed === 1 && mode === 'interview') return [...INTERVIEW_STARTERS]
+  return getShuffledChips(mode, seed, count).map((chip) => ({ label: chip, message: chip }))
+}
