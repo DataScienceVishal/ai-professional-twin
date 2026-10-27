@@ -54,6 +54,18 @@ body,
   outline-offset: 2px;
 }
 
+/*
+ * The contact bar sits against the viewport's top edge, which would clip a
+ * ring drawn outside its links, so their rings are drawn inside instead.
+ */
+[data-ring='inset'] a:focus-visible {
+  outline-offset: -4px;
+}
+
+[data-ring='inset'] a[data-fill='ink']:focus-visible {
+  outline-color: var(--color-paper);
+}
+
 /* Swipeable chip strip on mobile: scrolling without a visible scrollbar. */
 @utility no-scrollbar {
   scrollbar-width: none;
