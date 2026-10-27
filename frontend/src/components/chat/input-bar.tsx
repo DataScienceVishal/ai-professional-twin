@@ -1,5 +1,8 @@
 import { type FormEvent, useRef, useState } from 'react'
 
+/** Exported so the layer key can hand keyboard focus to the field. */
+export const ASK_FIELD_ID = 'ask'
+
 interface InputBarProps {
   onSend: (message: string) => void
   onStop?: () => void
@@ -20,27 +23,32 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      // `pb` clears the iOS home indicator when the page opts into the safe
-      // area; it falls back to the normal 1rem everywhere else.
-      className="flex shrink-0 gap-2 border-t border-border p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-    >
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <label htmlFor={ASK_FIELD_ID} className="sr-only">
+        Ask about his record
+      </label>
       <input
+        id={ASK_FIELD_ID}
         ref={inputRef}
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder={disabled ? 'Thinking...' : 'Ask me anything about Vishal...'}
-        autoFocus
+        placeholder={disabled ? 'Thinking...' : 'Ask about his record'}
         // 16px text stops iOS Safari from zooming the viewport on focus.
-        className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-bg-card px-4 py-2.5 text-base text-text-primary transition-all placeholder:text-text-muted focus:border-accent-cyan/40 focus:outline-none focus:ring-1 focus:ring-accent-cyan/20 lg:text-sm"
+        className="min-h-11 min-w-0 flex-1 border-[1.5px] border-ink bg-paper px-3 py-2 text-base placeholder:text-muted"
       />
       {disabled && onStop ? (
         <button
           type="button"
-          onClick={onStop}
-          className="min-h-11 shrink-0 rounded-lg border border-border bg-bg-card px-4 py-2.5 text-sm font-medium text-text-secondary transition-all hover:border-accent-cyan/30 hover:text-accent-cyan"
+          onClick={(event) => {
+            onStop()
+            // This button turns into a disabled Ask, which would drop focus
+            // to the top of the page. A keyboard press (detail 0) hands focus
+            // back to the field; a tap leaves it, so a phone keeps its
+            // keyboard down.
+            if (event.detail === 0) inputRef.current?.focus()
+          }}
+          className="min-h-11 shrink-0 border-[1.5px] border-ink px-5 font-semibold"
         >
           Stop
         </button>
@@ -48,9 +56,9 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
         <button
           type="submit"
           disabled={disabled || !input.trim()}
-          className="min-h-11 shrink-0 rounded-lg border border-accent-cyan/30 bg-accent-cyan/15 px-4 py-2.5 text-sm font-medium text-accent-cyan transition-all hover:bg-accent-cyan/25 disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-11 shrink-0 bg-route px-6 font-semibold tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Send
+          Ask
         </button>
       )}
     </form>

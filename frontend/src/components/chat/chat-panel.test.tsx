@@ -85,7 +85,7 @@ describe('ChatPanel empty state', () => {
     expect(screen.queryByRole('heading', { name: 'Skills' })).toBeNull()
     // The chat itself is untouched.
     expect(screen.getByText("Vishal Khan's AI Twin")).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/Ask me anything/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Ask about his record/)).toBeInTheDocument()
   })
 
   it('drops the showcase as soon as a conversation starts', async () => {
