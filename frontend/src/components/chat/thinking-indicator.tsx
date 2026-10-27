@@ -68,11 +68,13 @@ export function ThinkingIndicator({ toolsUsed }: ThinkingIndicatorProps) {
       className="flex items-center gap-2 text-sm text-muted"
     >
       {/* Decorative: the label already carries the meaning for screen readers.
-          `motion-safe:` keeps it still for prefers-reduced-motion. */}
+          `motion-safe:` keeps it still for prefers-reduced-motion. The dots pulse
+          like a running tool's marker in message.tsx; a bounce read as a stock
+          chat widget. */}
       <span className="flex shrink-0 gap-1" aria-hidden="true">
-        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce" />
-        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce [animation-delay:0.15s]" />
-        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-bounce [animation-delay:0.3s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-pulse" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-pulse [animation-delay:0.15s]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-route motion-safe:animate-pulse [animation-delay:0.3s]" />
       </span>
       <span>{thinkingLabel(phaseIndex, toolsUsed)}&hellip;</span>
     </div>

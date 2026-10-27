@@ -54,14 +54,15 @@ describe('ThinkingIndicator', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/reading repository stats/i)
   })
 
-  it('gates the animation behind prefers-reduced-motion', () => {
+  it('pulses its dots rather than bouncing them, and keeps them still under reduced motion', () => {
     const { container } = render(<ThinkingIndicator />)
-    const dots = container.querySelectorAll('[class*="animate-bounce"]')
+    expect(container.querySelector('[class*="bounce"]')).toBeNull()
+    const dots = container.querySelectorAll('[class*="animate-pulse"]')
     expect(dots).toHaveLength(3)
     for (const dot of dots) {
-      expect(dot.className).toContain('motion-safe:animate-bounce')
+      expect(dot.className).toContain('motion-safe:animate-pulse')
       // No unguarded animation class that would run for reduced-motion users.
-      expect(dot.className).not.toMatch(/(^|\s)animate-bounce/)
+      expect(dot.className).not.toMatch(/(^|\s)animate-pulse/)
     }
     // The dots carry no meaning the label does not already carry.
     expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull()
