@@ -155,6 +155,22 @@ describe('Message mobile overflow guards', () => {
     rerender(<Message message={answer} />)
     expect(container.querySelector('pre')).toBe(pre)
   })
+
+  it('keeps a code block in place when the answer finishes streaming', () => {
+    const answer = assistant({ content: '```python\nprint("hi")\n```' })
+    const { container, rerender } = render(<Message message={answer} isStreaming />)
+    const pre = container.querySelector('pre')
+    rerender(<Message message={answer} />)
+    expect(container.querySelector('pre')).toBe(pre)
+  })
+
+  it('keeps a table in place when the answer finishes streaming', () => {
+    const answer = assistant({ content: ['| a | b |', '| - | - |', '| 1 | 2 |'].join('\n') })
+    const { container, rerender } = render(<Message message={answer} isStreaming />)
+    const table = container.querySelector('table')
+    rerender(<Message message={answer} />)
+    expect(container.querySelector('table')).toBe(table)
+  })
 })
 
 describe('Message code highlighting', () => {

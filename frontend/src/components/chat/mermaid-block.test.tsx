@@ -45,6 +45,20 @@ describe('a diagram in a finished answer', () => {
     expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
   })
 
+  it('keeps the placeholder from the end of the stream until the diagram is drawn', async () => {
+    const drawing = deferred<{ svg: string }>()
+    mermaid.render.mockReturnValue(drawing.promise)
+    const { container, rerender } = render(<Message message={answer} isStreaming />)
+    expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
+
+    rerender(<Message message={answer} />)
+    expect(screen.getByRole('status', { name: /building diagram/i })).toBeInTheDocument()
+
+    drawing.resolve({ svg: '<svg data-drawn="yes"></svg>' })
+    await drawnSvg(container)
+    expect(screen.queryByRole('status', { name: /building diagram/i })).toBeNull()
+  })
+
   it('shows the source when Mermaid cannot draw the diagram', async () => {
     mermaid.render.mockRejectedValue(new Error('Parse error on line 2'))
     render(<Message message={answer} />)

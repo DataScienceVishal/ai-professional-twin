@@ -1,4 +1,4 @@
-import { isValidElement, type ReactNode } from 'react'
+import { createContext, isValidElement, useContext, type ReactNode } from 'react'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { motion, useReducedMotionConfig } from 'framer-motion'
@@ -74,39 +74,39 @@ function CodeBlock({ children }: { children: ReactNode }) {
   return <pre className="scroll-frame max-w-full overflow-x-auto">{children}</pre>
 }
 
-/**
- * Renderers for the parts of an answer that plain markdown does not cover.
- * react-markdown uses each function as a component type, so a new function on
- * every render would remount every code block, table and diagram. A finished
- * answer re-renders on each chunk of the next one, so both sets are built once.
- */
-function markdownComponents(isStreaming: boolean): Components {
-  return {
-    pre({ children }) {
-      const mermaidCode = extractMermaid(children)
-      // A half-written diagram cannot parse, so it is not rendered
-      // until the stream finishes. Showing its raw source in the
-      // meantime reads as broken output rather than as progress,
-      // so hold a placeholder instead and swap in the diagram.
-      if (isStreaming) {
-        return mermaidCode ? <DiagramPending /> : <CodeBlock>{children}</CodeBlock>
-      }
-      if (mermaidCode) return <MermaidBlock code={mermaidCode} />
-      return <CodeBlock>{children}</CodeBlock>
-    },
-    // Comparison tables are wide; scroll them instead of the page.
-    table({ children }) {
-      return (
-        <div className="scroll-frame max-w-full overflow-x-auto">
-          <table>{children}</table>
-        </div>
-      )
-    },
+const StreamingContext = createContext(false)
+
+function Pre({ children }: { children?: ReactNode }) {
+  const isStreaming = useContext(StreamingContext)
+  const mermaidCode = extractMermaid(children)
+  // A half-written diagram cannot parse, so it is not rendered
+  // until the stream finishes. Showing its raw source in the
+  // meantime reads as broken output rather than as progress,
+  // so hold a placeholder instead and swap in the diagram.
+  if (isStreaming) {
+    return mermaidCode ? <DiagramPending /> : <CodeBlock>{children}</CodeBlock>
   }
+  if (mermaidCode) return <MermaidBlock code={mermaidCode} />
+  return <CodeBlock>{children}</CodeBlock>
 }
 
-const STREAMING_COMPONENTS = markdownComponents(true)
-const SETTLED_COMPONENTS = markdownComponents(false)
+// Comparison tables are wide; scroll them instead of the page.
+function Table({ children }: { children?: ReactNode }) {
+  return (
+    <div className="scroll-frame max-w-full overflow-x-auto">
+      <table>{children}</table>
+    </div>
+  )
+}
+
+/**
+ * react-markdown uses each renderer as a component type, so a new function
+ * would remount every code block, table and diagram in the answer, and a
+ * finished answer re-renders on each chunk of the next one. These keep one
+ * identity, and the streaming flag reaches them through context, so nothing
+ * remounts when an answer finishes either.
+ */
+const MARKDOWN_COMPONENTS: Components = { pre: Pre, table: Table }
 
 export function Message({ message, isStreaming = false }: MessageProps) {
   // The page's reducedMotion setting stops the rise but still runs the fade,
@@ -146,13 +146,11 @@ export function Message({ message, isStreaming = false }: MessageProps) {
         <ThinkingIndicator toolsUsed={message.toolsUsed} />
       ) : (
         <div className="prose max-w-none">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={rehypePlugins}
-            components={isStreaming ? STREAMING_COMPONENTS : SETTLED_COMPONENTS}
-          >
-            {fenceBareMermaid(message.content)}
-          </ReactMarkdown>
+          <StreamingContext.Provider value={isStreaming}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={rehypePlugins} components={MARKDOWN_COMPONENTS}>
+              {fenceBareMermaid(message.content)}
+            </ReactMarkdown>
+          </StreamingContext.Provider>
         </div>
       )}
       {message.limited && (
