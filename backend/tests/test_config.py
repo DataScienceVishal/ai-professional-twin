@@ -59,8 +59,8 @@ def test_github_quality_gates_default_on() -> None:
 
 
 def test_analytics_log_path_is_derived_beside_the_vector_store() -> None:
-    """One Railway volume is mounted at /data, so the query log has to land on
-    it too - without hardcoding /data anywhere."""
+    """The Docker image puts the vector store at /data/chromadb, so a volume
+    mounted at /data can hold the query log too, without hardcoding /data."""
     settings = Settings(chroma_persist_dir="/data/chromadb")
 
     assert settings.analytics_log_path == "/data/analytics/queries.jsonl"

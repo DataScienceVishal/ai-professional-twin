@@ -1,7 +1,7 @@
 """Durable, queryable record of what visitors actually ask.
 
-``app.routers.chat`` already emits one structlog event per request, but Railway
-log lines scroll away and cannot be aggregated, so the single most valuable
+``app.routers.chat`` already emits one structlog event per request, but the
+app cannot read the container logs back, so the single most valuable
 signal this project produces - what recruiters ask, and which questions the
 assistant fails to answer - was being thrown away. This module appends the same
 fields to a JSON Lines file on the mounted volume and aggregates them back on
@@ -205,7 +205,7 @@ class QueryAnalytics:
     def _rotate_if_full(self) -> None:
         """Cap the log at ``max_bytes``, keeping a single ``.1`` backup.
 
-        The Railway volume is small and this file only ever grows. Two
+        This file only ever grows, so with no cap it would fill its volume. Two
         generations keeps recent history without pulling in a log shipper; the
         older backup is dropped on the next rotation.
         """
