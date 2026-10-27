@@ -15,11 +15,18 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    if (input.trim() && !disabled) {
-      onSend(input.trim())
-      setInput('')
-      requestAnimationFrame(() => inputRef.current?.focus())
+    if (disabled) return
+    const question = input.trim()
+    // Ask stays enabled with nothing typed, so the sheet shows its magenta
+    // action at rest instead of a faded one; pressed then, it sends nothing
+    // and leaves the visitor in the field.
+    if (!question) {
+      inputRef.current?.focus()
+      return
     }
+    onSend(question)
+    setInput('')
+    requestAnimationFrame(() => inputRef.current?.focus())
   }
 
   return (
@@ -42,9 +49,8 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
           type="button"
           onClick={(event) => {
             onStop()
-            // This button turns into a disabled Ask, which would drop focus
-            // to the top of the page. A keyboard press (detail 0) hands focus
-            // back to the field; a tap leaves it, so a phone keeps its
+            // A keyboard press (detail 0) hands focus back to the field for
+            // the next question; a tap leaves it, so a phone keeps its
             // keyboard down.
             if (event.detail === 0) inputRef.current?.focus()
           }}
@@ -55,7 +61,7 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
       ) : (
         <button
           type="submit"
-          disabled={disabled || !input.trim()}
+          disabled={disabled}
           className="min-h-11 shrink-0 bg-route px-6 font-semibold tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           Ask

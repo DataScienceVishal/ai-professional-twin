@@ -15,8 +15,28 @@ describe('InputBar', () => {
     expect(field).toHaveValue('')
   })
 
-  it('refuses an empty question', () => {
-    render(<InputBar onSend={() => {}} />)
+  it('keeps Ask enabled with nothing typed, and moves focus to the field instead of sending', () => {
+    const onSend = vi.fn()
+    render(<InputBar onSend={onSend} />)
+    const ask = screen.getByRole('button', { name: 'Ask' })
+    expect(ask).toBeEnabled()
+
+    fireEvent.click(ask)
+
+    expect(onSend).not.toHaveBeenCalled()
+    expect(screen.getByRole('textbox', { name: 'Ask about his record' })).toHaveFocus()
+  })
+
+  it('sends nothing for a question that is only spaces', () => {
+    const onSend = vi.fn()
+    render(<InputBar onSend={onSend} />)
+    fireEvent.change(screen.getByRole('textbox', { name: 'Ask about his record' }), { target: { value: '   ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Ask' }))
+    expect(onSend).not.toHaveBeenCalled()
+  })
+
+  it('disables Ask while an answer is written if no Stop is offered', () => {
+    render(<InputBar onSend={() => {}} disabled />)
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
   })
 
