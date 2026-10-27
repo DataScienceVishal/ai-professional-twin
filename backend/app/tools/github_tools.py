@@ -78,6 +78,7 @@ def create_github_tools(
                         "topics": repo.get("topics", []),
                         "url": repo["html_url"],
                         "last_updated": repo.get("updated_at", ""),
+                        "last_pushed": repo.get("pushed_at", ""),
                     }
                 )
         return json.dumps({"error": f"Repository '{repo_name}' not found"})
@@ -100,7 +101,9 @@ def create_github_tools(
             if repo.get("pushed_at", "") >= since
         ]
         recent.sort(key=lambda r: r["last_pushed"], reverse=True)
-        return json.dumps({"recent_repos": recent[:10], "period_days": days})
+        return json.dumps(
+            {"total_in_period": len(recent), "recent_repos": recent[:10], "period_days": days}
+        )
 
     return {
         "search_repos": search_repos,
