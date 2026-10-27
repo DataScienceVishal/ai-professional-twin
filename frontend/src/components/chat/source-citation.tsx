@@ -22,10 +22,9 @@ export function SourceCitation({ source }: SourceCitationProps) {
         type="button"
         aria-pressed={isOpen}
         onClick={() => setFocused(isOpen ? null : source)}
-        // A note can carry several of these, so a full 44px target would turn
-        // the reference row into the bulk of the note. 36px on touch screens
-        // clears WCAG 2.5.8; `lg` and up is mouse-driven.
-        className="min-h-9 min-w-0 px-2.5 text-left break-words hover:bg-work aria-pressed:bg-survey aria-pressed:text-paper lg:min-h-0 lg:py-1"
+        // 44px on touch screens, as everywhere below `lg`; from `lg` the page is mouse-driven.
+        // Forced colours drop the pressed fill, so an underline marks it there.
+        className="min-h-11 min-w-0 px-2.5 text-left break-words hover:bg-work aria-pressed:bg-survey aria-pressed:text-paper forced-colors:aria-pressed:underline lg:min-h-0 lg:py-1"
       >
         {displayText}
       </button>
@@ -35,7 +34,7 @@ export function SourceCitation({ source }: SourceCitationProps) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Open ${displayText} in a new tab`}
-          className="flex min-h-9 shrink-0 items-center border-l border-survey/50 px-2 hover:bg-work lg:min-h-0"
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center border-l border-survey/50 px-2 hover:bg-work lg:min-h-0 lg:min-w-0"
         >
           <svg className="h-3 w-3" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
             <path d="M3.75 2h3.5a.75.75 0 010 1.5h-3.5a1.25 1.25 0 00-1.25 1.25v7.5c0 .69.56 1.25 1.25 1.25h7.5c.69 0 1.25-.56 1.25-1.25v-3.5a.75.75 0 011.5 0v3.5A2.75 2.75 0 0111.25 15h-7.5A2.75 2.75 0 011 12.25v-7.5A2.75 2.75 0 013.75 2z" />

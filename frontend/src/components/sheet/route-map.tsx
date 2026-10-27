@@ -1,4 +1,4 @@
-import { FULL_TIME_FROM, FULL_TIME_LABEL } from '../../lib/constants'
+import { FULL_TIME_FROM, FULL_TIME_LABEL, FULL_TIME_SOURCE } from '../../lib/constants'
 import { sourceLabel } from '../../lib/source-label'
 import {
   entriesForSource,
@@ -8,7 +8,7 @@ import {
   type SheetRecord,
   type Track,
 } from '../../lib/timeline'
-import { useSheet } from './sheet-context'
+import { sameSource, useSheet } from './sheet-context'
 
 interface MapProps {
   record: SheetRecord
@@ -96,10 +96,13 @@ function FeatureLabel({ record, entry, above }: { record: SheetRecord; entry: Re
   )
 }
 
-function Dot({ left, top, solid }: { left: number; top: number; solid: boolean }) {
+function Dot({ left, top, solid, marker, lit }: { left: number; top: number; solid: boolean; marker: string; lit?: boolean }) {
   return (
     <span
-      className={`absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-route ${
+      data-marker={marker}
+      data-dim
+      data-lit={lit || undefined}
+      className={`route-marker absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-route ${
         solid ? 'bg-route' : 'bg-paper'
       }`}
       style={{ left: `${left}%`, top: `${top}%` }}
@@ -107,15 +110,19 @@ function Dot({ left, top, solid }: { left: number; top: number; solid: boolean }
   )
 }
 
-function MarkerLabel({ left, top, label, track }: { left: number; top: number; label: string; track: Track }) {
+/**
+ * A marker's label takes a margin row of its own, on bare paper, so wider text
+ * spacing cannot push it into the labels inside a band (WCAG 1.4.12).
+ */
+function MarkerLabel({ left, top, label, lit }: { left: number; top: string; label: string; lit?: boolean }) {
   // Past 85% of the width the label ends at its marker, so it never runs off the sheet.
   const shift = left > 85 ? '-translate-x-full' : '-translate-x-1/2'
   return (
     <span
-      className={`absolute ${shift} whitespace-nowrap pt-3 text-xs font-semibold uppercase tracking-[0.14em] text-route`}
-      style={{ left: `${left}%`, top: `${top}%` }}
+      className={`route-marker absolute ${shift} whitespace-nowrap text-xs font-semibold uppercase tracking-[0.14em] text-route`}
+      style={{ left: `${left}%`, top }}
     >
-      <span data-knockout={track} className={`px-1 ${KNOCKOUT[track]}`}>
+      <span data-knockout="paper" data-lit={lit || undefined} className="bg-paper px-1">
         {label}
       </span>
     </span>
@@ -128,6 +135,9 @@ function MarkerLabel({ left, top, label, track }: { left: number; top: number; l
  * lets the graphics recede never fades a label.
  */
 export function RouteMap({ record, now, className = '' }: MapProps) {
+  const { focused } = useSheet()
+  // The recorded answer's source is where the full-time date comes from, so opening it lights that marker.
+  const fullTimeLit = sameSource(focused, FULL_TIME_SOURCE)
   const route = routePoints(record, now)
   const here = route[route.length - 1]
   // "You are here" is the visitor's date, so it shows even before any entry has started.
@@ -170,9 +180,14 @@ export function RouteMap({ record, now, className = '' }: MapProps) {
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
-          <RouteLine points={line} width={4} />
+          <g data-dim>
+            <RouteLine points={line} width={4} />
+          </g>
           {beforeFullTime && (
             <line
+              data-marker="planned"
+              data-dim
+              data-lit={fullTimeLit || undefined}
               x1={today}
               y1={centre(hereTrack)}
               x2={planned}
@@ -184,8 +199,8 @@ export function RouteMap({ record, now, className = '' }: MapProps) {
             />
           )}
         </svg>
-        <Dot left={today} top={centre(hereTrack)} solid />
-        <Dot left={planned} top={centre('work')} solid={false} />
+        <Dot left={today} top={centre(hereTrack)} solid marker="today" />
+        <Dot left={planned} top={centre('work')} solid={!beforeFullTime} marker="full-time" lit={fullTimeLit} />
       </div>
       <div className="absolute inset-0">
         <div className="absolute inset-0 flex">
@@ -209,8 +224,14 @@ export function RouteMap({ record, now, className = '' }: MapProps) {
             .filter((entry) => entry.track === track)
             .map((entry, i) => <FeatureLabel key={entry.id} record={record} entry={entry} above={i % 2 === 1} />),
         )}
-        <MarkerLabel left={today} top={centre(hereTrack)} label="You are here" track={hereTrack} />
-        <MarkerLabel left={planned} top={centre('work')} label={FULL_TIME_LABEL} track="work" />
+        {/* The year row above is one 16px line of text-xs; this row starts just under it. */}
+        <MarkerLabel left={today} top="1.125rem" label="You are here" />
+        <MarkerLabel
+          left={planned}
+          top={`calc(${BAND.work.top + BAND.work.height}% + 2px)`}
+          label={FULL_TIME_LABEL}
+          lit={fullTimeLit}
+        />
       </div>
     </div>
   )
@@ -260,11 +281,9 @@ export function RecordStrip({ record, now, className = '' }: MapProps) {
       </div>
       <div className="min-w-0 flex-1 space-y-3">
         {focused && lit.size === 0 && (
-          <div data-lit className="border-l-[3px] border-survey py-1 pl-2 pr-2 text-sm">
-            <span className="sheet-label block">Open source</span>
-            <span className="block break-words">{sourceLabel(focused, trailing)}</span>
-            <span className="block text-muted">Not tied to a date on the record.</span>
-          </div>
+          <p data-lit className="py-1 pl-2 pr-2 text-sm break-words">
+            {`${sourceLabel(focused, trailing)} is not tied to a date on the record.`}
+          </p>
         )}
         {/* Safari drops list semantics when list-style is none. This list is the map's only text equivalent. */}
         <ol role="list" aria-label="Dated record" className="space-y-1 text-sm">
@@ -272,18 +291,17 @@ export function RecordStrip({ record, now, className = '' }: MapProps) {
             <li
               key={entry.id}
               data-lit={lit.has(entry.id) || undefined}
-              className={`border-l-[3px] py-1 pl-2 pr-2 ${lit.has(entry.id) ? 'border-survey font-semibold' : 'border-transparent'}`}
+              data-track={entry.track}
+              className={`py-1 pl-2 pr-2 ${lit.has(entry.id) ? 'font-semibold' : ''}`}
             >
-              <span className="sheet-label block">
-                {TRACK_NAMES[entry.track]} · {entry.dates}
-              </span>
               <span className="block break-words">{entry.title}</span>
+              <span className="block text-xs text-muted">{`${TRACK_NAMES[entry.track]} · ${entry.dates}`}</span>
             </li>
           ))}
           {record.unplotted.map((item, index) => (
-            <li key={`undated-${index}`} className="py-1 pl-2 pr-2 text-muted">
-              <span className="sheet-label block">Undated · {item.dates}</span>
+            <li key={`undated-${index}`} className="py-1 pl-2 pr-2">
               <span className="block break-words">{item.title}</span>
+              <span className="block text-xs text-muted">{`Undated · ${item.dates}`}</span>
             </li>
           ))}
         </ol>

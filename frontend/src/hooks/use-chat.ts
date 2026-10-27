@@ -23,6 +23,9 @@ const UNAVAILABLE_ERROR =
  */
 const CONTENT_REJECTED_STATUSES = new Set([413, 422])
 
+/** What the backend sends with a turn its daily budget refused. */
+const BUDGET_EXHAUSTED_CODE = 'budget_exhausted'
+
 function describeError(error: unknown): string {
   // A status code means the backend answered, so "could not reach it" would be
   // a lie - and it reads as a network blip, which invites a retry that sends
@@ -122,10 +125,12 @@ export function useChat() {
             sources = event.sources
           } else if (event.type === 'error') {
             streamError = event.message || GENERIC_ERROR
+            const limited = event.code === BUDGET_EXHAUSTED_CODE
             console.error('[chat] backend reported an error:', event.message)
             patchLast({
               content: fullContent ? `${fullContent}\n\n${streamError}` : streamError,
               isError: true,
+              ...(limited ? { limited } : {}),
             })
           } else if (event.type === 'done') {
             patchLast({
@@ -146,7 +151,8 @@ export function useChat() {
           return
         }
         console.error('[chat] streaming failed:', error)
-        patchLast({ content: describeError(error), isError: true })
+        const limited = error instanceof ChatRequestError && error.status === 429
+        patchLast({ content: describeError(error), isError: true, ...(limited ? { limited } : {}) })
       } finally {
         if (abortRef.current === controller) {
           abortRef.current = null

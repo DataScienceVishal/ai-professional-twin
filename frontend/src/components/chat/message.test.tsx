@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MotionConfig } from 'framer-motion'
 import { describe, expect, it } from 'vitest'
 import { Message } from './message'
+import { CONTACT_MAILTO } from '../../lib/constants'
 import type { Message as MessageType } from '../../lib/types'
 
 function assistant(partial: Partial<MessageType> = {}): MessageType {
@@ -58,6 +59,37 @@ describe('Message failure state', () => {
   })
 })
 
+describe('Message stopped and limited states', () => {
+  it('says an answer was stopped before any text arrived', () => {
+    render(<Message message={assistant()} />)
+    expect(screen.getByText('Stopped before an answer arrived.')).toBeInTheDocument()
+  })
+
+  it('keeps the thinking line, not the stopped line, while the answer is still on its way', () => {
+    render(<Message message={assistant()} isStreaming />)
+    expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
+    expect(screen.getByRole('status')).toBeInTheDocument()
+  })
+
+  it('does not call a failed turn stopped, even one that carries no text', () => {
+    render(<Message message={assistant({ isError: true })} />)
+    expect(screen.queryByText('Stopped before an answer arrived.')).toBeNull()
+    expect(screen.getByRole('alert')).toHaveTextContent('Could not answer')
+  })
+
+  it('points to email after the safe message when a usage limit refused the turn', () => {
+    render(<Message message={assistant({ content: 'Rate limit exceeded. Try again later.', isError: true, limited: true })} />)
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('Rate limit exceeded. Try again later.')
+    expect(within(alert).getByRole('link', { name: 'Email' })).toHaveAttribute('href', CONTACT_MAILTO)
+  })
+
+  it('offers no email line for other failures', () => {
+    render(<Message message={assistant({ content: 'The assistant backend ran into a problem.', isError: true })} />)
+    expect(screen.queryByRole('link', { name: 'Email' })).toBeNull()
+  })
+})
+
 describe('Message mobile overflow guards', () => {
   it('puts code blocks in their own horizontal scroller', () => {
     const code = '```python\n' + `x = "${'a'.repeat(200)}"\n` + '```'
@@ -73,6 +105,12 @@ describe('Message mobile overflow guards', () => {
     const { container } = render(<Message message={assistant({ content: table })} />)
     const wrapper = container.querySelector('table')?.parentElement
     expect(wrapper?.className).toContain('overflow-x-auto')
+    expect(wrapper).toHaveClass('scroll-frame')
+  })
+
+  it('gives code blocks the thin, muted scrollbar the sheet uses', () => {
+    const { container } = render(<Message message={assistant({ content: '```python\nprint("hi")\n```' })} />)
+    expect(container.querySelector('pre')).toHaveClass('scroll-frame')
   })
 
   it('lets long unbroken strings break inside the answer', () => {
@@ -116,6 +154,8 @@ describe('Message on the sheet', () => {
   it('lists tool activity as plain log lines', () => {
     render(<Message message={assistant({ content: 'Done.', toolsUsed: [{ tool: 'search_repos', summary: '3 repos' }] })} />)
     expect(screen.getByRole('list', { name: 'Tools used' })).toHaveTextContent('Searched GitHub')
+    // Safari drops list semantics from a list styled without markers.
+    expect(screen.getByRole('list', { name: 'Tools used' })).toHaveAttribute('role', 'list')
   })
 
   it('stops marking a tool as running once the answer has stopped streaming', () => {

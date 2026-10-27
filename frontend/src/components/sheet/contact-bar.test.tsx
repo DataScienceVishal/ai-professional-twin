@@ -17,7 +17,7 @@ describe('ContactBar', () => {
     }
   })
 
-  it('hides on desktop only while the title panel is on screen', () => {
+  it('hides on desktop unless it is asked to show there', () => {
     const { rerender } = render(<ContactBar showOnDesktop={false} />)
     expect(screen.getByRole('navigation', { name: 'Contact' }).className).toContain('lg:hidden')
 

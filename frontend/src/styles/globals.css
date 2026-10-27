@@ -42,6 +42,16 @@ body,
   outline-offset: 2px;
 }
 
+/* The browser's own surfaces, drawn from the sheet's palette rather than left at their defaults. */
+::selection {
+  background-color: var(--color-grid);
+  color: var(--color-ink);
+}
+
+:root {
+  caret-color: var(--color-ink);
+}
+
 /*
  * The contact bar sits against the viewport's top edge, which would clip a
  * ring drawn outside its links, so their rings are drawn inside instead.
@@ -62,6 +72,12 @@ body,
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Boxes that scroll inside the sheet: the rail, the key row at lg, code blocks and tables. */
+@utility scroll-frame {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-muted) transparent;
 }
 
 /* The double frame line a printed survey sheet carries. */
@@ -101,6 +117,21 @@ body,
   .route-reveal[data-axis='y'] {
     animation-name: route-reveal-y;
   }
+
+  /*
+   * The markers sit about 90% of the way across, which the ease-out reveal
+   * reaches some 700ms in. Filling backwards only, the fade hands opacity back
+   * to the page when it ends, so an open source can still recede today's dot.
+   */
+  .route-marker {
+    animation: route-marker-in 150ms ease-out 700ms backwards;
+  }
+}
+
+@keyframes route-marker-in {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes route-reveal-x {
@@ -123,8 +154,9 @@ body,
 
 /*
  * Opening a source brings what it points at forward. Text keeps its full
- * contrast: only the map's graphics recede, and the lit note or entry gets a
- * tint, so nothing drops below WCAG AA while a source is open.
+ * contrast: only the map's graphics recede. A lit note or label gets a thin
+ * survey-blue frame, and a lit strip entry its own track's tint, because colour
+ * marks territory, never status.
  */
 [data-graphic] [data-dim] {
   transition: opacity 150ms ease-out;
@@ -135,7 +167,17 @@ body,
 }
 
 [data-focus='on'] [data-lit]:not([data-graphic] *) {
+  box-shadow: inset 0 0 0 1px var(--color-survey);
+}
+
+[data-focus='on'] [data-lit][data-track='education']:not([data-graphic] *) {
+  background-color: var(--color-edu);
+  box-shadow: none;
+}
+
+[data-focus='on'] [data-lit][data-track='work']:not([data-graphic] *) {
   background-color: var(--color-work);
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

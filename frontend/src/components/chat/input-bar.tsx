@@ -1,6 +1,6 @@
 import { type FormEvent, useRef, useState } from 'react'
 
-/** Exported so the layer key can hand keyboard focus to the field. */
+/** Exported so the layer key and Clear chat can hand keyboard focus to the field. */
 export const ASK_FIELD_ID = 'ask'
 
 interface InputBarProps {
@@ -54,7 +54,7 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
             // keyboard down.
             if (event.detail === 0) inputRef.current?.focus()
           }}
-          className="min-h-11 shrink-0 border-[1.5px] border-ink px-5 font-semibold"
+          className="min-h-11 shrink-0 border-[1.5px] border-ink px-5 font-semibold hover:bg-wash"
         >
           Stop
         </button>
@@ -62,7 +62,7 @@ export function InputBar({ onSend, onStop, disabled }: InputBarProps) {
         <button
           type="submit"
           disabled={disabled}
-          className="min-h-11 shrink-0 bg-route px-6 font-semibold tracking-wide text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-11 shrink-0 bg-route px-6 font-semibold tracking-wide text-paper hover:brightness-95 active:brightness-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Ask
         </button>

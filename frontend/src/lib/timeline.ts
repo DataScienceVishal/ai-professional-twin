@@ -67,7 +67,7 @@ function monthStart(token: string): number | null {
 
 /**
  * Reads a `dates` string as academics.yaml and linkedin.yaml write it:
- * "March 2023 - August 2024", "Jun 2024 - Jan 2026", "2018" or
+ * "January 2026 - January 2027", "Jun 2024 - Jan 2026", "2018" or
  * "Jan 2026 - Present". An end month counts in full.
  */
 export function parseDates(

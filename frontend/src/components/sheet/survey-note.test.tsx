@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest'
 import { SurveyNote } from './survey-note'
 
 describe('SurveyNote', () => {
-  it('sets the question as the note heading under its kicker', () => {
-    render(
-      <SurveyNote kicker="Question 1" question="Who is Vishal?">
+  it('opens with the question as its heading, with no label above it', () => {
+    const { container } = render(
+      <SurveyNote question="Who is Vishal?">
         <p>An answer.</p>
       </SurveyNote>,
     )
-    expect(screen.getByText('Question 1')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Who is Vishal?' })).toBeInTheDocument()
+    expect(container.querySelector('article')?.firstElementChild?.tagName).toBe('H2')
     expect(screen.getByText('An answer.')).toBeInTheDocument()
     const note = screen.getByRole('article')
     expect(note.className).toContain('border-ink')
@@ -19,9 +19,22 @@ describe('SurveyNote', () => {
     expect(note).not.toHaveAttribute('data-lit')
   })
 
+  it('sets a dateline under the question as plain text, not a heading', () => {
+    render(
+      <SurveyNote question="Who is Vishal?" dateline="Recorded 12 Oct 2026 · career_qa.yaml, availability">
+        <p>An answer.</p>
+      </SurveyNote>,
+    )
+    const dateline = screen.getByText('Recorded 12 Oct 2026 · career_qa.yaml, availability')
+    expect(dateline.tagName).toBe('P')
+    expect(dateline).toHaveClass('text-sm', 'text-muted')
+    expect(screen.getByRole('heading', { level: 2 }).nextElementSibling).toBe(dateline)
+    expect(screen.getAllByRole('heading')).toHaveLength(1)
+  })
+
   it('turns its rule magenta while the answer is in flight', () => {
     render(
-      <SurveyNote kicker="Question 1" question="Who is Vishal?" writing>
+      <SurveyNote question="Who is Vishal?" writing>
         <p>Searching his knowledge base</p>
       </SurveyNote>,
     )
@@ -32,7 +45,7 @@ describe('SurveyNote', () => {
 
   it('reports busy only while answer text is streaming', () => {
     render(
-      <SurveyNote kicker="Question 1" question="Who is Vishal?" writing busy>
+      <SurveyNote question="Who is Vishal?" writing busy>
         <p>An</p>
       </SurveyNote>,
     )
@@ -41,7 +54,7 @@ describe('SurveyNote', () => {
 
   it('stays lit while one of its sources is open', () => {
     render(
-      <SurveyNote kicker="Question 1" question="Who is Vishal?" lit>
+      <SurveyNote question="Who is Vishal?" lit>
         <p>An answer.</p>
       </SurveyNote>,
     )
@@ -50,7 +63,7 @@ describe('SurveyNote', () => {
 
   it('lets a long unbroken question wrap instead of clipping', () => {
     render(
-      <SurveyNote kicker="Question 1" question={'https://example.com/' + 'a'.repeat(200)}>
+      <SurveyNote question={'https://example.com/' + 'a'.repeat(200)}>
         <p>An answer.</p>
       </SurveyNote>,
     )
@@ -59,7 +72,7 @@ describe('SurveyNote', () => {
 
   it('carries no dimming hook, because text keeps full contrast when a source opens', () => {
     render(
-      <SurveyNote kicker="Question 1" question="Who is Vishal?">
+      <SurveyNote question="Who is Vishal?">
         <p>An answer.</p>
       </SurveyNote>,
     )

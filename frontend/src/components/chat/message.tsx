@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import { motion, useReducedMotionConfig } from 'framer-motion'
 import { MermaidBlock } from './mermaid-block'
+import { CONTACT_MAILTO } from '../../lib/constants'
 import { fenceBareMermaid } from '../../lib/mermaid-sanitize'
 import { SourceCitation } from './source-citation'
 import { ThinkingIndicator } from './thinking-indicator'
@@ -70,7 +71,7 @@ function extractText(node: ReactNode): string {
  * drags the whole message list sideways on a phone.
  */
 function CodeBlock({ children }: { children: ReactNode }) {
-  return <pre className="max-w-full overflow-x-auto">{children}</pre>
+  return <pre className="scroll-frame max-w-full overflow-x-auto">{children}</pre>
 }
 
 /**
@@ -103,6 +104,8 @@ export function Message({ message, isStreaming = false }: MessageProps) {
   // The turn is in flight and nothing has streamed yet: show the pending state
   // instead of an empty note. The first `chunk` event removes it.
   const isPending = !isUser && isStreaming && message.content.length === 0
+  // Stop pressed before the first token leaves nothing to render, which would read as a broken note.
+  const isStopped = !isUser && !isStreaming && message.content.length === 0 && !message.isError
 
   if (isUser) return <p className="text-base">{message.content}</p>
 
@@ -118,7 +121,9 @@ export function Message({ message, isStreaming = false }: MessageProps) {
       }`}
     >
       {message.isError && <p className="sheet-label mb-1">Could not answer</p>}
-      {isPending ? (
+      {isStopped ? (
+        <p className="text-sm text-muted">Stopped before an answer arrived.</p>
+      ) : isPending ? (
         <ThinkingIndicator toolsUsed={message.toolsUsed} />
       ) : (
         <div className="prose max-w-none">
@@ -141,7 +146,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
               // Comparison tables are wide; scroll them instead of the page.
               table({ children }) {
                 return (
-                  <div className="max-w-full overflow-x-auto">
+                  <div className="scroll-frame max-w-full overflow-x-auto">
                     <table>{children}</table>
                   </div>
                 )
@@ -152,8 +157,16 @@ export function Message({ message, isStreaming = false }: MessageProps) {
           </ReactMarkdown>
         </div>
       )}
+      {message.limited && (
+        <p className="mt-2">
+          You can still reach him directly:{' '}
+          <a href={CONTACT_MAILTO} className="py-1 font-semibold text-survey underline underline-offset-2">
+            Email
+          </a>
+        </p>
+      )}
       {message.toolsUsed && message.toolsUsed.length > 0 && (
-        <ul aria-label="Tools used" className="mt-3 space-y-1 text-xs text-muted">
+        <ul role="list" aria-label="Tools used" className="mt-3 space-y-1 text-xs text-muted">
           {message.toolsUsed.map((activity, i) => (
             <ToolLine key={i} activity={activity} streaming={isStreaming} />
           ))}

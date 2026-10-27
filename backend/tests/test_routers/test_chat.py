@@ -13,6 +13,7 @@ from app.main import create_app
 from app.rag.retriever import SourceInfo
 from app.rate_limit import DailyChatBudget
 from app.routers.chat import (
+    BUDGET_EXHAUSTED_CODE,
     BUDGET_EXHAUSTED_MESSAGE,
     CHAT_QUERY_EVENT,
     STREAM_ERROR_MESSAGE,
@@ -238,10 +239,21 @@ def test_chat_refuses_politely_once_the_daily_budget_is_gone() -> None:
     # A friendly message, not a raw 500.
     assert second.status_code == 200
     assert _events(second) == [
-        {"type": "error", "message": BUDGET_EXHAUSTED_MESSAGE},
+        {"type": "error", "message": BUDGET_EXHAUSTED_MESSAGE, "code": BUDGET_EXHAUSTED_CODE},
         {"type": "done"},
     ]
     assert "tomorrow" in BUDGET_EXHAUSTED_MESSAGE
+
+
+def test_only_the_budget_refusal_carries_a_code() -> None:
+    async def retrieve(*_: Any, **__: Any) -> Any:
+        raise RuntimeError("store down")
+
+    response = TestClient(_build_app(retrieve=retrieve)).post("/chat", json=PAYLOAD)
+
+    errors = [e for e in _events(response) if e["type"] == "error"]
+    assert errors
+    assert all("code" not in e for e in errors)
 
 
 def test_budget_refusal_does_not_call_the_model() -> None:

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { ASK_FIELD_ID } from './input-bar'
 import { Message } from './message'
 import { SurveyNote } from '../sheet/survey-note'
@@ -35,6 +35,8 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
   const scrollRef = useRef<HTMLDivElement>(null)
   const railRef = useRef<HTMLDivElement>(null)
   const isAtBottom = useRef(true)
+  const wasStreaming = useRef(false)
+  const [announcement, setAnnouncement] = useState('')
   const { focused } = useSheet()
   const conversing = messages.length > 0
   const railShown = Boolean(rail)
@@ -67,6 +69,18 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
     else if (!focused) frame.scrollTop = frame.scrollHeight
   }, [focused, conversing, railShown])
 
+  // The thinking line falls silent once text starts to arrive, so nothing would
+  // tell a screen reader that the answer has finished. A failed turn has its own alert.
+  useEffect(() => {
+    if (isStreaming || messages.length === 0) {
+      setAnnouncement('')
+    } else if (wasStreaming.current) {
+      const last = messages[messages.length - 1]
+      if (last.role === 'assistant' && last.content && !last.isError) setAnnouncement('Answer ready')
+    }
+    wasStreaming.current = isStreaming
+  }, [isStreaming, messages])
+
   const handleScroll = () => {
     if (!scrollRef.current) return
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current
@@ -82,6 +96,9 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
       data-focus={focused ? 'on' : undefined}
       className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto [container-type:size]"
     >
+      <p role="status" data-testid="answer-status" className="sr-only">
+        {announcement}
+      </p>
       {messages.length === 0 ? (
         firstSheet
       ) : (
@@ -117,7 +134,6 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
               return (
                 <SurveyNote
                   key={turn.key}
-                  kicker={`Question ${n + 1}`}
                   question={turn.question}
                   writing={isStreaming && last}
                   busy={isStreaming && last && Boolean(turn.answer?.content)}
@@ -129,7 +145,7 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
             })}
           </div>
           {rail && (
-            <aside aria-label="His record" data-record className="hidden min-w-0 lg:block">
+            <aside data-record className="hidden min-w-0 lg:block">
               {/* The strip can be taller than the scroller, so this frame scrolls on its own.
                   Safari never focuses a scroll box by itself, so `tabIndex` lets the keyboard in. */}
               <div
@@ -137,7 +153,7 @@ export function ChatPanel({ messages, isStreaming, firstSheet, rail, onClear }: 
                 tabIndex={0}
                 role="group"
                 aria-label="His record"
-                className="sticky top-8 max-h-[calc(100cqh_-_4rem)] overflow-y-auto"
+                className="scroll-frame sticky top-8 max-h-[calc(100cqh_-_4rem)] overflow-y-auto"
               >
                 {rail}
               </div>

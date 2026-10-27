@@ -1,0 +1,159 @@
+<!doctype html>
+<!-- Re-render: open this file in Chrome for Testing at a 1200x630 viewport (with --allow-file-access-from-files, for the fonts), capture a PNG over CDP to ../../public/og-image.png, then run stamp_provenance.py on it. -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Share card</title>
+    <style>
+      @font-face {
+        font-family: 'Signika';
+        font-weight: 400;
+        src: url('../../node_modules/@fontsource/signika/files/signika-latin-400-normal.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Signika';
+        font-weight: 600;
+        src: url('../../node_modules/@fontsource/signika/files/signika-latin-600-normal.woff2') format('woff2');
+      }
+      :root {
+        --paper: #ffffff;
+        --ink: #1b1b1b;
+        --muted: #5b6470;
+        --grid: #c9dcef;
+        --edu: #e3f0db;
+        --work: #e4edf7;
+        --route: #c2185b;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: 'Signika', sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .sheet {
+        position: absolute;
+        inset: 24px;
+        border: 2px solid var(--ink);
+        box-shadow:
+          inset 0 0 0 6px var(--paper),
+          inset 0 0 0 7px var(--ink);
+        padding: 56px 64px 0;
+      }
+      h1 {
+        font-size: 88px;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .role {
+        margin-top: 18px;
+        font-size: 36px;
+      }
+      dl {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 10px 20px;
+        margin-top: 34px;
+        align-items: baseline;
+      }
+      dt {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      dd {
+        font-size: 28px;
+      }
+      .route {
+        position: absolute;
+        left: 9px;
+        right: 9px;
+        bottom: 9px;
+        height: 132px;
+      }
+      .band {
+        opacity: 0.8;
+      }
+      .edu {
+        fill: var(--edu);
+      }
+      .work {
+        fill: var(--work);
+      }
+      .grid {
+        stroke: var(--grid);
+        stroke-width: 1;
+      }
+      .path {
+        fill: none;
+        stroke-linejoin: round;
+      }
+      .casing {
+        stroke: var(--paper);
+        stroke-width: 12;
+      }
+      .line {
+        stroke: var(--route);
+        stroke-width: 6;
+      }
+      .leg {
+        stroke: var(--route);
+        stroke-width: 4;
+        stroke-dasharray: 8 7;
+      }
+      .here {
+        fill: var(--route);
+      }
+      .ring {
+        fill: var(--paper);
+        stroke: var(--route);
+        stroke-width: 4;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="sheet">
+      <h1>Vishal Khan</h1>
+      <p class="role">Seeking AI engineer roles · four years in data</p>
+      <dl>
+        <dt>Available</dt>
+        <dd>Full-time from January 2027 · part-time and internships now</dd>
+        <dt>Visa</dt>
+        <dd>Right to work now · no sponsorship needed to start</dd>
+      </dl>
+      <svg class="route" viewBox="0 0 1130 132" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="band edu" x="0" y="14" width="1130" height="52" />
+        <rect class="band work" x="0" y="70" width="1130" height="52" />
+        <g class="grid">
+          <line x1="94" y1="0" x2="94" y2="132" />
+          <line x1="188" y1="0" x2="188" y2="132" />
+          <line x1="282" y1="0" x2="282" y2="132" />
+          <line x1="377" y1="0" x2="377" y2="132" />
+          <line x1="471" y1="0" x2="471" y2="132" />
+          <line x1="565" y1="0" x2="565" y2="132" />
+          <line x1="659" y1="0" x2="659" y2="132" />
+          <line x1="753" y1="0" x2="753" y2="132" />
+          <line x1="847" y1="0" x2="847" y2="132" />
+          <line x1="942" y1="0" x2="942" y2="132" />
+          <line x1="1036" y1="0" x2="1036" y2="132" />
+        </g>
+        <polyline class="path casing" points="0,40 160,40 230,96 420,96 500,40 640,40 700,96 820,96 900,40 960,40" />
+        <polyline class="path line" points="0,40 160,40 230,96 420,96 500,40 640,40 700,96 820,96 900,40 960,40" />
+        <line class="leg" x1="960" y1="40" x2="1010" y2="96" />
+        <circle class="here" cx="960" cy="40" r="10" />
+        <circle class="ring" cx="1010" cy="96" r="9" />
+      </svg>
+    </main>
+  </body>
+</html>

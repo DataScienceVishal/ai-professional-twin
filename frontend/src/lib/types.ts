@@ -13,6 +13,8 @@ export interface Message {
   toolsUsed?: ToolActivity[]
   /** Set when the turn failed; rendered with error styling. */
   isError?: boolean
+  /** Set when a usage limit refused the turn: the rate limit or the daily budget. */
+  limited?: boolean
 }
 
 export interface SourceInfo {
@@ -54,6 +56,8 @@ export interface SSEDoneEvent {
 export interface SSEErrorEvent {
   type: 'error'
   message: string
+  /** `budget_exhausted` when the daily budget refused the turn. */
+  code?: string
 }
 
 export interface SSEToolStartEvent {

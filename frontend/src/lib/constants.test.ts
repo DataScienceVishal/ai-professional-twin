@@ -100,13 +100,13 @@ describe('getLayerSuggestions', () => {
     expect(getLayerSuggestions('recruiter', 1)).toEqual(RECRUITER_ACTIONS)
   })
 
-  it('shows all nine interview starters in their old order before the first question', () => {
+  it('shows all nine interview starters, in order, before the first question', () => {
     const starters = getLayerSuggestions('interview', 1)
     expect(starters).toHaveLength(9)
     expect(starters).toEqual(INTERVIEW_STARTERS)
   })
 
-  it('keeps the old interview categories in order, three questions each', () => {
+  it('groups the interview starters into three categories of three questions', () => {
     expect(getLayerSuggestions('interview', 1).map((s) => s.group)).toEqual(
       ['RAG & Retrieval', 'System Design', 'ML & AI'].flatMap((group) => [group, group, group]),
     )
@@ -135,6 +135,15 @@ describe('getLayerSuggestions', () => {
   })
 })
 
+describe('copy that dates itself', () => {
+  it('is reviewed before 5 January 2027', () => {
+    expect(
+      Date.now() < new Date(2027, 0, 5).getTime(),
+      'SHEET_FACTS, FULL_TIME_LABEL, the descriptions in index.html and EXHIBIT describe January 2027 as the future. Review them, then move this date on.',
+    ).toBe(true)
+  })
+})
+
 describe('title panel copy', () => {
   const copy = [
     ROLE_LINE,
@@ -147,7 +156,7 @@ describe('title panel copy', () => {
     for (const text of copy) expect(text).not.toMatch(/[\u2013\u2014\u2015]/)
   })
 
-  it('carries the approved role and availability lines', () => {
+  it('carries the role line and the availability fact word for word', () => {
     expect(ROLE_LINE).toBe('Seeking AI engineer roles · four years in data')
     expect(SHEET_FACTS.find((f) => f.label === 'Available')?.value).toBe(
       'Full-time from January 2027 · part-time and internships now',

@@ -81,6 +81,15 @@ describe('InputBar', () => {
     expect(screen.getByRole('textbox', { name: 'Ask about his record' })).not.toHaveFocus()
   })
 
+  it('sets Ask in paper on magenta and answers the pointer on Ask and Stop', () => {
+    const { rerender } = render(<InputBar onSend={() => {}} onStop={() => {}} />)
+    const ask = screen.getByRole('button', { name: 'Ask' })
+    expect(ask).toHaveClass('bg-route', 'text-paper', 'hover:brightness-95', 'active:brightness-90')
+    expect(ask).not.toHaveClass('text-white')
+    rerender(<InputBar onSend={() => {}} onStop={() => {}} disabled />)
+    expect(screen.getByRole('button', { name: 'Stop' })).toHaveClass('hover:bg-wash')
+  })
+
   it('keeps the field at 16px at every width, so iOS never zooms', () => {
     render(<InputBar onSend={() => {}} />)
     const field = screen.getByRole('textbox', { name: 'Ask about his record' })

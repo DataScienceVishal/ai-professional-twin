@@ -40,6 +40,9 @@ BUDGET_EXHAUSTED_MESSAGE = (
     "This assistant has reached its daily usage limit. Please try again "
     "tomorrow, or use the contact link to reach Vishal directly."
 )
+# Sent with the budget refusal so the page can offer email without reading the
+# wording: on the wire the refusal is otherwise shaped like any failed answer.
+BUDGET_EXHAUSTED_CODE = "budget_exhausted"
 
 
 def init_chat_dependencies(
@@ -97,8 +100,8 @@ def _sse(payload: dict[str, Any]) -> dict[str, str]:
     return {"data": json.dumps(payload)}
 
 
-async def _refusal_stream(message: str) -> AsyncGenerator[dict[str, str]]:
-    yield _sse({"type": "error", "message": message})
+async def _refusal_stream(message: str, code: str) -> AsyncGenerator[dict[str, str]]:
+    yield _sse({"type": "error", "message": message, "code": code})
     yield _sse({"type": "done"})
 
 
@@ -129,7 +132,7 @@ async def chat(
             await analytics.record(
                 QueryRecord(query=last_message, mode=mode, outcome=OUTCOME_REFUSED)
             )
-        return EventSourceResponse(_refusal_stream(BUDGET_EXHAUSTED_MESSAGE))
+        return EventSourceResponse(_refusal_stream(BUDGET_EXHAUSTED_MESSAGE, BUDGET_EXHAUSTED_CODE))
 
     async def event_stream() -> AsyncGenerator[dict[str, str]]:
         started = time.perf_counter()

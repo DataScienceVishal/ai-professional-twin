@@ -163,6 +163,52 @@ describe('useChat', () => {
     expect(result.current.messages[1].content).toMatch(/still starting up/)
   })
 
+  it('marks a turn refused by the rate limit, from its 429 status', async () => {
+    mockFetch(errorResponse(429, { detail: 'Rate limit exceeded. Try again later.' }))
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('hello')
+    })
+
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    expect(result.current.messages[1]).toMatchObject({ isError: true, limited: true })
+  })
+
+  it('marks a turn refused by the daily budget, from the code on its error event', async () => {
+    mockFetch(
+      sseResponse([
+        'data: {"type":"error","message":"Any wording at all.","code":"budget_exhausted"}\n\n',
+        'data: {"type":"done"}\n\n',
+      ]),
+    )
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('hello')
+    })
+
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    expect(result.current.messages[1]).toMatchObject({ content: 'Any wording at all.', isError: true, limited: true })
+  })
+
+  it('does not mark other failures as a usage limit', async () => {
+    mockFetch(sseResponse(['data: {"type":"error","message":"Something went wrong."}\n\n', 'data: {"type":"done"}\n\n']))
+    const { result } = renderHook(() => useChat())
+    await act(async () => {
+      await result.current.sendMessage('hello')
+    })
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    expect(result.current.messages[1].isError).toBe(true)
+    expect(result.current.messages[1].limited).toBeFalsy()
+
+    mockFetch(errorResponse(503, { detail: 'The assistant is still starting up.' }))
+    await act(async () => {
+      await result.current.sendMessage('again')
+    })
+    await waitFor(() => expect(result.current.isStreaming).toBe(false))
+    expect(result.current.messages[3].isError).toBe(true)
+    expect(result.current.messages[3].limited).toBeFalsy()
+  })
+
   it('does not replay an error bubble back to the model as context', async () => {
     // The failed turn leaves an apology in the transcript; it is a UI notice,
     // not something the assistant said.
