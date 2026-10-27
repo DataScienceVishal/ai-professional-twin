@@ -155,6 +155,8 @@ Generation streams over SSE. The model sees at most the last six turns of the co
 
 **Cost controls.** A per-IP `slowapi` limit (10 requests/minute on `/chat`, 60/minute elsewhere) stops one visitor hammering the endpoint, and a global daily completion budget caps the number of answers across all visitors. Each answer has a ceiling too: the history trim above bounds what the model reads, and the last call offers no tools. Exhausting the budget returns an SSE refusal with a `budget_exhausted` code, which the page follows with an email link, instead of a 500. The budget counter is in process memory, so with multiple replicas the effective cap is `budget × replicas`. That is documented in the code, and fine for a single-instance personal site.
 
+Every request reaches the container from the Container Apps ingress, so whoever the visitor is, the TCP peer is one of a few internal ingress addresses. The access log for the 30 days to 27 October 2026 shows nothing else, so a limit keyed on the TCP peer put every visitor in the same few allowances. Trusting `X-Forwarded-For` outright would be worse: the API host is public, and a caller can write any address into the header. The limiter believes the header only as far as a known hop vouches for it. The ingress appends the address that connected to it, so the last entry counts when the TCP peer is in `TRUSTED_PROXIES`. On the `/api` rewrite Vercel overwrites the header with the visitor's address, so when a Vercel routing rule adds an `X-Origin-Secret` matching `ORIGIN_SECRET`, the entry before the last counts instead. The image runs uvicorn with `--no-proxy-headers`, so uvicorn's own handling, which trusts proxies by address alone, cannot swap the client address before the limiter reads it.
+
 **Temperature is omitted for GPT-5-family models.** GPT-5 and o-series deployments reject any non-default temperature with an HTTP 400, and take the output cap as `max_completion_tokens` rather than `max_tokens`. The client detects the family from the model name and adjusts both, with `LLM_SEND_TEMPERATURE` available to override the heuristic when a deployment disagrees.
 
 **The frontend fails loudly on a misrouted API.** Vercel reserves `/api/*` for serverless functions, so a missing or mis-ordered rewrite makes every API call return `index.html` with a 200. The SSE parser would then yield zero events and the chat would produce a silent empty reply. `streamChat` asserts the response `content-type` is `text/event-stream` and throws a message naming the likely cause instead.
@@ -235,6 +237,8 @@ Backend variables are read by [`backend/app/config.py`](backend/app/config.py) f
 | `PUBLIC_BASE_URL` | `http://localhost:8000` | Public origin of *this* API, used to build resume links |
 | `RATE_LIMIT` | `60/minute` | Default per-IP limit for read-only endpoints |
 | `CHAT_RATE_LIMIT` | `10/minute` | Per-IP limit for `/chat` |
+| `TRUSTED_PROXIES` | *(empty)* | Comma-separated proxy addresses or networks whose `X-Forwarded-For` entries the per-IP limits believe. Empty trusts none. On Azure, set it to the ingress range, `100.100.0.0/17` |
+| `ORIGIN_SECRET` | *(empty)* | The value Vercel sends as `X-Origin-Secret` on `/api` requests. When it matches, the limits count the visitor's address rather than Vercel's. Read only when the TCP peer is in `TRUSTED_PROXIES`. At least 32 ASCII characters, or the app will not start |
 | `DAILY_CHAT_BUDGET` | `500` | Global completions per UTC day, across all visitors |
 | `LOG_LEVEL` | `info` | structlog level |
 

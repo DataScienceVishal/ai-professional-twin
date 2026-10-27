@@ -1,3 +1,8 @@
+from ipaddress import IPv4Network
+
+import pytest
+from pydantic import ValidationError
+
 from app.config import Settings, get_settings
 
 
@@ -49,6 +54,25 @@ def test_profile_repo_is_denylisted_by_default() -> None:
 def test_github_exclude_repos_split_from_csv() -> None:
     settings = Settings(github_exclude_repos="my-ai-resume, DataScienceVishal ,")
     assert settings.github_exclude_repos == ["my-ai-resume", "DataScienceVishal"]
+
+
+def test_trusted_proxies_split_from_csv() -> None:
+    settings = Settings(trusted_proxies="100.100.0.0/17, 10.0.0.1 ,")
+
+    assert settings.trusted_proxies == [IPv4Network("100.100.0.0/17"), IPv4Network("10.0.0.1/32")]
+
+
+def test_a_short_origin_secret_is_rejected() -> None:
+    """A secret short enough to guess would let a direct caller pick their own key."""
+    with pytest.raises(ValidationError, match="32 ASCII characters"):
+        Settings(origin_secret="x" * 31)
+
+
+def test_an_origin_secret_that_cannot_be_encoded_is_rejected() -> None:
+    """Bytes that are not UTF-8 reach os.environ as lone surrogates. Encoding
+    one for the comparison would fail every forwarded request, not the boot."""
+    with pytest.raises(ValidationError, match="32 ASCII characters"):
+        Settings(origin_secret="\udcff" * 40)
 
 
 def test_github_quality_gates_default_on() -> None:

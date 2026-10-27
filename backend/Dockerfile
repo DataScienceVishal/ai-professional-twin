@@ -19,4 +19,6 @@ ENV CHROMA_PERSIST_DIR=/data/chromadb
 
 EXPOSE 8000
 
-CMD uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000}
+# app/rate_limit.py reads X-Forwarded-For itself, only as far as a known proxy
+# vouches for it. uvicorn's proxy headers would swap the client address first.
+CMD uvicorn app.main:create_app --factory --host 0.0.0.0 --port ${PORT:-8000} --no-proxy-headers
