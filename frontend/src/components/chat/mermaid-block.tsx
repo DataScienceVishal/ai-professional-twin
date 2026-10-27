@@ -1,53 +1,61 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Mermaid } from 'mermaid'
+import type { Mermaid, MermaidConfig } from 'mermaid'
 import { sanitizeMermaid } from '../../lib/mermaid-sanitize'
+
+const MERMAID_CONFIG: MermaidConfig = {
+  startOnLoad: false,
+  // Diagram source is model output, and the model sees retrieved context that
+  // includes automatically ingested GitHub READMEs - so it is not trusted
+  // input. 'strict' makes Mermaid run its own DOMPurify pass over the SVG it
+  // returns and disables click handlers and inline script, which is what makes
+  // injecting that SVG below safe. Set explicitly rather than relying on the
+  // library default staying this way.
+  securityLevel: 'strict',
+  theme: 'base',
+  themeVariables: {
+    primaryColor: '#e4edf7',
+    primaryTextColor: '#1b1b1b',
+    primaryBorderColor: '#2b6cb0',
+    lineColor: '#2b6cb0',
+    secondaryColor: '#e3f0db',
+    tertiaryColor: '#ffffff',
+    background: '#ffffff',
+    mainBkg: '#e4edf7',
+    nodeBorder: '#2b6cb0',
+    clusterBkg: '#ffffff',
+    clusterBorder: '#2b6cb0',
+    titleColor: '#1b1b1b',
+    edgeLabelBackground: '#ffffff',
+    nodeTextColor: '#1b1b1b',
+    textColor: '#1b1b1b',
+    labelTextColor: '#5b6470',
+    noteBkgColor: '#e4edf7',
+    noteBorderColor: '#2b6cb0',
+    noteTextColor: '#1b1b1b',
+    activationBorderColor: '#2b6cb0',
+    fontFamily: 'Signika, system-ui, sans-serif',
+    fontSize: '13px',
+  },
+}
 
 let mermaidReady: Promise<Mermaid> | undefined
 
 /**
  * Mermaid is large and only an answer with a diagram needs it, so it loads on
  * first use rather than with the page. Every caller shares the one import, so
- * the settings below are applied once.
+ * the settings above are applied once.
  */
 function loadMermaid(): Promise<Mermaid> {
-  mermaidReady ??= import('mermaid').then(({ default: mermaid }) => {
-    mermaid.initialize({
-      startOnLoad: false,
-      // Diagram source is model output, and the model sees retrieved context that
-      // includes automatically ingested GitHub READMEs - so it is not trusted
-      // input. 'strict' makes Mermaid run its own DOMPurify pass over the SVG it
-      // returns and disables click handlers and inline script, which is what makes
-      // injecting that SVG below safe. Set explicitly rather than relying on the
-      // library default staying this way.
-      securityLevel: 'strict',
-      theme: 'base',
-      themeVariables: {
-        primaryColor: '#e4edf7',
-        primaryTextColor: '#1b1b1b',
-        primaryBorderColor: '#2b6cb0',
-        lineColor: '#2b6cb0',
-        secondaryColor: '#e3f0db',
-        tertiaryColor: '#ffffff',
-        background: '#ffffff',
-        mainBkg: '#e4edf7',
-        nodeBorder: '#2b6cb0',
-        clusterBkg: '#ffffff',
-        clusterBorder: '#2b6cb0',
-        titleColor: '#1b1b1b',
-        edgeLabelBackground: '#ffffff',
-        nodeTextColor: '#1b1b1b',
-        textColor: '#1b1b1b',
-        labelTextColor: '#5b6470',
-        noteBkgColor: '#e4edf7',
-        noteBorderColor: '#2b6cb0',
-        noteTextColor: '#1b1b1b',
-        activationBorderColor: '#2b6cb0',
-        fontFamily: 'Signika, system-ui, sans-serif',
-        fontSize: '13px',
-      },
+  mermaidReady ??= import('mermaid')
+    .then(({ default: mermaid }) => {
+      mermaid.initialize(MERMAID_CONFIG)
+      return mermaid
     })
-    return mermaid
-  })
+    .catch((error: unknown) => {
+      // Drop the failed import, so the next diagram tries again.
+      mermaidReady = undefined
+      throw error
+    })
   return mermaidReady
 }
 
