@@ -62,7 +62,7 @@ function loadMermaid(): Promise<Mermaid> {
 /**
  * Stands in for a diagram until Mermaid has drawn it: while its source is
  * still streaming, and while Mermaid loads and draws. Sized to roughly a small
- * flowchart so the surrounding text does not jump when the real SVG replaces it.
+ * flowchart, so the text below moves less when the real SVG replaces it.
  */
 export function DiagramPending() {
   // A diagram is on its way, so fetch Mermaid while the rest of it streams.
@@ -77,7 +77,7 @@ export function DiagramPending() {
       aria-label="Building diagram"
       className="my-3 flex h-32 max-w-full items-center justify-center gap-2 border border-dashed border-ink/30 text-xs text-muted"
     >
-      <svg className="h-3.5 w-3.5 motion-safe:animate-pulse" viewBox="0 0 16 16" fill="currentColor">
+      <svg aria-hidden="true" className="h-3.5 w-3.5 motion-safe:animate-pulse" viewBox="0 0 16 16" fill="currentColor">
         <rect x="1" y="1" width="6" height="4" rx="1" />
         <rect x="9" y="6" width="6" height="4" rx="1" />
         <rect x="1" y="11" width="6" height="4" rx="1" />
