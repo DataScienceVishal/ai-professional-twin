@@ -1,9 +1,9 @@
 import { isValidElement, type ReactNode } from 'react'
 import ReactMarkdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import rehypeHighlight from 'rehype-highlight'
 import { motion, useReducedMotionConfig } from 'framer-motion'
 import { DiagramPending, MermaidBlock } from './mermaid-block'
+import { useHighlighter } from '../../hooks/use-highlighter'
 import { CONTACT_MAILTO } from '../../lib/constants'
 import { fenceBareMermaid } from '../../lib/mermaid-sanitize'
 import { SourceCitation } from './source-citation'
@@ -112,6 +112,8 @@ export function Message({ message, isStreaming = false }: MessageProps) {
   // The page's reducedMotion setting stops the rise but still runs the fade,
   // and under reduced motion nothing may animate, so the answer starts in place.
   const reduceMotion = useReducedMotionConfig()
+  // A question shows as plain text, so only an answer can need the highlighter.
+  const rehypePlugins = useHighlighter(message.role === 'user' ? '' : message.content)
   if (message.role === 'user') return <p className="text-base">{message.content}</p>
 
   // The turn is in flight and nothing has streamed yet: show the pending state
@@ -146,7 +148,7 @@ export function Message({ message, isStreaming = false }: MessageProps) {
         <div className="prose max-w-none">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
+            rehypePlugins={rehypePlugins}
             components={isStreaming ? STREAMING_COMPONENTS : SETTLED_COMPONENTS}
           >
             {fenceBareMermaid(message.content)}

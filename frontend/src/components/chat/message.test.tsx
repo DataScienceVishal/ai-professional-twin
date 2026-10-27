@@ -157,6 +157,23 @@ describe('Message mobile overflow guards', () => {
   })
 })
 
+describe('Message code highlighting', () => {
+  it('highlights a fenced code block that names its language', async () => {
+    const { container } = render(<Message message={assistant({ content: '```python\nprint("hi")\n```' })} />)
+    await waitFor(() => expect(container.querySelector('code.hljs .hljs-string')).toHaveTextContent('"hi"'))
+  })
+
+  it('highlights a later answer from its first render once the highlighter has loaded', async () => {
+    const answer = assistant({ content: '```python\nprint("hi")\n```' })
+    const first = render(<Message message={answer} />)
+    await waitFor(() => expect(first.container.querySelector('.hljs-string')).not.toBeNull())
+    first.unmount()
+
+    const { container } = render(<Message message={answer} />)
+    expect(container.querySelector('.hljs-string')).not.toBeNull()
+  })
+})
+
 describe('diagram rendering during streaming', () => {
   const mermaidMsg = {
     role: 'assistant' as const,
