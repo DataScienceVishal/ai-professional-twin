@@ -150,6 +150,24 @@ export const SHEET_FACTS: readonly { label: string; value: string }[] = [
 export const FULL_TIME_FROM = 2027
 export const FULL_TIME_LABEL = 'Full-time from Jan 2027'
 
+/**
+ * Short map labels, keyed by an entry's full title. Most come from the sheet
+ * sketch Vishal chose on 12 Oct 2026. An entry not listed keeps its generated
+ * short form.
+ */
+export const MAP_LABELS: Readonly<Record<string, string>> = {
+  'MSc Artificial Intelligence & Computer Science, Northeastern University London': 'Northeastern MSc AI and CS',
+  'MSc Data Science, Liverpool John Moores University (LJMU)': 'LJMU MSc Data Science',
+  'Executive Post Graduate Programme in Data Science, International Institute of Information Technology Bangalore (IIIT-B)':
+    'IIIT Bangalore PG',
+  'Senior School Certificate (Class 12 / CBSE), Sarvodaya Bal Vidyalaya No 2 C Block Janakpuri, Delhi': 'Class 12 / CBSE',
+  'Secondary School Certificate (Class 10 / CBSE), Angel Public School, Om Vihar, Uttam Nagar, Delhi': 'Class 10 / CBSE',
+  'Finance/Accounts/Taxation, PJRJ Associates': 'Finance, PJRJ Associates',
+  'E-commerce & Finance Executive, Aryan Care Pvt. Ltd.': 'E-commerce, Aryan Care',
+  'Executive, Avant Garde Clean Room & Engg. Solutions Pvt. Ltd.': 'Executive, Avant Garde',
+  'Data Engineer, Teleperformance Global Business Pvt. Ltd.': 'Data Engineer, Teleperformance',
+}
+
 export interface Suggestion {
   label: string
   message: string

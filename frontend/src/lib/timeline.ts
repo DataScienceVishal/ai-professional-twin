@@ -1,3 +1,4 @@
+import { MAP_LABELS } from './constants'
 import type { SourceInfo, Timeline } from './types'
 
 export type Track = 'education' | 'work'
@@ -120,26 +121,28 @@ export function buildRecord(timeline: Timeline, now: Date, plannedFrom: number):
     else unplotted.push({ title: entry.title, dates: entry.dates })
   }
 
-  timeline.education.forEach((item, i) =>
+  timeline.education.forEach((item, i) => {
+    const title = `${item.degree}, ${item.institution}`
     add({
       id: `education-${i}`,
       track: 'education',
-      label: `${shortDegree(item.degree)}, ${shortInstitution(item.institution)}`,
-      title: `${item.degree}, ${item.institution}`,
+      label: MAP_LABELS[title] ?? `${shortDegree(item.degree)}, ${shortInstitution(item.institution)}`,
+      title,
       dates: item.dates,
       matchKey: item.institution,
-    }),
-  )
-  timeline.work.forEach((item, i) =>
+    })
+  })
+  timeline.work.forEach((item, i) => {
+    const title = `${item.role}, ${item.company}`
     add({
       id: `work-${i}`,
       track: 'work',
-      label: `${item.role}, ${shortCompany(item.company)}`,
-      title: `${item.role}, ${item.company}`,
+      label: MAP_LABELS[title] ?? `${item.role}, ${shortCompany(item.company)}`,
+      title,
       dates: item.dates,
       matchKey: item.company,
-    }),
-  )
+    })
+  })
 
   entries.sort((a, b) => a.start - b.start)
   const today = toYear(now)

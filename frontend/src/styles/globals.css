@@ -10,6 +10,9 @@
   --color-work: #e4edf7;
   --color-edu-bar: #548238;
   --color-work-bar: #5c7fa8;
+  /* Each band as painted: its tint at 80% over the paper. Map labels use it to block out the route. */
+  --color-edu-band: color-mix(in srgb, var(--color-edu) 80%, var(--color-paper));
+  --color-work-band: color-mix(in srgb, var(--color-work) 80%, var(--color-paper));
   --color-route: #c2185b;
   --color-wash: #f3f5f8;
   --font-sans: 'Signika', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -152,6 +155,18 @@ body,
 
 [data-layer='interview'] [data-record] [data-graphic] {
   opacity: 0.45;
+}
+
+/*
+ * The receding graphics layer paints each band at 45%, so the block-out matches it and keeps
+ * both ink and magenta labels clear of the route. The 45% must track the 0.45 opacity in the rule above.
+ */
+[data-layer='interview'] [data-record] [data-knockout='education'] {
+  background-color: color-mix(in srgb, var(--color-edu-band) 45%, var(--color-paper));
+}
+
+[data-layer='interview'] [data-record] [data-knockout='work'] {
+  background-color: color-mix(in srgb, var(--color-work-band) 45%, var(--color-paper));
 }
 
 .prose > * + * {
