@@ -1,3 +1,4 @@
+import { createRef } from 'react'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { TitlePanel } from './title-panel'
@@ -53,6 +54,11 @@ describe('TitlePanel', () => {
     )
   })
 
+  it('leaves his GitHub to the Sources list below sm, so the recorded answer starts higher on phones', () => {
+    render(<TitlePanel />)
+    expect(screen.getByRole('link', { name: 'Public repositories on GitHub' })).toHaveClass('hidden', 'sm:inline-flex')
+  })
+
   it('opens his GitHub in a new tab with a 24px target on desktop', () => {
     render(<TitlePanel />)
     const github = screen.getByRole('link', { name: 'Public repositories on GitHub' })
@@ -69,6 +75,14 @@ describe('TitlePanel', () => {
   it('shows its own contact buttons only on desktop, where the contact bar steps aside', () => {
     render(<TitlePanel />)
     expect(screen.getByRole('link', { name: 'Email' }).parentElement?.className).toMatch(/\bhidden\b.*\blg:flex\b/)
+  })
+
+  it('hands its ref to the row of contact links, which the contact bar stands in for', () => {
+    const ref = createRef<HTMLDivElement>()
+    render(<TitlePanel ref={ref} />)
+    const row = screen.getByRole('link', { name: 'Email' }).parentElement
+    expect(ref.current).toBe(row)
+    expect(row).toContainElement(screen.getByRole('link', { name: 'CV (PDF)' }))
   })
 
   it('sets a 64px photo beside the name on phones, and the 88px photo beside the facts from sm', () => {

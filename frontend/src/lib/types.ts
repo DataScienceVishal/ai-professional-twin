@@ -15,6 +15,8 @@ export interface Message {
   isError?: boolean
   /** Set when a usage limit refused the turn: the rate limit or the daily budget. */
   limited?: boolean
+  /** Set when the visitor pressed Stop while this answer was still on its way. */
+  stopped?: boolean
 }
 
 export interface SourceInfo {

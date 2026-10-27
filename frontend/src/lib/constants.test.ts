@@ -136,11 +136,14 @@ describe('getLayerSuggestions', () => {
 })
 
 describe('copy that dates itself', () => {
+  const review = [
+    'SHEET_FACTS, FULL_TIME_LABEL, the descriptions in index.html, EXHIBIT and the share card describe January 2027 as the future.',
+    'The card is frontend/scripts/og-card/og-card.html, rendered to frontend/public/og-image.png.',
+    'Review them, then move this date on.',
+  ].join(' ')
+
   it('is reviewed before 5 January 2027', () => {
-    expect(
-      Date.now() < new Date(2027, 0, 5).getTime(),
-      'SHEET_FACTS, FULL_TIME_LABEL, the descriptions in index.html and EXHIBIT describe January 2027 as the future. Review them, then move this date on.',
-    ).toBe(true)
+    expect(Date.now() < new Date(2027, 0, 5).getTime(), review).toBe(true)
   })
 })
 

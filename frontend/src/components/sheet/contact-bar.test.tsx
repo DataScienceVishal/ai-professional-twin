@@ -25,6 +25,16 @@ describe('ContactBar', () => {
     expect(screen.getByRole('navigation', { name: 'Contact' }).className).not.toContain('lg:hidden')
   })
 
+  it('lies over the top of the sheet on desktop when asked, so showing it moves nothing', () => {
+    const { rerender } = render(<ContactBar showOnDesktop overlay />)
+    expect(screen.getByRole('navigation', { name: 'Contact' })).toHaveClass('lg:fixed', 'lg:inset-x-0', 'lg:top-0', 'lg:z-10')
+
+    rerender(<ContactBar showOnDesktop />)
+    const nav = screen.getByRole('navigation', { name: 'Contact' })
+    expect(nav).not.toHaveClass('lg:fixed')
+    expect(nav.className).not.toMatch(/\blg:(inset-x-0|top-0|z-10)\b/)
+  })
+
   it('draws its focus rings inside the links, since the bar meets the top of the viewport', () => {
     render(<ContactBar showOnDesktop={false} />)
     const nav = screen.getByRole('navigation', { name: 'Contact' })

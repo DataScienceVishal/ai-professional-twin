@@ -9,9 +9,10 @@ function keepDots(text: string): string {
   return text.replaceAll(' · ', '\u00a0· ')
 }
 
-export function TitlePanel({ ref }: { ref?: Ref<HTMLElement> }) {
+/** `ref` reaches the row of contact links, so the page can bring the contact bar back the moment that row leaves view. */
+export function TitlePanel({ ref }: { ref?: Ref<HTMLDivElement> }) {
   return (
-    <section ref={ref} aria-labelledby="sheet-title" className="min-w-0 border-[1.5px] border-ink bg-paper p-5 sm:p-6">
+    <section aria-labelledby="sheet-title" className="min-w-0 border-[1.5px] border-ink bg-paper p-5 sm:p-6">
       {/* One photo, placed by the grid: beside the name on phones, so the facts get
           the full width and the recorded answer starts higher; beside the facts from sm. */}
       <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-x-3 sm:grid-cols-[88px_minmax(0,1fr)] sm:items-start sm:gap-x-4">
@@ -43,14 +44,15 @@ export function TitlePanel({ ref }: { ref?: Ref<HTMLElement> }) {
         </dl>
       </div>
       {/* Phones get these from the contact bar, which never scrolls away. */}
-      <div className="mt-5 hidden gap-2 lg:flex">
+      <div ref={ref} className="mt-5 hidden gap-2 lg:flex">
         <ContactLinks linkClassName={BUTTON} />
       </div>
       <a
         href={PROFILE.githubUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex min-h-11 items-center text-sm text-survey underline underline-offset-2 lg:min-h-6"
+        // Phones find his GitHub in Sources, so the recorded answer starts higher there.
+        className="mt-3 hidden min-h-11 items-center text-sm text-survey underline underline-offset-2 sm:inline-flex lg:min-h-6"
       >
         Public repositories on GitHub
       </a>

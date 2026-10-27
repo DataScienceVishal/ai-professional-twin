@@ -38,6 +38,24 @@ describe('sourceLabel', () => {
     expect(label('career_qa', 'genai')).toBe('Career Q&A · GenAI')
     expect(label('career_qa', 'rag-and-llm-api')).toBe('Career Q&A · RAG and LLM API')
   })
+
+  it.each([
+    ['advanced', 'Advanced'],
+    ['intermediate', 'Intermediate'],
+    ['working knowledge', 'Working knowledge'],
+  ])('shows the skill level "%s" last, as "%s"', (level, shown) => {
+    expect(label('skills', `Web & Frontend - ${level}`)).toBe(`Skills · Web & Frontend · ${shown}`)
+    expect(label('skills', `${level} - Web & Frontend`)).toBe(`Skills · Web & Frontend · ${shown}`)
+  })
+
+  it('reads a slug word that is also an Object property as a word', () => {
+    expect(label('career_qa', 'constructor')).toBe('Career Q&A · Constructor')
+    expect(label('skills', 'constructor - advanced')).toBe('Skills · Constructor · Advanced')
+  })
+
+  it.each(['constructor', 'toString', '__proto__'])('shows the source kind "%s" as written', (kind) => {
+    expect(label(kind, 'Telecom Churn Prediction')).toBe(`${kind} · Telecom Churn Prediction`)
+  })
 })
 
 describe('orderDetail', () => {

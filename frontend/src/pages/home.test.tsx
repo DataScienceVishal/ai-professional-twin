@@ -87,6 +87,19 @@ async function loaded() {
   await screen.findByRole('list', { name: 'Dated record' })
 }
 
+// Classes that apply only on short screens (max-height: 30rem): a phone held
+// sideways, or a desktop browser at 200% zoom and beyond.
+const SHORT_HIDDEN = '[@media(max-height:30rem)]:hidden'
+const SHORT_SHOWN = '[@media(max-height:30rem)]:flex'
+const SHORT_BESIDE_TOGGLE = '[@media(max-height:30rem)]:col-start-2'
+
+/** The dock's row holding the layer switch and the suggested questions. */
+function layerRow(): HTMLElement {
+  const row = screen.getByRole('group', { name: 'Layer' }).parentElement
+  if (!row) throw new Error('the layer switch has no row')
+  return row
+}
+
 /** Ask, then wait until the answer has finished and Ask is back. */
 async function ask(question: string) {
   fireEvent.change(screen.getByLabelText('Ask about his record'), { target: { value: question } })
@@ -105,7 +118,7 @@ describe('Home', () => {
     render(<Home />)
     expect(screen.getByRole('heading', { level: 1, name: 'Vishal Khan' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: EXHIBIT.question })).toBeInTheDocument()
-    expect(screen.getByText('Recorded 12 Oct 2026 · career_qa.yaml, availability')).toBeInTheDocument()
+    expect(screen.getByText("The assistant's answer, recorded 12 Oct 2026 · career_qa.yaml, availability")).toBeInTheDocument()
     expect(await screen.findByRole('list', { name: 'Dated record' })).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'Builds' })).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'Legend' })).toBeInTheDocument()
@@ -128,14 +141,62 @@ describe('Home', () => {
     await screen.findByRole('heading', { level: 3, name: PROJECTS[0].name })
   })
 
-  it('folds the layer row away on short screens, so the sheet keeps its room', async () => {
+  it('keeps the layer row one press away on short screens, behind a "Layers and questions" toggle', async () => {
     mockApi()
     render(<Home />)
-    const row = screen.getByRole('group', { name: 'Layer' }).parentElement
+    const toggle = screen.getByRole('button', { name: 'Layers and questions' })
+    const row = layerRow()
     expect(row).toContainElement(screen.getByRole('list', { name: 'Suggested questions' }))
-    expect(row).toHaveClass('[@media(max-height:30rem)]:hidden')
-    expect(screen.getByLabelText('Ask about his record').closest('form')?.parentElement).toContainElement(row)
+    // Tall screens never see the toggle; short ones start with the row folded away.
+    expect(toggle).toHaveClass('hidden', SHORT_SHOWN)
+    // Below sm the label shortens to "Layers", so the field beside it keeps its width.
+    expect(within(toggle).getByText('and questions')).toHaveClass('max-sm:hidden')
+    expect(row.id).not.toBe('')
+    expect(toggle).toHaveAttribute('aria-controls', row.id)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(row).toHaveClass(SHORT_HIDDEN)
+
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(row).not.toHaveClass(SHORT_HIDDEN)
+    fireEvent.click(screen.getByRole('button', { name: 'Recruiter' }))
+    expect(screen.getByRole('button', { name: 'Recruiter' })).toHaveAttribute('aria-pressed', 'true')
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(row).toHaveClass(SHORT_HIDDEN)
     await screen.findByRole('heading', { level: 3, name: PROJECTS[0].name })
+  })
+
+  it('puts the revealed row straight after its toggle, so Tab moves from the toggle into the layers', async () => {
+    mockApi()
+    render(<Home />)
+    const toggle = screen.getByRole('button', { name: 'Layers and questions' })
+    const row = layerRow()
+    const field = screen.getByLabelText('Ask about his record')
+    expect(toggle.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(row.compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // The toggle sits beside the field, so showing it costs the sheet no height.
+    expect(field.closest('form')?.parentElement).toHaveClass(SHORT_BESIDE_TOGGLE)
+    await screen.findByRole('heading', { level: 3, name: PROJECTS[0].name })
+  })
+
+  it('folds the row away once a question is sent, so the answer gets the room', async () => {
+    mockApi({ replies: [reply([]), reply([])] })
+    render(<Home />)
+    await loaded()
+    const toggle = screen.getByRole('button', { name: 'Layers and questions' })
+    fireEvent.click(toggle)
+    fireEvent.click(screen.getByRole('button', { name: 'Recruiter' }))
+    fireEvent.click(screen.getByRole('button', { name: RECRUITER_ACTIONS[0].label }))
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(layerRow()).toHaveClass(SHORT_HIDDEN)
+    await screen.findByRole('button', { name: 'Ask' })
+
+    fireEvent.click(toggle)
+    await ask(EXHIBIT.question)
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
   })
 
   it('sends the chosen layer as the backend mode', async () => {
@@ -188,6 +249,16 @@ describe('Home', () => {
     })
     expect(container.querySelector('section[data-record]')).toBeNull()
     expect(screen.queryByRole('heading', { name: /His record/ })).toBeNull()
+  })
+
+  it('draws no record rail beside a conversation when the record is empty', async () => {
+    mockApi({ timelineBody: { education: [], work: [] }, replies: [reply([])] })
+    const { container } = render(<Home />)
+    await screen.findByRole('heading', { name: 'Builds' })
+    await ask(EXHIBIT.question)
+    expect(screen.getByRole('heading', { level: 1, name: 'Conversation' })).toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'His record' })).toBeNull()
+    expect(container.querySelector('[data-record]')).toBeNull()
   })
 
   it('still lists the record when its only entry has dates it cannot read', async () => {
@@ -281,14 +352,17 @@ describe('Home', () => {
     }
   })
 
-  it('shows the contact bar on desktop while the title panel is out of view', async () => {
-    let report: ((entries: { isIntersecting: boolean }[]) => void) | undefined
+  it("shows the contact bar on desktop whenever the panel's own contact links are not wholly in view", async () => {
+    type Report = (entries: Pick<IntersectionObserverEntry, 'isIntersecting' | 'intersectionRatio'>[]) => void
+    let report: Report | undefined
     let watched: Element | undefined
+    let options: IntersectionObserverInit | undefined
     vi.stubGlobal(
       'IntersectionObserver',
       class {
-        constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+        constructor(callback: Report, init?: IntersectionObserverInit) {
           report = callback
+          options = init
         }
         observe(element: Element) {
           watched = element
@@ -300,20 +374,28 @@ describe('Home', () => {
     render(<Home />)
     await loaded()
     const nav = () => screen.getByRole('navigation', { name: 'Contact' })
-    expect(watched).toBe(screen.getByRole('region', { name: 'Vishal Khan' }))
+    const panel = screen.getByRole('region', { name: 'Vishal Khan' })
+    // The row of links, not the whole panel: the panel's GitHub link and padding outlast it.
+    expect(watched).toBe(within(panel).getByRole('link', { name: 'Email' }).parentElement)
+    expect(options?.threshold).toBe(1)
     expect(nav().className).toContain('lg:hidden')
-    act(() => report?.([{ isIntersecting: false }]))
+    act(() => report?.([{ isIntersecting: true, intersectionRatio: 0.6 }]))
     expect(nav().className).not.toContain('lg:hidden')
-    act(() => report?.([{ isIntersecting: true }]))
+    act(() => report?.([{ isIntersecting: true, intersectionRatio: 1 }]))
     expect(nav().className).toContain('lg:hidden')
+    act(() => report?.([{ isIntersecting: false, intersectionRatio: 0 }]))
+    expect(nav().className).not.toContain('lg:hidden')
   })
 
-  it('shows the contact bar on desktop once a conversation starts', async () => {
+  it('lays the contact bar over the first sheet on desktop, and keeps it in flow once a conversation starts', async () => {
     mockApi({ replies: [reply(IN_FILE_ORDER)] })
     render(<Home />)
     await loaded()
-    expect(screen.getByRole('navigation', { name: 'Contact' }).className).toContain('lg:hidden')
+    const nav = () => screen.getByRole('navigation', { name: 'Contact' })
+    expect(nav().className).toContain('lg:hidden')
+    expect(nav()).toHaveClass('lg:fixed')
     await ask(EXHIBIT.question)
-    expect(screen.getByRole('navigation', { name: 'Contact' }).className).not.toContain('lg:hidden')
+    expect(nav().className).not.toContain('lg:hidden')
+    expect(nav()).not.toHaveClass('lg:fixed')
   })
 })
