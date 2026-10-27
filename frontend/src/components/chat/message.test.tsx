@@ -204,6 +204,12 @@ describe('diagram rendering during streaming', () => {
     expect(screen.queryByText(/graph TD/)).toBeNull()
   })
 
+  it('keeps the placeholder icon out of what a screen reader reads', () => {
+    render(<Message message={mermaidMsg} isStreaming />)
+    const placeholder = screen.getByRole('status', { name: /building diagram/i })
+    expect(placeholder.querySelector('svg')).toHaveAttribute('aria-hidden', 'true')
+  })
+
   it('still renders ordinary code blocks as code while streaming', () => {
     render(
       <Message
