@@ -1,4 +1,4 @@
-import type { ChatMode, Project, SkillCategory, SSEEvent } from './types'
+import type { ChatMode, Project, SkillCategory, SSEEvent, Timeline } from './types'
 
 /**
  * Base URL for API calls.
@@ -170,6 +170,12 @@ export async function fetchProjects(signal?: AbortSignal): Promise<Project[]> {
 export async function fetchSkills(signal?: AbortSignal): Promise<SkillCategory[]> {
   const response = await fetch(`${API_BASE}/skills`, { signal })
   if (!response.ok) return []
+  return response.json()
+}
+
+export async function fetchTimeline(signal?: AbortSignal): Promise<Timeline | null> {
+  const response = await fetch(`${API_BASE}/timeline`, { signal })
+  if (!response.ok) return null
   return response.json()
 }
 
