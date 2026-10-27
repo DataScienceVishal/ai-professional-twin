@@ -1,9 +1,10 @@
-"""The recorded answer on the first screen must stay true to the file it restates.
+"""The recorded answer on the first screen and the entry it cites must share the checked facts.
 
 `frontend/src/lib/exhibit.ts` quotes one real answer from the live assistant
-and cites career_qa.yaml's `availability` entry as its source. If that entry
-changes, the quote on the page would go on claiming something the knowledge
-base no longer says, so this fails until the quote is recorded again.
+and cites career_qa.yaml's `availability` entry as its source. These tests
+fail only when that entry stops stating one of the facts in FACTS, or when the
+quote stops stating them or citing the entry. Every other edit to either file
+passes unnoticed: after the entry is reworded, the quote is recorded again by hand.
 """
 
 from pathlib import Path
@@ -24,7 +25,7 @@ def _availability_answer() -> str:
     return " ".join(str(entry["answer"]).split())
 
 
-def test_cited_entry_still_states_every_quoted_fact() -> None:
+def test_cited_entry_still_states_the_checked_facts() -> None:
     answer = _availability_answer()
     for fact in FACTS:
         assert fact in answer, f"career_qa.yaml availability no longer says {fact!r}"

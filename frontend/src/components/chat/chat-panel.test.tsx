@@ -145,6 +145,15 @@ describe('ChatPanel', () => {
     expect(last).not.toHaveAttribute('aria-busy')
   })
 
+  it('numbers no questions and dates no answers in the conversation', () => {
+    renderPanel(CONVERSATION)
+    expect(screen.queryByText(/^Question \d/)).toBeNull()
+    for (const note of screen.getAllByRole('article')) {
+      expect(note.firstElementChild?.tagName).toBe('H2')
+      expect(note.querySelector('h2 + p')).toBeNull()
+    }
+  })
+
   it('heads the conversation view with the page heading', () => {
     renderPanel(CONVERSATION)
     expect(screen.getByRole('heading', { level: 1, name: 'Conversation' })).toBeInTheDocument()
@@ -184,6 +193,11 @@ describe('ChatPanel', () => {
     expect(railFrame()).toHaveAttribute('tabindex', '0')
   })
 
+  it('gives the rail the thin, muted scrollbar the sheet uses', () => {
+    renderPanel(CONVERSATION)
+    expect(railFrame()).toHaveClass('scroll-frame')
+  })
+
   it('hands focus to the ask field when Clear chat is pressed from the keyboard', () => {
     renderWithSheet(
       <>
@@ -199,9 +213,63 @@ describe('ChatPanel', () => {
     expect(field).toHaveFocus()
   })
 
+  it('says once, politely, that an answer is ready when its stream ends', () => {
+    const question: Message = { role: 'user', content: 'When can he start?' }
+    const answer: Message = { role: 'assistant', content: 'January 2027.', sources: [] }
+    const view = (messages: Message[], isStreaming: boolean) => (
+      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
+    )
+    const { rerender } = render(view([], false))
+    const status = screen.getByTestId('answer-status')
+    expect(status).toHaveAttribute('role', 'status')
+    expect(status).toBeEmptyDOMElement()
+
+    rerender(view([question, { role: 'assistant', content: '' }], true))
+    expect(screen.getByTestId('answer-status')).toBe(status)
+    expect(status).toBeEmptyDOMElement()
+    rerender(view([question, { role: 'assistant', content: 'January' }], true))
+    expect(status).toBeEmptyDOMElement()
+    rerender(view([question, answer], false))
+    expect(status).toHaveTextContent('Answer ready')
+
+    rerender(view([question, answer, { role: 'user', content: 'Where is he based?' }, { role: 'assistant', content: '' }], true))
+    expect(status).toBeEmptyDOMElement()
+  })
+
+  it('says nothing about an answer it did not see stream, or one stopped before any text', () => {
+    const question: Message = { role: 'user', content: 'When can he start?' }
+    const view = (messages: Message[], isStreaming: boolean) => (
+      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
+    )
+    const { rerender } = render(view([question, { role: 'assistant', content: 'January 2027.' }], false))
+    expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
+    rerender(view([question, { role: 'assistant', content: 'January 2027.' }, question, { role: 'assistant', content: '' }], true))
+    rerender(view([question, { role: 'assistant', content: 'January 2027.' }, question, { role: 'assistant', content: '' }], false))
+    expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
+  })
+
+  it('leaves the failure to its own alert instead of saying an answer is ready', () => {
+    const question: Message = { role: 'user', content: 'When can he start?' }
+    const view = (messages: Message[], isStreaming: boolean) => (
+      <ChatPanel messages={messages} isStreaming={isStreaming} firstSheet={<p>first sheet</p>} onClear={() => {}} />
+    )
+    const { rerender } = render(view([question, { role: 'assistant', content: '' }], true))
+    rerender(view([question, { role: 'assistant', content: 'The assistant backend ran into a problem.', isError: true }], false))
+    expect(screen.getByTestId('answer-status')).toBeEmptyDOMElement()
+    expect(screen.getByRole('alert')).toHaveTextContent('ran into a problem')
+  })
+
+  it('names the desktop rail once, on its frame', () => {
+    renderPanel(CONVERSATION)
+    const frame = screen.getByRole('group', { name: 'His record' })
+    expect(frame.closest('aside')).not.toHaveAttribute('aria-label')
+    expect(screen.getAllByRole('complementary', { name: 'His record' })).toHaveLength(1)
+  })
+
   it('reads the phone record before the notes', () => {
     renderPanel(CONVERSATION)
-    const [phone, desktop] = screen.getAllByRole('complementary', { name: 'His record' })
+    const phone = screen.getByRole('complementary', { name: 'His record' })
+    const desktop = screen.getByRole('group', { name: 'His record' }).closest('aside') as HTMLElement
     const notes = screen.getAllByRole('article')
     expect(phone.querySelector('details')).not.toBeNull()
     expect(phone.compareDocumentPosition(notes[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()

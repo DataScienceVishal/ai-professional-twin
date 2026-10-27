@@ -1,4 +1,4 @@
-import type { ChatMode } from './types'
+import type { ChatMode, SourceInfo } from './types'
 
 export const MODE_LABELS: Record<ChatMode, string> = {
   default: 'General',
@@ -127,7 +127,7 @@ export const CONTACT_MAILTO = `mailto:${PROFILE.email}?subject=${encodeURICompon
   CONTACT_SUBJECT,
 )}&body=${encodeURIComponent(CONTACT_BODY)}`
 
-/** The role line as approved on 12 Oct 2026. */
+/** AI engineer first, as career_qa.yaml `target-roles` lists it; four years in data, as career_qa.yaml `years-of-experience` counts them. */
 export const ROLE_LINE = 'Seeking AI engineer roles · four years in data'
 
 /** The title panel's facts. Each restates the knowledge-base entry named beside it. */
@@ -144,11 +144,10 @@ export const SHEET_FACTS: readonly { label: string; value: string }[] = [
 export const FULL_TIME_FROM = 2027
 export const FULL_TIME_LABEL = 'Full-time from Jan 2027'
 
-/**
- * Short map labels, keyed by an entry's full title. Most come from the sheet
- * sketch Vishal chose on 12 Oct 2026. An entry not listed keeps its generated
- * short form.
- */
+/** The full-time marker plots this entry. */
+export const FULL_TIME_SOURCE: SourceInfo = { source: 'career_qa', detail: 'availability', url: '' }
+
+/** Short map labels, keyed by an entry's full title. An entry not listed keeps its generated short form. */
 export const MAP_LABELS: Readonly<Record<string, string>> = {
   'MSc Artificial Intelligence & Computer Science, Northeastern University London': 'Northeastern MSc AI and CS',
   'MSc Data Science, Liverpool John Moores University (LJMU)': 'LJMU MSc Data Science',
@@ -168,7 +167,7 @@ export interface Suggestion {
   group?: string
 }
 
-/** The recruiter quick actions, moved here from the old side panel unchanged. */
+/** The Recruiter layer's quick actions: a short label for each, and the question it sends. */
 export const RECRUITER_ACTIONS: readonly Suggestion[] = [
   { label: 'Summarize Vishal in 60 seconds', message: 'Give me a 60-second summary of Vishal Khan as a candidate.' },
   { label: 'Why hire Vishal?', message: 'Why should we hire Vishal Khan?' },
@@ -183,7 +182,7 @@ export const RECRUITER_ACTIONS: readonly Suggestion[] = [
   },
 ]
 
-/** The interview panel's questions, moved here unchanged with their categories and in their old order. */
+/** The Interview layer's starter questions, in three categories of three. */
 export const INTERVIEW_STARTERS: readonly Suggestion[] = [
   {
     group: 'RAG & Retrieval',

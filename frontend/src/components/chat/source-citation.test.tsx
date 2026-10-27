@@ -52,6 +52,13 @@ describe('SourceCitation', () => {
     expect(screen.getByText('something_new')).toBeInTheDocument()
   })
 
+  it('gives the toggle and the link 44px targets on touch screens, and marks a pressed toggle in forced colours', () => {
+    render(<SourceCitation source={source({ source: 'github', detail: 'CIFAR-10-CNN', url: 'https://example.com/r' })} />)
+    const toggle = screen.getByRole('button')
+    expect(toggle).toHaveClass('min-h-11', 'lg:min-h-0', 'forced-colors:aria-pressed:underline')
+    expect(screen.getByRole('link')).toHaveClass('min-h-11', 'min-w-11', 'justify-center', 'lg:min-h-0', 'lg:min-w-0')
+  })
+
   it('shows only the label when there is no detail', () => {
     render(<SourceCitation source={source({ source: 'resume' })} />)
     expect(screen.getByText('CV')).toBeInTheDocument()

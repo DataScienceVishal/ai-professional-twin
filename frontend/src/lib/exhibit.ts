@@ -4,10 +4,11 @@ import type { Message } from './types'
  * One real answer from the live assistant, shown before anyone types.
  *
  * Copied character for character from the live test on 12 Oct 2026 (probe
- * P09, General mode). The backend also returned four unrelated source chips
- * with it; only the entry the answer restates is shown.
- * `backend/tests/test_recorded_answer.py` fails if career_qa.yaml stops saying
- * what this quotes.
+ * P09, General mode). The backend also returned career-gap, target-roles,
+ * salary-expectations and sponsorship chips, which the answer does not
+ * restate, so only the entry it does restate is shown.
+ * `backend/tests/test_recorded_answer.py` checks that this quote and that
+ * entry share three facts, not that their wording matches.
  */
 export const EXHIBIT = {
   question: 'When is he available to start a new role?',

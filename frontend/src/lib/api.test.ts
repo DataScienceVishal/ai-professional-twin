@@ -214,4 +214,27 @@ describe('fetchTimeline', () => {
 
     expect(await fetchTimeline()).toBeNull()
   })
+
+  it.each([
+    ['an empty object', {}],
+    ['an array', []],
+    ['a work list that is not a list', { education: [], work: 'none' }],
+    ['an entry with no dates', { education: [{ institution: 'X', degree: 'Y', status: '' }], work: [] }],
+    ['an entry whose field is not text', { education: [], work: [{ company: 'X', role: 'Y', dates: 2020 }] }],
+    ['an entry that is not an object', { education: [null], work: [] }],
+  ])('treats a 200 reply of %s as no timeline', async (_name, body) => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => body }) as Response))
+
+    expect(await fetchTimeline()).toBeNull()
+  })
+
+  it('keeps a reply with every field present as text', async () => {
+    const body = {
+      education: [{ institution: 'Northeastern University London', degree: 'MSc', dates: 'January 2026 - January 2027', status: '' }],
+      work: [{ company: 'Teleperformance', role: 'Data Engineer', dates: 'Jun 2024 - Jan 2026' }],
+    }
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => body }) as Response))
+
+    expect(await fetchTimeline()).toEqual(body)
+  })
 })

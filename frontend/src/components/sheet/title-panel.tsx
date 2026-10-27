@@ -1,32 +1,43 @@
+import type { Ref } from 'react'
 import { PROFILE, ROLE_LINE, SHEET_FACTS } from '../../lib/constants'
 import { ContactLinks } from './contact-bar'
 
 const BUTTON = 'flex-1 border-[1.5px] border-ink py-2.5 text-center font-semibold tracking-wide'
 
-export function TitlePanel() {
+/** A no-break space before each middle dot keeps it on the line it closes, as the Builds rows do. */
+function keepDots(text: string): string {
+  return text.replaceAll(' · ', '\u00a0· ')
+}
+
+export function TitlePanel({ ref }: { ref?: Ref<HTMLElement> }) {
   return (
-    <section aria-labelledby="sheet-title" className="min-w-0 border-[1.5px] border-ink bg-paper p-5 sm:p-6">
-      <p className="sheet-label">Sheet 1 · London</p>
-      <h1
-        id="sheet-title"
-        className="mt-2 text-4xl font-semibold uppercase leading-none tracking-[0.06em] sm:text-5xl lg:text-6xl"
-      >
-        {PROFILE.name}
-      </h1>
-      <p className="mt-2 text-lg sm:text-xl">{ROLE_LINE}</p>
-      <div className="mt-4 flex flex-col gap-4 sm:flex-row">
+    <section ref={ref} aria-labelledby="sheet-title" className="min-w-0 border-[1.5px] border-ink bg-paper p-5 sm:p-6">
+      {/* One photo, placed by the grid: beside the name on phones, so the facts get
+          the full width and the recorded answer starts higher; beside the facts from sm. */}
+      <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-x-3 sm:grid-cols-[88px_minmax(0,1fr)] sm:items-start sm:gap-x-4">
+        <h1
+          id="sheet-title"
+          className="col-start-2 row-start-1 text-4xl font-semibold uppercase leading-none tracking-[0.06em] sm:col-span-2 sm:col-start-1 sm:text-5xl lg:text-6xl"
+        >
+          {PROFILE.name}
+        </h1>
+        <p className="col-span-2 row-start-2 mt-2 text-lg sm:text-xl">{keepDots(ROLE_LINE)}</p>
         <img
           src={PROFILE.avatarUrl}
-          alt={PROFILE.name}
+          // The name sits beside the photo as the page heading.
+          alt=""
           width={88}
           height={88}
-          className="h-[88px] w-[88px] shrink-0 border-[1.5px] border-ink object-cover"
+          className="col-start-1 row-start-1 h-16 w-16 border-[1.5px] border-ink object-cover sm:row-start-3 sm:mt-4 sm:h-[88px] sm:w-[88px]"
         />
-        <dl data-facts className="grid min-w-0 grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1.5 text-base leading-snug lg:text-[15px]">
+        <dl
+          data-facts
+          className="col-span-2 row-start-3 mt-4 grid min-w-0 grid-cols-[5.5rem_1fr] gap-x-3 gap-y-1.5 text-base leading-snug sm:col-span-1 sm:col-start-2 lg:text-[15px]"
+        >
           {SHEET_FACTS.map((fact) => (
             <div key={fact.label} className="contents">
               <dt className="pt-0.5 text-[11px] uppercase tracking-[0.14em] text-muted">{fact.label}</dt>
-              <dd className="min-w-0 break-words">{fact.value}</dd>
+              <dd className="min-w-0 break-words">{keepDots(fact.value)}</dd>
             </div>
           ))}
         </dl>

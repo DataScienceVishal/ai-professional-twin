@@ -35,6 +35,11 @@ function turnWheel(list: HTMLElement, init: WheelEventInit) {
 }
 
 describe('LayerKey', () => {
+  it('gives its row the thin, muted scrollbar from lg, where the bar shows', () => {
+    render(<LayerKey mode="interview" seed={1} onSelect={() => {}} />)
+    expect(screen.getByRole('list', { name: 'Suggested questions' })).toHaveClass('lg:scroll-frame')
+  })
+
   it("shows the layer's questions", () => {
     render(<LayerKey mode="recruiter" seed={1} onSelect={() => {}} />)
     for (const action of RECRUITER_ACTIONS) {

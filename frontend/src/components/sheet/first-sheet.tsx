@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import { BuildsTable } from './builds-table'
 import { RecordStrip, RouteMap } from './route-map'
 import { sameSource, useSheet } from './sheet-context'
@@ -17,25 +18,35 @@ interface FirstSheetProps {
   projectsLoading: boolean
   skills: SkillCategory[]
   skillsLoading: boolean
+  /** Watches the title panel, which carries the same contact links as the contact bar. */
+  titlePanelRef?: Ref<HTMLElement>
 }
 
-export function FirstSheet({ record, now, projects, projectsLoading, skills, skillsLoading }: FirstSheetProps) {
+export function FirstSheet({
+  record,
+  now,
+  projects,
+  projectsLoading,
+  skills,
+  skillsLoading,
+  titlePanelRef,
+}: FirstSheetProps) {
   const { focused } = useSheet()
   const exhibitLit = EXHIBIT.message.sources.some((source) => sameSource(focused, source))
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-10 p-4 sm:p-6 lg:p-8">
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-10">
-        <TitlePanel />
+        <TitlePanel ref={titlePanelRef} />
         <SurveyNote
-          kicker={`A real answer · recorded ${EXHIBIT.recordedOn}`}
           question={EXHIBIT.question}
+          dateline={`Recorded ${EXHIBIT.recordedOn} · career_qa.yaml, availability`}
           lit={exhibitLit}
         >
           <Message message={EXHIBIT.message} />
         </SurveyNote>
       </div>
-      {record && (
+      {record && (record.entries.length > 0 || record.unplotted.length > 0) && (
         // From lg the strip is `sr-only`, which positions it absolutely. Without a
         // positioned ancestor it measured against <body> and made the whole page scroll.
         <section aria-labelledby="record-heading" data-record className="relative min-w-0">
@@ -45,7 +56,9 @@ export function FirstSheet({ record, now, projects, projectsLoading, skills, ski
           <RouteMap record={record} now={now} className="hidden lg:block" />
           <RecordStrip record={record} now={now} className="lg:sr-only" />
           <p className="mt-3 text-xs text-muted">
-            One column is one year. Dates come from academics.yaml and linkedin.yaml.
+            {/* Below lg the record is a strip, which has no year columns. */}
+            <span className="hidden lg:inline">One column is one year. </span>
+            Dates come from academics.yaml and linkedin.yaml.
           </p>
         </section>
       )}

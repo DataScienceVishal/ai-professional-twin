@@ -47,7 +47,7 @@ export function LayerKey({ mode, seed, onSelect, disabled = false }: LayerKeyPro
       ref={listRef}
       role="list"
       aria-label="Suggested questions"
-      className="-m-1 flex min-w-0 gap-1.5 overflow-x-auto p-1 max-lg:no-scrollbar lg:overflow-x-scroll"
+      className="-m-1 flex min-w-0 gap-1.5 overflow-x-auto p-1 max-lg:no-scrollbar lg:scroll-frame lg:overflow-x-scroll"
     >
       {suggestions.map((suggestion, index) => (
         <li key={suggestion.message} className="flex shrink-0 items-center gap-1.5">

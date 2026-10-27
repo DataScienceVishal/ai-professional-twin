@@ -6,7 +6,8 @@ import type { ChatMode, Project, SkillCategory, SSEEvent, Timeline } from './typ
  * Default is the same-origin `/api` prefix, which is proxied to the backend:
  *   - dev  : `vite.config.ts` -> `server.proxy` strips `/api` and forwards to
  *            http://localhost:8000
- *   - prod : `vercel.json` -> rewrite strips `/api` and forwards to Railway
+ *   - prod : `vercel.json` -> rewrite strips `/api` and forwards to the API
+ *            on Azure Container Apps
  *
  * The backend routes themselves are NOT prefixed (`/chat`, `/projects`,
  * `/skills`, `/health`, `/resume/download`), so both proxies strip `/api`.
@@ -173,10 +174,36 @@ export async function fetchSkills(signal?: AbortSignal): Promise<SkillCategory[]
   return response.json()
 }
 
+const EDUCATION_FIELDS = ['institution', 'degree', 'dates', 'status']
+const WORK_FIELDS = ['company', 'role', 'dates']
+
+function isTextRecordList(value: unknown, fields: readonly string[]): boolean {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        fields.every((field) => typeof (item as Record<string, unknown>)[field] === 'string'),
+    )
+  )
+}
+
+/**
+ * The record is drawn straight from this reply, so a body of any other shape
+ * counts as no timeline instead of throwing while the page renders.
+ */
+function isTimeline(body: unknown): body is Timeline {
+  if (typeof body !== 'object' || body === null) return false
+  const { education, work } = body as Record<string, unknown>
+  return isTextRecordList(education, EDUCATION_FIELDS) && isTextRecordList(work, WORK_FIELDS)
+}
+
 export async function fetchTimeline(signal?: AbortSignal): Promise<Timeline | null> {
   const response = await fetch(`${API_BASE}/timeline`, { signal })
   if (!response.ok) return null
-  return response.json()
+  const body: unknown = await response.json()
+  return isTimeline(body) ? body : null
 }
 
 export function getResumeDownloadUrl(): string {

@@ -1,6 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { RecordStrip, RouteMap } from './route-map'
+import { FULL_TIME_SOURCE } from '../../lib/constants'
 import { buildRecord } from '../../lib/timeline'
 import { renderWithSheet } from '../../test/sheet'
 import type { Timeline } from '../../lib/types'
@@ -77,7 +78,7 @@ describe('RouteMap', () => {
 
   it('puts every bar in the graphics layer, so receding layers reach them', () => {
     const { container } = render(<RouteMap record={record} now={NOW} />)
-    const bars = container.querySelectorAll<HTMLElement>('[data-graphic] [data-dim]')
+    const bars = container.querySelectorAll<HTMLElement>('[data-graphic] div[data-dim]')
     expect(bars).toHaveLength(record.entries.length)
     // The axis runs from 2023 to 2028, and Northeastern starts in January 2026.
     expect(bars[2].style.left).toBe('60%')
@@ -87,7 +88,7 @@ describe('RouteMap', () => {
     const { container } = render(<RouteMap record={fromSchool} now={NOW} />)
     const casing = parseFloat(container.querySelector('[data-route="casing"]')?.getAttribute('stroke-width') ?? '')
     expect(casing).toBeGreaterThan(0)
-    const bars = container.querySelectorAll<HTMLElement>('[data-graphic] [data-dim]')
+    const bars = container.querySelectorAll<HTMLElement>('[data-graphic] div[data-dim]')
     expect(bars).toHaveLength(fromSchool.entries.length)
     for (const bar of bars) {
       expect(parseFloat(bar.style.height)).toBeGreaterThanOrEqual(casing + 8)
@@ -113,13 +114,30 @@ describe('RouteMap', () => {
   it('blocks out the route behind every label', () => {
     render(<RouteMap record={record} now={NOW} />)
     for (const [text, track, band] of [
-      ['You are here', 'education', 'bg-edu-band'],
+      ['You are here', 'paper', 'bg-paper'],
       ['LJMU MSc Data Science', 'education', 'bg-edu-band'],
-      ['Full-time from Jan 2027', 'work', 'bg-work-band'],
+      ['Full-time from Jan 2027', 'paper', 'bg-paper'],
     ]) {
       const knockout = screen.getByText(text).closest(`[data-knockout="${track}"]`)
       expect(knockout).not.toBeNull()
       expect(knockout).toHaveClass(band)
+    }
+  })
+
+  it("sets the marker labels in the map's margin rows, clear of the bands and their labels", () => {
+    render(<RouteMap record={record} now={NOW} />)
+    // Between the year row and the education band, and below the work band.
+    expect(screen.getByText('You are here').parentElement?.style.top).toBe('1.125rem')
+    expect(screen.getByText('Full-time from Jan 2027').parentElement?.style.top).toBe('calc(86% + 2px)')
+  })
+
+  it('lets the markers and their labels wait for the route to reach them', () => {
+    const { container } = render(<RouteMap record={record} now={NOW} />)
+    for (const marker of ['today', 'full-time']) {
+      expect(container.querySelector(`[data-marker="${marker}"]`)).toHaveClass('route-marker')
+    }
+    for (const text of ['You are here', 'Full-time from Jan 2027']) {
+      expect(screen.getByText(text).closest('.route-marker')).not.toBeNull()
     }
   })
 
@@ -136,6 +154,43 @@ describe('RouteMap', () => {
     expect(after.container.querySelector('line')).toBeNull()
     const before = render(<RouteMap record={record} now={NOW} />)
     expect(before.container.querySelector('line')).not.toBeNull()
+  })
+
+  it('fills the full-time ring once full-time has started', () => {
+    const later = new Date(2027, 2, 1)
+    const after = render(<RouteMap record={buildRecord(TIMELINE, later, 2027)} now={later} />)
+    expect(after.container.querySelector('[data-marker="full-time"]')).toHaveClass('bg-route')
+    const before = render(<RouteMap record={record} now={NOW} />)
+    expect(before.container.querySelector('[data-marker="full-time"]')).toHaveClass('bg-paper')
+    expect(before.container.querySelector('[data-marker="full-time"]')).not.toHaveClass('bg-route')
+  })
+
+  it("lights the full-time ring, its dashed leg and its label while the recorded answer's source is open", () => {
+    const { container } = renderWithSheet(<RouteMap record={record} now={NOW} />, { focused: FULL_TIME_SOURCE })
+    expect(container.querySelector('[data-marker="full-time"]')).toHaveAttribute('data-lit', 'true')
+    expect(container.querySelector('line[data-marker="planned"]')).toHaveAttribute('data-lit', 'true')
+    expect(screen.getByText('Full-time from Jan 2027').closest('[data-lit]')).not.toBeNull()
+    expect(screen.getByText('Full-time from Jan 2027').closest('[data-graphic]')).toBeNull()
+    // Everything else recedes: the route, today's dot and every bar.
+    const route = container.querySelector('[data-route="line"]')?.closest('g')
+    expect(route).toHaveAttribute('data-dim')
+    expect(route).not.toHaveAttribute('data-lit')
+    const today = container.querySelector('[data-marker="today"]')
+    expect(today).toHaveAttribute('data-dim')
+    expect(today).not.toHaveAttribute('data-lit')
+    const bars = container.querySelectorAll('[data-graphic] div[data-dim]')
+    expect(bars).toHaveLength(record.entries.length)
+    for (const bar of bars) expect(bar).not.toHaveAttribute('data-lit')
+  })
+
+  it('lights nothing on the map for any other source', () => {
+    const { container } = renderWithSheet(<RouteMap record={record} now={NOW} />, {
+      focused: { source: 'career_qa', detail: 'sponsorship', url: '' },
+    })
+    expect(container.querySelectorAll('[data-lit]')).toHaveLength(0)
+    for (const marker of ['full-time', 'planned', 'today']) {
+      expect(container.querySelector(`[data-marker="${marker}"]`)).toHaveAttribute('data-dim')
+    }
   })
 
   it("marks the visitor's date even before any entry has started", () => {
@@ -172,8 +227,12 @@ describe('RecordStrip', () => {
     render(<RecordStrip record={record} now={NOW} />)
     const list = screen.getByRole('list', { name: 'Dated record' })
     expect(list).toHaveAttribute('role', 'list')
-    expect(within(list).getByText('Data Engineer, Teleperformance Global Business Pvt. Ltd.')).toBeInTheDocument()
-    expect(within(list).getByText('Work · Jun 2024 - Jan 2026')).toBeInTheDocument()
+    const title = within(list).getByText('Data Engineer, Teleperformance Global Business Pvt. Ltd.')
+    const caption = within(list).getByText('Work · Jun 2024 - Jan 2026')
+    // The title leads; the track and dates follow as a quiet caption, not a capitalised label.
+    expect(title.nextElementSibling).toBe(caption)
+    expect(caption).toHaveClass('text-muted')
+    expect(caption).not.toHaveClass('sheet-label')
   })
 
   it('lists an entry it could not date instead of dropping it', () => {
@@ -192,14 +251,33 @@ describe('RecordStrip', () => {
     expect(container.querySelectorAll('[data-graphic] [data-lit]')).toHaveLength(1)
   })
 
+  it('tags each entry with its track, so a lit entry takes its own territory tint, with no side stripe', () => {
+    const { container } = renderWithSheet(<RecordStrip record={record} now={NOW} />, {
+      focused: { source: 'academics', detail: 'MSc Data Science - Liverpool John Moores University (LJMU)', url: '' },
+    })
+    const lit = screen.getByText('MSc Data Science, Liverpool John Moores University (LJMU)').closest('li')
+    expect(lit).toHaveAttribute('data-track', 'education')
+    expect(screen.getByText('Data Engineer, Teleperformance Global Business Pvt. Ltd.').closest('li')).toHaveAttribute('data-track', 'work')
+    for (const element of container.querySelectorAll('li, [data-lit]')) {
+      expect(element.className).not.toMatch(/border-l-\[3px\]/)
+    }
+  })
+
+  it('frames the no-date note instead of striping its side', () => {
+    renderWithSheet(<RecordStrip record={record} now={NOW} />, {
+      focused: { source: 'career_qa', detail: 'availability', url: '' },
+    })
+    const note = screen.getByText('Career Q&A · Availability is not tied to a date on the record.')
+    expect(note.className).not.toMatch(/border-l-\[3px\]|border-survey/)
+    expect(note).not.toHaveAttribute('data-track')
+  })
+
   it('names an open source that has no date instead of lighting nothing', () => {
     renderWithSheet(<RecordStrip record={record} now={NOW} />, {
       focused: { source: 'career_qa', detail: 'availability', url: '' },
     })
-    expect(screen.getByText('Career Q&A · Availability')).toBeInTheDocument()
-    const note = screen.getByText('Not tied to a date on the record.').closest('[data-lit]')
-    expect(note).not.toBeNull()
-    expect(note).toHaveTextContent('Career Q&A · Availability')
+    const note = screen.getByText('Career Q&A · Availability is not tied to a date on the record.')
+    expect(note).toHaveAttribute('data-lit', 'true')
   })
 
   it('lists two undated entries that share a title without a key clash', () => {

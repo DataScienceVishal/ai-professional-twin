@@ -39,7 +39,7 @@ def test_get_timeline_serves_education_and_work(client: TestClient) -> None:
         assert job["dates"]
 
 
-def test_timeline_keeps_ljmu_dates_as_vishal_corrected_them(client: TestClient) -> None:
+def test_timeline_serves_the_corrected_ljmu_dates(client: TestClient) -> None:
     body = client.get("/timeline").json()
 
     ljmu = next(e for e in body["education"] if "(LJMU)" in e["institution"])

@@ -86,7 +86,7 @@ describe('short labels', () => {
     expect(shortDegree('MSc Data Science')).toBe('MSc Data Science')
   })
 
-  it('keeps every approved map label short enough to print in full', () => {
+  it('keeps every MAP_LABELS label short enough to print in full', () => {
     for (const label of Object.values(MAP_LABELS)) {
       expect(label.length).toBeLessThanOrEqual(30)
     }
@@ -121,7 +121,7 @@ describe('buildRecord', () => {
     expect(job?.title).toBe('Data Engineer, Teleperformance Global Business Pvt. Ltd.')
   })
 
-  it('keeps the generated short form for an entry without an approved label', () => {
+  it('keeps the generated short form for an entry MAP_LABELS does not list', () => {
     const { entries } = buildRecord(
       { education: [], work: [{ company: 'Acme Analytics Pvt. Ltd.', role: 'Analyst', dates: 'Jan 2020 - Jan 2021' }] },
       NOW,
