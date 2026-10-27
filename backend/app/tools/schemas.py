@@ -57,8 +57,10 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "name": "get_repo_stats",
             "description": (
                 "Look up one of the professional's GitHub repositories by name. Returns "
-                "its name, description, primary language, stars, forks, topics, URL "
-                "and last updated time."
+                "its name, description, primary language, stars, forks, topics, URL, "
+                "last updated time and last push time. The update time can change "
+                "without a push, so use the push time for when the professional last "
+                "worked on it."
             ),
             "parameters": {
                 "type": "object",
@@ -78,8 +80,9 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "name": "get_recent_activity",
             "description": (
                 "List the professional's GitHub repositories pushed to in the last "
-                "`days` days, newest push first. Returns up to 10, each with name, "
-                "primary language, created date, last push time and URL."
+                "`days` days, newest push first. Returns how many there were and up "
+                "to 10 of them, each with name, primary language, created date, last "
+                "push time and URL."
             ),
             "parameters": {
                 "type": "object",

@@ -63,6 +63,7 @@ FIELD_WORDS: dict[str, dict[str, str]] = {
         "topics": "topics",
         "url": "url",
         "last_updated": "last updated",
+        "last_pushed": "last push",
     },
     "get_recent_activity": {
         "name": "name",
@@ -151,6 +152,44 @@ async def test_get_repo_stats_not_found(mock_github_service: AsyncMock) -> None:
     tools = create_github_tools(mock_github_service)
     result = await tools["get_repo_stats"](repo_name="nonexistent")
     assert "not found" in result.lower()
+
+
+@pytest.mark.asyncio
+async def test_get_repo_stats_gives_the_push_time_apart_from_the_update_time(
+    mock_github_service: AsyncMock,
+) -> None:
+    tools = create_github_tools(mock_github_service)
+    stats = json.loads(await tools["get_repo_stats"](repo_name="chess-analytics"))
+    assert stats["last_updated"] == "2026-10-20T00:00:00Z"
+    assert stats["last_pushed"] == "2026-07-01T00:00:00Z"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("tool", "arguments", "list_key", "total_key", "words"),
+    [
+        ("search_repos", {"query": "repo"}, "repos", "total_matching", "number of matches"),
+        ("get_recent_activity", {"days": 30}, "recent_repos", "total_in_period", "how many"),
+    ],
+)
+async def test_capped_list_tool_counts_every_repo_and_says_so(
+    tool: str,
+    arguments: dict[str, Any],
+    list_key: str,
+    total_key: str,
+    words: str,
+) -> None:
+    # Twelve repos, all named repo-N and all pushed to on the day NOW falls on.
+    repos = [
+        {**TWIN, "name": f"repo-{n}", "html_url": f"https://github.com/DataScienceVishal/repo-{n}"}
+        for n in range(12)
+    ]
+    tools = create_github_tools(_service_returning(repos), now=lambda: NOW)
+    returned = json.loads(await tools[tool](**arguments))
+
+    assert len(returned[list_key]) == 10
+    assert returned[total_key] == 12
+    assert words in _schema(tool)["description"].lower()
 
 
 @pytest.mark.asyncio
