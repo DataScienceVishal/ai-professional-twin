@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from openai import AsyncStream
     from openai.types.chat import ChatCompletionChunk, ChatCompletionMessageParam
 
+# Tool rounds per answer. A round can run several tools, and the call after the
+# last round offers none, so it has to answer.
 MAX_TOOL_CALLS = 3
 TOOL_RESULT_SUMMARY_LIMIT = 200
 
@@ -119,11 +121,12 @@ class LLMService:
         ]
         usage_totals: dict[str, int] = {}
 
-        for _ in range(MAX_TOOL_CALLS + 1):
+        for call_index in range(MAX_TOOL_CALLS + 1):
+            # With tools on offer in the last call, a model that keeps reaching for
+            # one would spend that call on another round and end the turn with no answer.
+            offered = None if call_index == MAX_TOOL_CALLS else tool_definitions
             raw = await self.client.chat.completions.create(
-                **self.build_completion_kwargs(
-                    all_messages, stream=True, tools=tool_definitions or None
-                )
+                **self.build_completion_kwargs(all_messages, stream=True, tools=offered)
             )
             response = cast("AsyncStream[ChatCompletionChunk]", raw)
 

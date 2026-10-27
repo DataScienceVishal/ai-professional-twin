@@ -1,8 +1,11 @@
+from collections.abc import AsyncGenerator
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from app.services.llm import LLMService, is_gpt5_family
+from app.services.llm import MAX_TOOL_CALLS, LLMService, is_gpt5_family
+from app.tools import ToolRegistry
 
 
 @pytest.fixture
@@ -403,3 +406,66 @@ async def test_stream_with_tools_omits_usage_when_provider_sends_none(
         ]
 
     assert not [e for e in events if e["type"] == "usage"]
+
+
+def _chunk(
+    content: str | None = None, tool_call: Any = None, finish_reason: str | None = None
+) -> MagicMock:
+    chunk = MagicMock()
+    chunk.choices = [MagicMock()]
+    chunk.choices[0].delta.content = content
+    chunk.choices[0].delta.tool_calls = [tool_call] if tool_call else None
+    chunk.choices[0].finish_reason = finish_reason
+    chunk.usage = None
+    return chunk
+
+
+async def _tool_call_stream(name: str) -> AsyncGenerator[MagicMock]:
+    call = MagicMock()
+    call.index = 0
+    call.id = f"call_{name}"
+    call.function.name = name
+    call.function.arguments = "{}"
+    yield _chunk(tool_call=call)
+    yield _chunk(finish_reason="tool_calls")
+
+
+async def _text_stream(text: str) -> AsyncGenerator[MagicMock]:
+    yield _chunk(content=text)
+    yield _chunk(finish_reason="stop")
+
+
+@pytest.mark.asyncio
+async def test_the_last_call_offers_no_tools_so_the_model_answers(llm_service: LLMService) -> None:
+    """A model that calls a tool whenever it may would spend the last call on
+    one more tool round and end the turn with no answer at all."""
+    sent: list[dict[str, Any]] = []
+
+    async def create(**kwargs: Any) -> AsyncGenerator[MagicMock]:
+        sent.append(kwargs)
+        return _tool_call_stream("lookup") if "tools" in kwargs else _text_stream("An answer.")
+
+    registry = ToolRegistry()
+
+    async def lookup() -> str:
+        return "found"
+
+    registry.register("lookup", lookup)
+
+    with patch.object(
+        llm_service.client.chat.completions, "create", new_callable=AsyncMock
+    ) as mock_create:
+        mock_create.side_effect = create
+        events = [
+            event
+            async for event in llm_service.stream_with_tools(
+                system_prompt="Test",
+                messages=[{"role": "user", "content": "Hi"}],
+                tool_definitions=[{"type": "function", "function": {"name": "lookup"}}],
+                tool_registry=registry,
+            )
+        ]
+
+    assert ["tools" in kwargs for kwargs in sent] == [True] * MAX_TOOL_CALLS + [False]
+    assert [e["tool"] for e in events if e["type"] == "tool_start"] == ["lookup"] * MAX_TOOL_CALLS
+    assert [e["content"] for e in events if e["type"] == "chunk"] == ["An answer."]

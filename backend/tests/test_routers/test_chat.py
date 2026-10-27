@@ -10,14 +10,17 @@ from structlog.testing import capture_logs
 
 from app.analytics import OUTCOME_REFUSED, QueryAnalytics
 from app.main import create_app
+from app.models.chat import Message
 from app.rag.retriever import SourceInfo
 from app.rate_limit import DailyChatBudget
 from app.routers.chat import (
     BUDGET_EXHAUSTED_CODE,
     BUDGET_EXHAUSTED_MESSAGE,
     CHAT_QUERY_EVENT,
+    MAX_HISTORY_BYTES,
     STREAM_ERROR_MESSAGE,
     init_chat_dependencies,
+    trim_history,
 )
 from app.tools import ToolRegistry
 
@@ -184,6 +187,88 @@ def test_chat_still_rejects_an_oversized_user_turn() -> None:
     assert response.status_code == 422
 
 
+def _sized(label: str, size: int) -> str:
+    return label + "." * (size - len(label))
+
+
+def _conversation(answers: list[str], question_size: int = 20) -> list[dict[str, str]]:
+    """One question per answer, each answered, then the question in progress."""
+    messages: list[dict[str, str]] = []
+    for n, answer in enumerate(answers, start=1):
+        messages.append({"role": "user", "content": _sized(f"Q{n}", question_size)})
+        messages.append({"role": "assistant", "content": answer})
+    messages.append({"role": "user", "content": _sized(f"Q{len(answers) + 1}", question_size)})
+    return messages
+
+
+def _model_input(messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    """What the model was sent of `messages`, the system prompt aside."""
+    seen: list[list[dict[str, str]]] = []
+
+    async def stream(**kwargs: Any) -> AsyncGenerator[str]:
+        seen.append(kwargs["messages"])
+        yield "ok"
+
+    TestClient(_build_app(stream=stream)).post("/chat", json={"messages": messages})
+    assert len(seen) == 1
+    return seen[0]
+
+
+def test_a_normal_conversation_reaches_the_model_whole() -> None:
+    """Six questions at their 2,000-character limit and five answers at about the
+    1,024-token output cap: about the most a real conversation sends."""
+    messages = _conversation([_sized(f"A{n}", 4000) for n in range(1, 6)], question_size=2000)
+
+    assert _model_input(messages) == messages
+
+
+def test_the_model_sees_only_the_last_six_turns() -> None:
+    """A turn is a question and the answer to it, so the question in progress
+    and the five exchanges before it go to the model."""
+    messages = _conversation([f"A{n}" for n in range(1, 8)])
+
+    sent = _model_input(messages)
+
+    assert sent == messages[-11:]
+    assert sent[0]["content"].startswith("Q3")
+
+
+def test_a_forged_history_is_cut_to_the_byte_cap_from_its_oldest_turn() -> None:
+    """Answers at the 16,000-character assistant limit, three times over."""
+    messages = _conversation(["x" * 16000] * 3)
+
+    sent = _model_input(messages)
+
+    assert sent == messages[-3:]
+    assert sum(len(m["content"].encode()) for m in sent) <= MAX_HISTORY_BYTES
+
+
+def test_the_byte_cap_counts_bytes_not_characters() -> None:
+    """One rare character can take several tokens, so a cap on characters would
+    let a forged history through at several times the cost."""
+    four_bytes = "\U0001d538"
+    messages = _conversation([four_bytes * 4000] * 2)
+
+    assert _model_input(messages) == messages[-3:]
+
+
+def test_the_turn_in_progress_goes_to_the_model_even_over_the_cap() -> None:
+    four_bytes = "\U0001d538"
+    messages = [
+        {"role": "user", "content": "Q1"},
+        {"role": "assistant", "content": four_bytes * 16000},
+    ]
+
+    assert _model_input(messages) == messages
+
+
+def test_trimming_counts_a_lone_surrogate_instead_of_failing() -> None:
+    """JSON can carry one, and a plain str.encode() raises on it."""
+    question = Message(role="user", content="a\ud800b")
+
+    assert trim_history([question]) == [question]
+
+
 def test_chat_returns_503_when_dependencies_are_missing() -> None:
     """Requests can now arrive before init; that must degrade, not 500."""
     response = TestClient(create_app()).post("/chat", json=PAYLOAD)
@@ -243,6 +328,18 @@ def test_chat_refuses_politely_once_the_daily_budget_is_gone() -> None:
         {"type": "done"},
     ]
     assert "tomorrow" in BUDGET_EXHAUSTED_MESSAGE
+
+
+def test_budget_refusal_leaves_the_contact_offer_to_the_page() -> None:
+    """The page answers the code with its own email line, so the message stops
+    at the retry advice instead of offering contact a second time."""
+    client = TestClient(_build_app(budget=DailyChatBudget(max_per_day=0)))
+
+    refusal = _events(client.post("/chat", json=PAYLOAD))[0]
+
+    assert refusal["code"] == BUDGET_EXHAUSTED_CODE
+    assert refusal["message"].endswith("tomorrow.")
+    assert "contact" not in refusal["message"].lower()
 
 
 def test_only_the_budget_refusal_carries_a_code() -> None:
