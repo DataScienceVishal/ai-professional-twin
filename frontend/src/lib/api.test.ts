@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { API_BASE, ChatRequestError, getResumeDownloadUrl, streamChat } from './api'
+import { API_BASE, ChatRequestError, fetchTimeline, getResumeDownloadUrl, streamChat } from './api'
 import { errorResponse, htmlResponse, mockFetch, sseResponse } from '../test/sse'
 import type { SSEEvent } from './types'
 
@@ -195,5 +195,23 @@ describe('streamChat', () => {
 
     expect(error.status).toBe(502)
     expect(error.detail).toBeNull()
+  })
+})
+
+describe('fetchTimeline', () => {
+  it('requests the timeline route under the API base', async () => {
+    const fetchMock = vi.fn(
+      async () => ({ ok: true, json: async () => ({ education: [], work: [] }) }) as Response,
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    expect(await fetchTimeline()).toEqual({ education: [], work: [] })
+    expect(fetchMock).toHaveBeenCalledWith('/api/timeline', { signal: undefined })
+  })
+
+  it('returns null instead of throwing on a non-OK response', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, json: async () => ({}) }) as Response))
+
+    expect(await fetchTimeline()).toBeNull()
   })
 })

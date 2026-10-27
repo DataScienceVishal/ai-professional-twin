@@ -75,3 +75,21 @@ export type SSEEvent =
   | SSEErrorEvent
   | SSEToolStartEvent
   | SSEToolResultEvent
+
+export interface TimelineEducation {
+  institution: string
+  degree: string
+  dates: string
+  status: string
+}
+
+export interface TimelineWork {
+  company: string
+  role: string
+  dates: string
+}
+
+export interface Timeline {
+  education: TimelineEducation[]
+  work: TimelineWork[]
+}
