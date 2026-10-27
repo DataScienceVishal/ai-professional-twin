@@ -1,20 +1,10 @@
 <!doctype html>
-<!-- Re-render: open this file in Chrome for Testing at a 1200x630 viewport (with --allow-file-access-from-files, for the fonts), capture a PNG over CDP to ../../public/og-image.png, then run stamp_provenance.py on it. -->
+<!-- Re-render: with the backend on port 8000, run `npx vite` in frontend/, open http://localhost:5173/scripts/og-card/og-card.html in Chrome for Testing at a 1200x630 viewport, wait for <html data-state="ready">, capture a PNG over CDP to public/og-image.png, then run stamp_provenance.py on it with the date in data-now. -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Share card</title>
     <style>
-      @font-face {
-        font-family: 'Signika';
-        font-weight: 400;
-        src: url('../../node_modules/@fontsource/signika/files/signika-latin-400-normal.woff2') format('woff2');
-      }
-      @font-face {
-        font-family: 'Signika';
-        font-weight: 600;
-        src: url('../../node_modules/@fontsource/signika/files/signika-latin-600-normal.woff2') format('woff2');
-      }
       :root {
         --paper: #ffffff;
         --ink: #1b1b1b;
@@ -22,6 +12,8 @@
         --grid: #c9dcef;
         --edu: #e3f0db;
         --work: #e4edf7;
+        --edu-bar: #548238;
+        --work-bar: #5c7fa8;
         --route: #c2185b;
       }
       * {
@@ -78,22 +70,27 @@
       .route {
         position: absolute;
         left: 9px;
-        right: 9px;
         bottom: 9px;
-        height: 132px;
       }
       .band {
         opacity: 0.8;
       }
-      .edu {
+      .band.education {
         fill: var(--edu);
       }
-      .work {
+      .band.work {
         fill: var(--work);
       }
       .grid {
         stroke: var(--grid);
         stroke-width: 1;
+        shape-rendering: crispEdges;
+      }
+      .bar.education {
+        fill: var(--edu-bar);
+      }
+      .bar.work {
+        fill: var(--work-bar);
       }
       .path {
         fill: none;
@@ -120,40 +117,24 @@
         stroke: var(--route);
         stroke-width: 4;
       }
+      .ring.reached {
+        fill: var(--route);
+      }
+      .error {
+        padding: 24px;
+        font: 20px/1.4 ui-monospace, monospace;
+        color: var(--route);
+        white-space: pre-wrap;
+      }
     </style>
+    <script type="module" src="./og-card.ts"></script>
   </head>
   <body>
     <main class="sheet">
-      <h1>Vishal Khan</h1>
-      <p class="role">Seeking AI engineer roles · four years in data</p>
-      <dl>
-        <dt>Available</dt>
-        <dd>Full-time from January 2027 · part-time and internships now</dd>
-        <dt>Visa</dt>
-        <dd>Right to work now · no sponsorship needed to start</dd>
-      </dl>
-      <svg class="route" viewBox="0 0 1130 132" preserveAspectRatio="none" aria-hidden="true">
-        <rect class="band edu" x="0" y="14" width="1130" height="52" />
-        <rect class="band work" x="0" y="70" width="1130" height="52" />
-        <g class="grid">
-          <line x1="94" y1="0" x2="94" y2="132" />
-          <line x1="188" y1="0" x2="188" y2="132" />
-          <line x1="282" y1="0" x2="282" y2="132" />
-          <line x1="377" y1="0" x2="377" y2="132" />
-          <line x1="471" y1="0" x2="471" y2="132" />
-          <line x1="565" y1="0" x2="565" y2="132" />
-          <line x1="659" y1="0" x2="659" y2="132" />
-          <line x1="753" y1="0" x2="753" y2="132" />
-          <line x1="847" y1="0" x2="847" y2="132" />
-          <line x1="942" y1="0" x2="942" y2="132" />
-          <line x1="1036" y1="0" x2="1036" y2="132" />
-        </g>
-        <polyline class="path casing" points="0,40 160,40 230,96 420,96 500,40 640,40 700,96 820,96 900,40 960,40" />
-        <polyline class="path line" points="0,40 160,40 230,96 420,96 500,40 640,40 700,96 820,96 900,40 960,40" />
-        <line class="leg" x1="960" y1="40" x2="1010" y2="96" />
-        <circle class="here" cx="960" cy="40" r="10" />
-        <circle class="ring" cx="1010" cy="96" r="9" />
-      </svg>
+      <h1 data-slot="name"></h1>
+      <p class="role" data-slot="role"></p>
+      <dl data-slot="facts"></dl>
+      <svg class="route" data-slot="route" aria-hidden="true"></svg>
     </main>
   </body>
 </html>
