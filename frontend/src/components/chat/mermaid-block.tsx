@@ -11,6 +11,10 @@ const MERMAID_CONFIG: MermaidConfig = {
   // injecting that SVG below safe. Set explicitly rather than relying on the
   // library default staying this way.
   securityLevel: 'strict',
+  // Without this, when Mermaid cannot draw a diagram it leaves a div on
+  // document.body holding its "Syntax error in text" graphic. The answer
+  // shows the diagram's source instead.
+  suppressErrorRendering: true,
   theme: 'base',
   themeVariables: {
     primaryColor: '#e4edf7',
