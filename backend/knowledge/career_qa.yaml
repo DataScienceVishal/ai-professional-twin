@@ -12,7 +12,7 @@
     and migrated on-prem SQL Server schemas, improving query performance by ~20%
     and cutting costs by ~20%. Before that he spent ~4 years across finance,
     accounts and commercial analytics, where he moved from taxation into
-    Python/SQL analytics and ML forecasting models reaching 80-90% accuracy.
+    Python/SQL analytics and ML forecasting models with 10-20% MAPE.
     He holds an MSc in Data Science from LJMU and is currently deepening his
     expertise with an MSc in AI and Computer Science at Northeastern University
     London. His MSc thesis compared Reinforcement Learning algorithms (DQN, A2C,
@@ -66,7 +66,7 @@
     Executive at Aryan Care Pvt. Ltd., managing GST, ITR filings, and audits.
     From Aug 2021 to Dec 2023 he was an Executive at Avant Garde Clean Room &
     Engg. Solutions Pvt. Ltd., where he built ML sales forecasting models
-    (80-90% accuracy), translated commercial questions into analytical workflows
+    (10-20% MAPE), translated commercial questions into analytical workflows
     in Python and SQL, and rebuilt Excel reporting cutting time from ~2 hours to
     ~30 minutes. From Jun 2024 to Jan 2026 he was a Data Engineer at
     Teleperformance, building Databricks pipelines processing millions of
@@ -238,7 +238,7 @@
     cutting infrastructure costs by approximately 20%. He built and
     maintained pipelines processing millions of telecom records for a
     team of 50+ across multiple regions. At Avant Garde, he built ML
-    sales forecasting models achieving 80-90% accuracy on monthly
+    sales forecasting models achieving 10-20% MAPE on monthly
     revenue projections used daily by the business, and rebuilt revenue
     reporting in advanced Excel cutting monthly reporting time from
     approximately 2 hours to approximately 30 minutes.

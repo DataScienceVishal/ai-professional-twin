@@ -31,7 +31,7 @@ experience:
     role: Executive
     dates: Aug 2021 - Dec 2023
     description: >
-      Built ML sales forecasting models reaching 80-90% accuracy on monthly
+      Built ML sales forecasting models with 10-20% MAPE on monthly
       revenue projections, used daily by the business for commercial planning.
       Translated commercial questions into analytical workflows in Python and
       SQL, turning ad-hoc requests into recurring reports. Rebuilt revenue and
