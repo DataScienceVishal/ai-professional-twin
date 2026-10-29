@@ -76,14 +76,13 @@
 - topic: career-gap
   question: Why is there a gap between December 2023 and June 2024?
   answer: >
-    Vishal left Avant Garde in December 2023 and joined Teleperformance in
-    June 2024. During that period he was completing his MSc in Data Science at
-    Liverpool John Moores University, which ran from August 2023 to August 2024,
-    and he used the time to focus on his dissertation. His thesis compared
-    Reinforcement Learning algorithms (DQN, A2C, PPO) for dynamic pricing in
-    e-commerce, which required building a custom Gym-style environment and
-    running multi-episode training experiments. He took a short planned break
-    after submission before starting at Teleperformance.
+    Vishal left Avant Garde in December 2023 to write the dissertation for his
+    MSc in Data Science at Liverpool John Moores University, which ran from
+    August 2023 to August 2024. He submitted the dissertation in March 2024,
+    joined Teleperformance in June 2024 and received the result in August 2024.
+    His thesis compared Reinforcement Learning algorithms (DQN, A2C, PPO) for
+    dynamic pricing in e-commerce, which required building a custom Gym-style
+    environment and running multi-episode training experiments.
 
 - topic: study-while-working
   question: Why do Vishal's study dates overlap with his employment dates?
