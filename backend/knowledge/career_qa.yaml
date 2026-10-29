@@ -10,7 +10,7 @@
     Vishal brings around 2 years of hands-on data engineering at Teleperformance
     where he built Databricks pipelines processing millions of telecom records
     and migrated on-prem SQL Server schemas, improving query performance by ~20%
-    and cutting costs by ~20%. Before that he spent ~4 years across finance,
+    and cutting costs by ~20%. Before that he worked across finance,
     accounts and commercial analytics, where he moved from taxation into
     Python/SQL analytics and ML forecasting models with 10-20% MAPE.
     He holds an MSc in Data Science from LJMU and is currently deepening his
@@ -21,7 +21,7 @@
 - topic: years-of-experience
   question: How many years of experience does Vishal have?
   answer: >
-    Vishal has approximately 6 years of professional experience, about four of
+    Vishal has more than 6 years of professional experience, about four of
     them in data. He started in finance, accounts and taxation at PJRJ
     Associates and Aryan Care. At Avant Garde Clean Room & Engg. Solutions
     (Aug 2021 to Dec 2023) he progressed from taxation work into Python/SQL
@@ -37,8 +37,9 @@
     learning engineering. His trajectory shows a clear pattern: starting in
     finance and taxation, moving into commercial analytics with Python-based
     reporting and ML forecasting, then into data engineering with Databricks
-    and cloud pipelines, and now pursuing an MSc in AI and Computer Science
-    with a focus on Generative AI (LLMs, RAG, Prompt Engineering). His goal
+    and cloud pipelines, and now pursuing an MSc in AI and Computer Science.
+    The MSc has no Generative AI module, but he has learned LLMs, RAG and
+    prompt engineering on his own. His goal
     is to work on production AI systems where he can combine his data
     engineering background with his deep learning and GenAI expertise.
 
@@ -47,15 +48,18 @@
   answer: >
     Vishal's core strengths span data engineering and applied ML/AI. He is
     most proficient in Python, SQL and Databricks, with strong working
-    experience across Azure, AWS, MySQL, SQL Server, MongoDB and Neo4j. In ML
+    experience across Azure, MySQL, SQL Server, MongoDB and Neo4j. His AWS
+    experience is self-paced labs and Great Learning coursework only. In ML
     he has worked with Reinforcement Learning (DQN, A2C, PPO), Deep Learning,
     Classification, Regression, Time-Series Forecasting and NLP using PyTorch,
     TensorFlow, Keras and Scikit-learn. His Generative AI skills cover LLMs,
-    RAG, prompt engineering, fine-tuning, agentic AI and the Model Context
-    Protocol (MCP), tool and function calling, vector databases (ChromaDB,
-    FAISS) and LangChain. He works with Power BI, Tableau and Excel for
-    visualization and uses Git, VS Code, Jupyter, Streamlit and Google Colab
-    as his development tools, deploying to Azure Container Apps and Vercel.
+    RAG, prompt engineering, tool and function calling, and vector databases
+    (ChromaDB, FAISS). He used LangChain and FAISS in the first version of
+    this assistant, and learned fine-tuning, agentic AI and the Model Context
+    Protocol (MCP) in Ed Donner's course on Udemy. He works with Power BI,
+    Tableau and Excel for visualization and uses Git, VS Code, Jupyter,
+    Streamlit and Google Colab as his development tools, deploying to Azure
+    Container Apps and Vercel.
 
 - topic: work-experience
   question: Tell me about Vishal's work experience.
@@ -89,9 +93,11 @@
   question: Why do Vishal's study dates overlap with his employment dates?
   answer: >
     The overlaps are intentional, not errors. Vishal completed his Executive PG
-    Program in Data Science at IIIT Bangalore (Mar 2022 - Apr 2023) and his MSc
-    in Data Science at Liverpool John Moores University (Aug 2023 - Aug 2024)
-    part-time and online while working full-time in India. His Bachelor of
+    Program in Data Science at IIIT Bangalore (Mar 2022 - Apr 2023) part-time
+    and online while working full-time in India. His MSc in Data Science at
+    Liverpool John Moores University (Aug 2023 - Aug 2024) was part-time and
+    online too, and he worked full-time in India alongside it until December
+    2023, when he left Avant Garde to write his dissertation. His Bachelor of
     Commerce at the University of Delhi (Nov 2018 - Nov 2021) was also completed
     alongside his early finance roles. Only his current MSc in AI and Computer
     Science at Northeastern University London (Jan 2026 - Jan 2027) is a
@@ -106,7 +112,9 @@
     Liverpool John Moores University, UK (Aug 2023 - Aug 2024), and is currently
     pursuing an MSc in AI and Computer Science at Northeastern University London
     (Jan 2026 - Jan 2027). The IIIT Bangalore and LJMU programmes were completed
-    part-time and online alongside full-time work.
+    part-time and online. He studied for the IIIT Bangalore programme alongside
+    full-time work, and left his job at Avant Garde in December 2023 to write
+    his LJMU dissertation.
 
 - topic: differentiators
   question: What makes Vishal stand out from other candidates?
@@ -118,7 +126,8 @@
     (DQN, A2C, PPO) for dynamic pricing. He also has Generative AI skills
     (LLMs, RAG, LangChain, FAISS) and is comfortable across the full analytics
     chain from framing problems to shipping end-to-end applications. He funded
-    and completed two postgraduate qualifications while working full-time,
+    and completed two postgraduate qualifications, working full-time through
+    the IIIT Bangalore programme and during the LJMU MSc until December 2023,
     which shows sustained commitment to growing as an AI practitioner.
 
 - topic: target-role
@@ -258,9 +267,10 @@
   answer: >
     Yes. Vishal has practical Generative AI skills including building
     RAG (Retrieval-Augmented Generation) systems, prompt engineering,
-    fine-tuning LLMs, agentic AI and the Model Context Protocol (MCP),
-    tool and function calling, vector databases (ChromaDB, FAISS), and
-    frameworks like LangChain. This assistant is his own work: a full-stack
+    tool and function calling, and vector databases (ChromaDB, FAISS). He
+    used LangChain and FAISS in the first version of this assistant, and
+    learned LLM fine-tuning, agentic AI and the Model Context Protocol (MCP)
+    in Ed Donner's course on Udemy. This assistant is his own work: a full-stack
     RAG application with tool calling, SSE streaming, semantic search with
     source citations, and prompt-injection hardening. It demonstrates
     end-to-end GenAI engineering rather than notebook experiments. Its
