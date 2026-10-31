@@ -452,7 +452,7 @@ def _chat_query_logs(logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def test_chat_logs_one_analytics_event_per_request() -> None:
-    """Item 8: the single most valuable signal, greppable from Railway logs."""
+    """Item 8: the single most valuable signal, greppable from the container logs."""
     retrieve = AsyncMock(
         return_value=(
             "[Source: resume]\nData Engineer",
@@ -552,7 +552,7 @@ def _persisted(path: Path) -> list[dict[str, Any]]:
 
 
 def test_chat_persists_one_analytics_line_per_request(tmp_path: Path) -> None:
-    """Railway logs scroll away; the JSONL file is what survives to be counted."""
+    """The app cannot read the container logs back; the JSONL file is what it counts."""
     path = tmp_path / "analytics" / "queries.jsonl"
     retrieve = AsyncMock(
         return_value=(

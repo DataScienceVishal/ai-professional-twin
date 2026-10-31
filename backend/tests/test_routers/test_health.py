@@ -29,7 +29,8 @@ def test_health_reports_the_package_version(app: FastAPI) -> None:
 
 
 def test_health_does_not_depend_on_ingestion(app: FastAPI) -> None:
-    """Railway polls /health, so it must answer before ingestion finishes."""
+    """/health is meant for the platform's health check, so it must answer
+    before ingestion finishes."""
     app.state.ingestion = IngestionState(completed=False)
     app.state.store = FakeStore(0)
 

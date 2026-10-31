@@ -1,7 +1,7 @@
-# Secrets must never reach the image. Railway built from git, where .env is
-# already ignored; `az containerapp up --source` uploads the working directory
-# instead, so the exclusion has to be repeated here or the key ends up in a
-# registry layer.
+# Secrets must never reach the image. The workflow in deploy-backend.yml builds
+# from a git checkout, which has no .env because git ignores it, but a local
+# build sends this folder as it is on disk, so the exclusion has to be repeated
+# here or the key ends up in an image layer.
 .env
 .env.*
 !.env.example
