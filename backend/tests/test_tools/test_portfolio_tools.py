@@ -50,7 +50,7 @@ def sample_knowledge_dir(tmp_path: Path) -> Path:
         "    company: Teleperformance\n"
         "    dates: Jan 2023 - Aug 2024\n"
         "  - role: Application Development Analyst\n"
-        "    company: Accenture\n"
+        "    company: Example Company\n"
         "    dates: Feb 2021 - Dec 2022\n"
     )
     return tmp_path

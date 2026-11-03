@@ -16,13 +16,13 @@ def test_add_and_query_documents(store: ChromaStore) -> None:
     docs = [
         Document(
             id="doc1",
-            text="Vishal worked as a Data Engineer at Accenture",
+            text="Worked as a Data Engineer at Example Company",
             metadata={"source": "resume", "section": "experience"},
             embedding=[0.1] * 10,
         ),
         Document(
             id="doc2",
-            text="Built ETL pipelines using Azure Data Factory",
+            text="Built ETL pipelines at Example Company",
             metadata={"source": "resume", "section": "experience"},
             embedding=[0.2] * 10,
         ),
