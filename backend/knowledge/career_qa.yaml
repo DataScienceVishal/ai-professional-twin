@@ -8,7 +8,7 @@
   question: Why should we hire Vishal?
   answer: >
     Vishal brings around 2 years of hands-on data engineering at Teleperformance
-    where he built Databricks pipelines processing millions of telecom records
+    where he built Azure Databricks pipelines processing millions of telecom records
     and migrated on-prem SQL Server schemas, improving query performance by ~20%
     and cutting costs by ~20%. Before that he spent ~4 years across finance,
     accounts and commercial analytics, where he moved from taxation into
@@ -69,7 +69,7 @@
     (10-20% MAPE), translated commercial questions into analytical workflows
     in Python and SQL, and rebuilt Excel reporting cutting time from ~2 hours to
     ~30 minutes. From Jun 2024 to Jan 2026 he was a Data Engineer at
-    Teleperformance, building Databricks pipelines processing millions of
+    Teleperformance, building Azure Databricks pipelines processing millions of
     telecom records for a team of 50+ and migrating on-prem SQL Server to
     Databricks. He is now a full-time MSc student in London.
 
@@ -111,7 +111,7 @@
   question: What makes Vishal stand out from other candidates?
   answer: >
     Vishal combines a rare mix of backgrounds: finance operations, commercial
-    analytics with ML forecasting, production data engineering with Databricks,
+    analytics with ML forecasting, production data engineering with Azure Databricks,
     and applied AI research. He can point to both a ~20% efficiency gain from a
     real production data migration and an MSc thesis comparing RL algorithms
     (DQN, A2C, PPO) for dynamic pricing. He also has Generative AI skills
@@ -233,7 +233,7 @@
   question: How has Vishal demonstrated impact in previous roles?
   answer: >
     At Teleperformance, Vishal migrated on-prem SQL Server schemas to
-    Databricks, improving query performance by approximately 20% and
+    Azure Databricks, improving query performance by approximately 20% and
     cutting infrastructure costs by approximately 20%. He built and
     maintained pipelines processing millions of telecom records for a
     team of 50+ across multiple regions. At Avant Garde, he built ML
