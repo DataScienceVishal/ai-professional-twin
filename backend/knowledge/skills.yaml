@@ -10,7 +10,7 @@
 - category: Data Engineering
   skills:
     - ETL Pipelines
-    - Databricks
+    - Azure Databricks
     - Apache Spark (via Databricks)
     - Data Modelling
     - SQL Server
