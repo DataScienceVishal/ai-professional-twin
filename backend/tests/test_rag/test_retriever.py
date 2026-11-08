@@ -7,6 +7,7 @@ from app.rag.retriever import (
     QueryClassifier,
     QueryIntent,
     Retriever,
+    SourceInfo,
     build_retrieval_query,
     format_context,
     rank_results,
@@ -188,6 +189,31 @@ def test_format_context_deduplicates_identical_sources() -> None:
     ]
     _, sources = format_context(results)
     assert len(sources) == 1
+
+
+def test_format_context_keeps_every_resume_page() -> None:
+    """Regression: every resume page has the citation key "resume::", so only
+    the first page in rank order used to reach the context. The resume is
+    still cited once."""
+    results = [
+        SearchResult(
+            id="resume-page-0",
+            text="first page text",
+            metadata={"source": "resume", "page": "1", "content_hash": "hash-1"},
+            distance=0.1,
+        ),
+        SearchResult(
+            id="resume-page-1",
+            text="second page text",
+            metadata={"source": "resume", "page": "2", "content_hash": "hash-2"},
+            distance=0.2,
+        ),
+    ]
+
+    context, sources = format_context(results)
+
+    assert context == "[Source: resume]\nfirst page text\n\n[Source: resume]\nsecond page text\n"
+    assert sources == [SourceInfo(source="resume", detail="", url="")]
 
 
 class _FakeEmbeddingService:
