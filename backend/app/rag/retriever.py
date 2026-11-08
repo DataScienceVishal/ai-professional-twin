@@ -217,13 +217,15 @@ def format_context(results: list[SearchResult]) -> tuple[str, list[SourceInfo]]:
     seen: set[str] = set()
     for result in results:
         source = result.metadata.get("source", "unknown")
+        # Every chunk's text goes into the context. Only the citations are
+        # deduplicated, because chunks can share a key ("resume::" for every resume page).
+        context_parts.append(f"[Source: {source}]\n{result.text}\n")
         url = _extract_url(result.metadata)
         detail = _extract_detail(result.metadata)
         key = f"{source}:{detail}:{url}"
         if key in seen:
             continue
         seen.add(key)
-        context_parts.append(f"[Source: {source}]\n{result.text}\n")
         sources.append(SourceInfo(source=source, detail=detail, url=url))
     return "\n".join(context_parts), sources
 
